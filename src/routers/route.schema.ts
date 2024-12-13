@@ -1,4 +1,5 @@
-import { MenuItemGroupType, MenuItemType, SubMenuType } from "antd/es/menu/interface";
+import { ItemType, MenuItemGroupType, MenuItemType, SubMenuType } from "antd/es/menu/interface";
+import MenuItem from "antd/es/menu/MenuItem";
 /**
  *  All Dashboard Routes
  *
@@ -24,7 +25,8 @@ import { MenuItemGroupType, MenuItemType, SubMenuType } from "antd/es/menu/inter
  */
 export interface DashboardRouter {
     role: string;
-    route: MenuItem[];
+    route: ItemType<MenuItemType>[];
+    // route: MenuItem[]
 }
 export interface MenuItem {
     id: string;
@@ -36,3 +38,4 @@ export interface MenuItem {
     link?: string;
     children?: MenuItem[];
 }
+    

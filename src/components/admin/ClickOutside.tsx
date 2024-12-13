@@ -5,6 +5,7 @@ interface Props {
   exceptionRef?: React.RefObject<HTMLElement>;
   onClick: () => void;
   className?: string;
+  active?: boolean;
 }
 
 const ClickOutside: React.FC<Props> = ({
@@ -12,7 +13,15 @@ const ClickOutside: React.FC<Props> = ({
   exceptionRef,
   onClick,
   className,
+  active = true,
 }) => {
+  if (!active) {
+    return (
+      <>
+        {children}
+      </>
+    );
+  }
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -6,8 +6,12 @@ import NavbarVertical from './layout/NavbarVertical';
 import NavbarTop from './layout/NavbarTop';
 
 import { DashboardRouter } from '@/src/routers/route.schema';
+import clsx from 'clsx';
+import { Layout } from 'antd';
+import Sider from 'antd/es/layout/Sider';
+import { Content } from 'antd/es/layout/layout';
 
-export default function DashboardLayout({ children, menu }: { children: React.ReactNode, menu:DashboardRouter }) {
+export default function DashboardLayout({ children, menu }: { children: React.ReactNode, menu: DashboardRouter }) {
 	const [showMenu, setShowMenu] = useState(true);
 	const ToggleMenu = () => {
 		return setShowMenu(!showMenu);
@@ -15,9 +19,9 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 
 	return (
 		<>
-		
 			{/* <!-- ===== Page Wrapper Start ===== --> */}
-			<div className="flex">
+			<Layout>
+					
 				{/* <!-- ===== Sidebar Start ===== --> */}
 				<NavbarVertical showMenu={showMenu}
 					onClick={(value: any) => setShowMenu(value)}
@@ -25,9 +29,9 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 				{/* <!-- ===== Sidebar End ===== --> */}
 
 				{/* <!-- ===== Content Area Start ===== --> */}
-				<div className="relative flex flex-1 flex-col lg:ml-72.5">
+				<Content>
 					{/* <!-- ===== Header Start ===== --> */}
-					{/* <NavbarTop sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} /> */}
+					<NavbarTop sidebarOpen={showMenu} setSidebarOpen={ToggleMenu} />
 					{/* <!-- ===== Header End ===== --> */}
 
 					{/* <!-- ===== Main Content Start ===== --> */}
@@ -37,33 +41,13 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 						</div>
 					</main>
 					{/* <!-- ===== Main Content End ===== --> */}
-				</div>
+					</Content>
 				{/* <!-- ===== Content Area End ===== --> */}
-			</div>
+			
+
+			</Layout>
 			{/* <!-- ===== Page Wrapper End ===== --> */}
+
 		</>
-		// <div id="db-wrapper" className={`${showMenu ? '' : 'toggled'}`}>
-		// 	<div className="navbar-vertical navbar">
-		// 		<NavbarVertical
-		// 			showMenu={showMenu}
-		// 			onClick={(value: any) => setShowMenu(value)}
-		// 			menu={menu}
-		// 		/>
-		// 	</div>
-		// 	<div id="page-content" className=' bg-light'>
-		// 		<div className="header">
-		// 			<NavbarTop
-		// 				data={{
-		// 					showMenu: showMenu,
-		// 					SidebarToggleMenu: ToggleMenu
-		// 				}}
-		// 			/>
-		// 		</div>
-
-		// 		{children}
-
-
-		// 	</div>
-		// </div>
 	)
 }

@@ -17,6 +17,10 @@ import useLocalStorage from "@/src/hooks/useLocalStorage";
 import { Menu } from 'antd';
 import MenuItem from 'antd/es/menu/MenuItem';
 import Image from 'next/image';
+import ClickOutside from '../../ClickOutside';
+import useMounted from '@/src/hooks/useMounted';
+import Sider from 'antd/es/layout/Sider';
+import { User } from 'react-feather';
 
 interface SidebarProps {
 	sidebarOpen: boolean;
@@ -83,20 +87,35 @@ function NavbarVertical({ showMenu, onClick, menu }: { showMenu: boolean; onClic
 
 	const isMobile = useMediaQuery({ maxWidth: 767 });
 
+	const isDesktop = useMediaQuery({
+		query: '(min-width: 1224px)'
+	})
 	return (
 		<>
-			<SimpleBar style={{ maxHeight: '100vh' }}>
-				<aside
-					className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${showMenu ? "translate-x-0" : "-translate-x-full"
+			<Sider className='h-screen' collapsible collapsed={!showMenu} width={"16.125rem"}>
+				<Menu
+					theme="dark"
+					mode="inline"
+					defaultSelectedKeys={['1']}
+					items={menu.route}
+				/>
+			</Sider>
+			{/* <ClickOutside active={isMobile} onClick={() => {
+				if (isMobile)
+					onClick(false)
+			}}> */}
+			{/* <SimpleBar style={{ maxHeight: '100vh' }}> */}
+			{/* <nav
+					className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark ${showMenu ? "translate-x-0" : "-translate-x-full"
 						}`}
-				>
-					<div className="flex items-center justify-center gap-2 px-6 py-5.5 lg:py-6.5">
+				> */}
+			{/* <div className="flex items-center justify-center gap-2 px-6 py-5.5 lg:py-6.5">
 						<div className="">
 							<Link href={`/${menu.role}`} type='button' className="">
 								<p className={clsx('text-xl font-black m-0 text-white', inter,)}>
 									BGame
 									<span className={clsx('text-xl font-black m-0 text-white', inter,)}>
-										{" "+menu.role}
+										{" " + menu.role}
 									</span>
 								</p>
 
@@ -122,14 +141,14 @@ function NavbarVertical({ showMenu, onClick, menu }: { showMenu: boolean; onClic
 								/>
 							</svg>
 						</button>
-					</div>
+					</div> */}
 
-					<div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-						{/* <!-- Sidebar Menu --> */}
-						<nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
+			{/* <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear"> */}
+			{/* <!-- Sidebar Menu --> */}
+			{/* <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
 							{menuList?.map(function (group, groupIndex) {
 								if (group.grouptitle) {
-									
+
 									return (
 										<h3 key={group.id} className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
 											{group.title}
@@ -162,11 +181,12 @@ function NavbarVertical({ showMenu, onClick, menu }: { showMenu: boolean; onClic
 								}
 
 							})}
-						</nav>
-						{/* <!-- Sidebar Menu --> */}
-					</div>
-				</aside>
-			</SimpleBar>
+						</nav> */}
+			{/* <!-- Sidebar Menu --> */}
+			{/* </div> */}
+			{/* </nav> */}
+			{/* </SimpleBar> */}
+			{/* </ClickOutside> */}
 		</>
 	);
 };

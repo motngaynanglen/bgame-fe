@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 
 import { Menu } from "antd";
 import { MenuItem } from "@/src/routers/route.schema";
+import clsx from "clsx";
 
-function SidebarItem({ item, pageName, setPageName }: { item: MenuItem, pageName: string, setPageName: any }) {
+function SidebarItem({ showMenu, item, pageName, setPageName }: { showMenu: boolean, item: MenuItem, pageName: string, setPageName: any }) {
 
   const handleClick = () => {
     const updatedPageName =
@@ -32,11 +33,17 @@ function SidebarItem({ item, pageName, setPageName }: { item: MenuItem, pageName
         <Link
           href={item.link ?? "#"}
           onClick={handleClick}
-          className={`${isItemActive ? "bg-graydark dark:bg-meta-4" : ""} group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4`}
+          className={clsx(
+            `${isItemActive ? "bg-graydark dark:bg-meta-4" : ""}`,
+           "group relative flex items-center gap-2.5 rounded-sm py-2" ,
+            "font-medium text-bodydark1" ,
+           "duration-300 ease-in-out" ,
+           "hover:bg-graydark dark:hover:bg-meta-4",
+          `${showMenu ? "px-4 " : "justify-center p-0"}`)}
         >
           {item.icon}
-          {item.title}
-          {item.children && (
+          {showMenu && item.title}
+          {(showMenu && item.children) && (
             <svg
               className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${pageName === item.title.toLowerCase() && "rotate-180"
                 }`}
@@ -56,7 +63,7 @@ function SidebarItem({ item, pageName, setPageName }: { item: MenuItem, pageName
           )}
         </Link>
 
-        {item.children && (
+        {(showMenu && item.children) && (
           <div
             className={`translate transform overflow-hidden ${pageName !== item.title.toLowerCase() && "hidden"
               }`}
