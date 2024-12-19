@@ -1,6 +1,7 @@
 "use client";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
+import Link from "next/link";
 import { BsBag, BsPersonCircle, BsSearch } from "react-icons/bs";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -54,8 +55,10 @@ export default function Header() {
   return (
     <div>
       <div className="bg-white flex flex-wrap justify-between items-center px-4 sm:px-10 py-2">
-        <div className="text-3xl text-green-700 basis-2 font-bold">
-          BoGemStore
+        <div className="text-3xl text-green-700 basis-2 font-bold hover: text-green-500">
+          <Link href="/">
+            BoGemStore
+          </Link>
         </div>
 
         <form className="basis-full sm:basis-1/3 h-auto mt-2 sm:mt-0">
@@ -81,10 +84,12 @@ export default function Header() {
 
         <div className="flex justify-items-center space-x-6 sm:space-x-6 lg:space-x-10">
           <BsBag className="size-7 fill-green-700" />
-          <BsPersonCircle
-            className="size-7
+          <Link href="/login">
+            <BsPersonCircle
+              className="size-7
            fill-green-700"
-          />
+            />
+          </Link>
         </div>
       </div>
       <Menu
