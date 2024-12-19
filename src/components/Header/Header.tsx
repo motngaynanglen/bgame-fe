@@ -53,25 +53,12 @@ const items: MenuItem[] = [
 export default function Header() {
   return (
     <div>
-      <div className="bg-white  flex justify-between items-center px-10 py-2">
+      <div className="bg-white flex flex-wrap justify-between items-center px-4 sm:px-10 py-2">
         <div className="text-3xl text-green-700 basis-2 font-bold">
           BoGemStore
         </div>
 
-        {/* <Search
-          className="w-auto basis-1/4 text-black border-black focus-within:border-blue-500 rounded-lg"
-          placeholder="input search text"
-          allowClear
-          // style={{ width: 200, borderColor: "black"}}
-        /> */}
-
-        <form className="basis-1/3 h-auto">
-          {/* <label
-            htmlFor="default-search"
-            className="mb-1 text-sm font-normal text-gray-900 sr-only dark:text-white"
-          >
-            Search
-          </label> */}
+        <form className="basis-full sm:basis-1/3 h-auto mt-2 sm:mt-0">
           <div className="relative">
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
               <BsSearch className="fill-green-700" />
@@ -92,7 +79,7 @@ export default function Header() {
           </div>
         </form>
 
-        <div className="flex justify-items-center basis-4 space-x-10">
+        <div className="flex justify-items-center space-x-6 sm:space-x-6 lg:space-x-10">
           <BsBag className="size-7 fill-green-700" />
           <BsPersonCircle
             className="size-7
@@ -101,7 +88,7 @@ export default function Header() {
         </div>
       </div>
       <Menu
-        className="flex justify-center space-x-48  uppercase  "
+        className="flex flex-wrap justify-center xl:space-x-32 lg:space-x-10 sm:space-x-10 uppercase"
         theme="dark"
         mode="horizontal"
         defaultSelectedKeys={["2"]}
