@@ -1,4 +1,4 @@
-import { EntityError } from "./httpAxios"
+
 // export const formatDateToLocal = (dateStr: string, locale = "vi-VN") => {
 //   if (dateStr === undefined) {
 //     return "NaN";
@@ -51,17 +51,5 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
 }
 export const normalizePath = (path: string) => {
   return path.startsWith("/") ? path.slice(1) : path
-}
 
-export const handleErrorApi = ({ error, setError, duration = undefined }:{error:any, setError:any, duration:any}) => {
-  if (error instanceof EntityError && setError) {
-    error.payload.errors.forEach((item) => {
-      setError(item.field, {
-        type: 'server',
-        message: item.message
-      })
-    })
-  } else {
-    // toast.error(error?.payload?.message ?? 'Lỗi không xác định');
-  }
 }

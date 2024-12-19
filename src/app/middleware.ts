@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
-const privatePaths = ["/profile", "/user", "/admin", "/manager", "/partner",'/staff']; //, 
-const managePaths = ["/admin", "/manager", "/partner", '/staff',];
-const authPaths = ["/login", "/register"];
+// const privatePaths = ["/profile", "/user", "/admin", "/manager", "/partner",'/staff']; //, 
+// const managePaths = ["/admin", "/manager", "/partner", '/staff',];
+// const authPaths = ["/login", "/register"];
 // const adminPaths = ['/admin/:part*'];
 // const managerPaths = ['/manager/:part*'];
-const productEditRegex = /^\/products\/\d+\/edit$/;
 
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const sessionToken = request.cookies.get("sessionToken")?.value;
+  // const { pathname } = request.nextUrl;
+  // const sessionToken = request.cookies.get("sessionToken")?.value;
   const sessionRole = request.cookies.get("sessionRole")?.value;
- console.log("run middleware:"+ sessionRole)
-  //  bconsole.log(pathname + ' : ' + sessionRole);
+  console.log("run middleware:" + sessionRole)
+  //  console.log(pathname + ' : ' + sessionRole);
 
   // Bảng điều hướng - Verson 2
 

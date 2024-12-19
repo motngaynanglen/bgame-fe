@@ -2,10 +2,20 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "../../ClickOutside";
+import UserImage from "@/src/public/assets/images/blog-author.png"
 
+interface ProfileType {
+  name: string
+  role: string
+  avatar: string | undefined
+}
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
+  const profile: ProfileType = {
+    name: "Đoàn Sỹ Bách",
+    role: "FullstackDev",
+    avatar: undefined
+  }
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
@@ -15,20 +25,17 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {profile.name}
           </span>
-          <span className="block text-xs">UX Designer</span>
+          <span className="block text-xs">{profile.role}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
           <Image
             width={112}
             height={112}
-            src={"/images/user/user-01.png"}
-            style={{
-              width: "auto",
-              height: "auto",
-            }}
+            className="rounded-full"
+            src={profile.avatar ?? UserImage}
             alt="User"
           />
         </span>

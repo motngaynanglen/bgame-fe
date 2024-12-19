@@ -6,45 +6,52 @@ import NavbarVertical from './layout/NavbarVertical';
 import NavbarTop from './layout/NavbarTop';
 
 import { DashboardRouter } from '@/src/routers/route.schema';
-import clsx from 'clsx';
 import { Layout } from 'antd';
+import { Content, Footer, Header } from 'antd/es/layout/layout';
+// import { useMediaQuery } from 'react-responsive';
 import Sider from 'antd/es/layout/Sider';
-import { Content } from 'antd/es/layout/layout';
 
 export default function DashboardLayout({ children, menu }: { children: React.ReactNode, menu: DashboardRouter }) {
 	const [showMenu, setShowMenu] = useState(true);
 	const ToggleMenu = () => {
 		return setShowMenu(!showMenu);
 	};
-
+	// const isMobile = useMediaQuery({ maxWidth: 767 });
 	return (
 		<>
 			{/* <!-- ===== Page Wrapper Start ===== --> */}
 			<Layout>
-					
 				{/* <!-- ===== Sidebar Start ===== --> */}
-				<NavbarVertical showMenu={showMenu}
-					onClick={(value: any) => setShowMenu(value)}
-					menu={menu} />
+				<Sider className='h-screen' collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
+
+					<NavbarVertical sidebarOpen={showMenu}
+						setSidebarOpen={(value: boolean) => setShowMenu(value)}
+						menu={menu} />
+
+				</Sider>
 				{/* <!-- ===== Sidebar End ===== --> */}
+				<Layout>
+					<Header className='p-0 bg-white'>
+						{/* <!-- ===== Header Start ===== --> */}
+						<NavbarTop sidebarOpen={showMenu} setSidebarOpen={ToggleMenu} />
+						{/* <!-- ===== Header End ===== --> */}
+					</Header>
+					{/* <!-- ===== Content Area Start ===== --> */}
+					<Content>
+						{/* <!-- ===== Main Content Start ===== --> */}
 
-				{/* <!-- ===== Content Area Start ===== --> */}
-				<Content>
-					{/* <!-- ===== Header Start ===== --> */}
-					<NavbarTop sidebarOpen={showMenu} setSidebarOpen={ToggleMenu} />
-					{/* <!-- ===== Header End ===== --> */}
-
-					{/* <!-- ===== Main Content Start ===== --> */}
-					<main>
 						<div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
 							{children}
 						</div>
-					</main>
-					{/* <!-- ===== Main Content End ===== --> */}
-					</Content>
-				{/* <!-- ===== Content Area End ===== --> */}
-			
 
+						{/* <!-- ===== Main Content End ===== --> */}
+					</Content>
+					<Footer>
+						contact to bachdoan, Copyright with antd
+					</Footer>
+					{/* <!-- ===== Content Area End ===== --> */}
+
+				</Layout>
 			</Layout>
 			{/* <!-- ===== Page Wrapper End ===== --> */}
 

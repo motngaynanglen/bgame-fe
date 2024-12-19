@@ -1,6 +1,6 @@
 
 import { ItemType, MenuItemType } from 'antd/es/menu/interface';
-import { DashboardRouter, MenuItem } from './route.schema';
+import { DashboardRouter } from './route.schema';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
@@ -290,7 +290,7 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	// },
 ]
 export const AdminRouter: DashboardRouter = {
-	role: "admin",
+	role: "Admin",
 	route: AdminMenuAntd,
 }
 
