@@ -200,7 +200,7 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	},
 	{
 		key: "group-12",
-		label: (<Link href={"/admin"} className={clsx("font-medium text-lg")}>Quản lý người dùng</Link>),
+		label: (<Link href={"/admin/users"} className={clsx("font-medium text-lg")}>Quản lý người dùng</Link>),
 		icon: (<UserOutlined />),
 	},
 	
