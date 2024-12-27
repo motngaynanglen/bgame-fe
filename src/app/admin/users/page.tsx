@@ -1,7 +1,9 @@
 
 "use client"
 import { InvoicesTableSkeleton, TableSkeleton } from "@/src/components/admin/layout/skeletons";
-import { Space, Table, Tag } from "antd";
+import AntdCustomPagination from "@/src/components/admin/table/pagination";
+import SearchBar from "@/src/components/admin/table/search";
+import { Pagination, Space, Table, Tag } from "antd";
 import type { TableProps } from "antd"
 import { Suspense, useEffect, useState } from "react";
 interface DataType {
@@ -83,6 +85,28 @@ const data: DataType[] = [
         address: 'Sydney No. 1 Lake Park',
         tags: ['cool', 'teacher'],
     },
+    {
+        key: '4',
+        name: 'John Brown',
+        age: 32,
+        address: 'New York No. 1 Lake Park',
+        tags: ['nice', 'developer'],
+    },
+    {
+        key: '5',
+        name: 'Jim Green',
+        age: 42,
+        address: 'London No. 1 Lake Park',
+        tags: ['loser'],
+    },
+    {
+        key: '6',
+        name: 'Joe Black',
+        age: 32,
+        address: 'Sydney No. 1 Lake Park',
+        tags: ['cool', 'teacher'],
+    },
+    
 ];
 export default function adminTableUser() {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
@@ -102,10 +126,16 @@ export default function adminTableUser() {
     }, []);
     return (
         <>
-             {useData === undefined ? (
+            <SearchBar placeholder={"searching something..."} />
+            <br />
+            {useData === undefined ? (
                 <TableSkeleton />
             ) : (
-                <Table<DataType> columns={columns} dataSource={useData} />
+                <>
+                    <Table<DataType> columns={columns} dataSource={useData} pagination={false} />
+                    <br />
+                    <AntdCustomPagination totalPages={20} />
+                </>
             )}
         </>
     )
