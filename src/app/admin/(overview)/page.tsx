@@ -5,7 +5,7 @@ import Title from "antd/es/typography/Title";
 export default function admin() {
     return (
         <>
-            <Row gutter={16}>
+            <Row gutter={[24, 0]}>
                 <CardWrapper/>
             </Row>
         </>

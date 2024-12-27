@@ -51,10 +51,10 @@ const count: dashboardCardType[] = [
     },
 ];
 const iconMap = {
-    Sales: <AiFillProfile fontSize={50}/>,
-    Users: <AiFillProfile fontSize={50}/>,
-    Clients: <AiFillProfile fontSize={50}/>,
-    Orders: <AiFillProfile fontSize={50}/>,
+    Sales: <AiFillProfile fontSize={50} />,
+    Users: <AiFillProfile fontSize={50} />,
+    Clients: <AiFillProfile fontSize={50} />,
+    Orders: <AiFillProfile fontSize={50} />,
 };
 
 export default async function CardWrapper() {
@@ -108,7 +108,13 @@ export function AntdCustomCard({
 }) {
     const Icon = iconMap[type]
     return (
-        <Col span={6}>
+        <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={6}
+            xl={6}
+            className="mb-8">
             <Card loading={false} bordered={false}>
                 <div className="number">
                     <Row align="middle" gutter={[24, 0]}>
