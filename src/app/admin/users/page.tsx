@@ -106,9 +106,9 @@ const data: DataType[] = [
         address: 'Sydney No. 1 Lake Park',
         tags: ['cool', 'teacher'],
     },
-    
+
 ];
-export default function adminTableUser() {
+export default function AdminTableUser() {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
 
     useEffect(() => {
@@ -126,7 +126,9 @@ export default function adminTableUser() {
     }, []);
     return (
         <>
-            <SearchBar placeholder={"searching something..."} />
+            <Suspense>
+                <SearchBar placeholder={"searching something..."} />
+            </Suspense>
             <br />
             {useData === undefined ? (
                 <TableSkeleton />
