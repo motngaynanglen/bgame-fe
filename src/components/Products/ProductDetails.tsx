@@ -1,5 +1,4 @@
 import { Rate } from "antd";
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 // import ProductPriceCount from "./ProductPriceCount";
@@ -11,7 +10,7 @@ function ProductDetails(): JSX.Element {
       <div>
         <div className="space-y-4">
           <div className="w-auto h-auto">
-            <Image
+            <img
               className="w-full h-auto object-cover"
               src="/assets/images/tqs.jpg"
               alt="Product"
@@ -23,7 +22,7 @@ function ProductDetails(): JSX.Element {
                 key={i}
                 className="border rounded-lg overflow-hidden focus:ring-2 focus:ring-orange-500"
               >
-                <Image
+                <img
                   src={`/assets/images/tqs.jpg`}
                   alt="Thumbnail"
                   className="w-full h-full object-cover"
@@ -81,7 +80,7 @@ function ProductDetails(): JSX.Element {
           <h6 className="font-semibold">Guaranteed Safe Checkout</h6>
           <div className="flex space-x-4">
             {["visa2", "mastercard", "vnpay", "paypal", "pay"].map((item) => (
-              <Image
+              <img
                 key={item}
                 src={`/assets/icon/${item}.svg`}
                 alt={item}

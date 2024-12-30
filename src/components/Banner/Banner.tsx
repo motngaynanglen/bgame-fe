@@ -13,7 +13,7 @@ export default function Banner() {
           >
         
             <div className="relative">
-              <Image
+              <img
                 src="/assets/images/carousel1.jpg"
                 alt="Banner 1"
                 className="w-full h-[500px] object-cover"
@@ -32,7 +32,7 @@ export default function Banner() {
             </div>
 
             <div className="relative">
-              <Image
+              <img
                 src="/assets/images/carousel2.jpg"
                 alt="Banner 2"
                 className="w-full h-[500px] object-cover"

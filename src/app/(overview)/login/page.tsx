@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -6,7 +5,7 @@ export default function LoginPage() {
   return (
     <div className="bg-sky-100 flex justify-center items-center ">
       <div className="w-1/2 h-screen hidden lg:block">
-        <Image
+        <img
           src="/assets/images/bg-login.jpg"
           alt="Placeholder Image"
           className="object-cover w-full h-full"
