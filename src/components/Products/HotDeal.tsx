@@ -1,6 +1,6 @@
-import { Button, Card, Carousel } from "antd";
-import Meta from "antd/es/card/Meta";
-import React from "react";
+import { Carousel } from "antd";
+import Link from "next/link";
+import CardProduct from "./CardProduct";
 
 // const SampleNextArrow: React.FC<{
 //   className?: "string";
@@ -33,16 +33,17 @@ export default function HotDeal() {
 
   return (
     <div className="relative pt-3  ">
-      <div className=" text-white p-4 flex justify-between items-center bg-green-600 rounded-md">
+      <div className=" text-white p-4 flex justify-between items-center bg-gradient-to-r from-green-500 to-blue-500 rounded-md">
         <h1 className="text-xl font-bold">Hot deal</h1>
-        <a href="#" className="text-white">
+
+        <Link className="text-white" href="/products">
           View All
-        </a>
+        </Link>
       </div>
       <Carousel
         autoplay
         arrows
-        slidesToShow={5}
+        slidesToShow={4}
         slidesToScroll={1}
         dots={false}
         infinite
@@ -54,7 +55,12 @@ export default function HotDeal() {
             key={index}
             className="flex flex-wrap-reverse items-center justify-items-center p-4 "
           >
-            <Card
+            <CardProduct
+              image="/assets/images/tqs.jpg"
+              price={800000}
+              title="Tam quốc sát"
+            />
+            {/* <Card
               hoverable
               cover={<img alt="example" src="/assets/images/tqs.jpg" />}
               className="flex flex-col items-center"
@@ -72,7 +78,7 @@ export default function HotDeal() {
                 description="800.000đ"
                 className="text-center"
               />
-            </Card>
+            </Card> */}
           </div>
         ))}
       </Carousel>
