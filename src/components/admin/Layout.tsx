@@ -20,9 +20,9 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 	return (
 		<>
 			{/* <!-- ===== Page Wrapper Start ===== --> */}
-			<Layout>
+			<Layout className='min-h-screen'>
 				{/* <!-- ===== Sidebar Start ===== --> */}
-				<Sider className='h-screen' collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
+				<Sider collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
 
 					<NavbarVertical sidebarOpen={showMenu}
 						setSidebarOpen={(value: boolean) => setShowMenu(value)}
