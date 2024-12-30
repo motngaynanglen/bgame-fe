@@ -30,7 +30,7 @@ function NavbarTop(props: NavbarTopProps) {
 					/>
 					{/* <!-- Hamburger Toggle BTN --> */}
 					{/* <Link className="block flex-shrink-0 lg:hidden" href="/">
-						<Image
+						<img
 							width={32}
 							height={32}
 							src={"/images/logo/logo-icon.svg"}
@@ -138,7 +138,7 @@ function NavbarTop(props: NavbarTopProps) {
 		// 			{/* <!-- Hamburger Toggle BTN --> */}
 		// 			<p>{""+props.sidebarOpen}</p>
 		// 			<Link className="block flex-shrink-0 lg:hidden" href="/">
-		// 				<Image
+		// 				<img
 		// 					width={32}
 		// 					height={32}
 		// 					src={"/images/logo/logo-icon.svg"}

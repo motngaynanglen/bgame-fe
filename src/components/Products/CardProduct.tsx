@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -16,7 +15,7 @@ function CardProduct({
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="h-full w-full">
           {/* <a href="#"> */}
-          <Image
+          <img
             className="mx-auto h-full dark:hidden object-cover"
             src={image}
             alt=""

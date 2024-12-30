@@ -1,5 +1,3 @@
-import Image from "next/image";
-import React from "react";
 
 function SingleProductDescription(): JSX.Element {
   return (
@@ -81,8 +79,8 @@ function SingleProductDescription(): JSX.Element {
               },
             ].map((review, index) => (
               <li key={index} className="flex space-x-4">
-                <Image
-                  src={`/assets/images/bg/review-Image-${index + 1}.png`}
+                <img
+                  src={`/assets/images/bg/review-img-${index + 1}.png`}
                   alt="Reviewer"
                   className="w-16 h-16 rounded-full"
                 />
