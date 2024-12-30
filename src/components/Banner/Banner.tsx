@@ -1,4 +1,4 @@
-import { Button, Carousel, Col, Image, Row } from "antd";
+import { Button, Carousel, Col, Row } from "antd";
 import React from "react";
 
 export default function Banner() {
@@ -52,11 +52,11 @@ export default function Banner() {
           </Carousel>
         </Col>
         <Col xs={24} lg={6}>
-          <Image
+          <img
             src="https://i.pinimg.com/736x/98/cf/03/98cf0386e7394df6a0fb5077c3cd3acf.jpg"
             className="w-full h-[100px] object-cover rounded-lg"
           />
-          <Image
+          <img
             src="https://i.pinimg.com/736x/8f/f8/9d/8ff89d23c2aeed786214bfbfe8f8064c.jpg"
             className="w-full h-[190px] object-cover rounded-lg"
           />

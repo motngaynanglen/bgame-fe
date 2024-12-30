@@ -20,20 +20,12 @@ const items: MenuItem[] = [
     key: "boardGame",
     children: [
       {
-        type: "group",
-        label: "Item 1",
-        children: [
-          { label: "Option 1", key: "setting:1" },
-          { label: "Option 2", key: "setting:2" },
-        ],
+        label: "Bộ cơ bản",
+        key: "all",
       },
       {
-        type: "group",
-        label: "Item 2",
-        children: [
-          { label: "Option 3", key: "setting:3" },
-          { label: "Option 4", key: "setting:4" },
-        ],
+        label: "Bản mở rộng",
+        key: "expansion",
       },
     ],
   },
@@ -48,6 +40,20 @@ const items: MenuItem[] = [
   {
     label: "Tin Tức",
     key: "news",
+    children: [
+      {
+        label: "Hệ thống cửa hàng",
+        key: "stores",
+      },
+      {
+        label: "Giải đấu",
+        key: "tournament",
+      },
+      {
+        label: "Board Game",
+        key: "boardGameNews",
+      },
+    ],
   },
 ];
 
@@ -55,10 +61,8 @@ export default function Header() {
   return (
     <div>
       <div className="bg-white flex flex-wrap justify-between items-center px-4 sm:px-10 py-2">
-        <div className="text-3xl text-green-700 basis-2 font-bold hover: text-green-500">
-          <Link href="/">
-            BoGemStore
-          </Link>
+        <div className="text-3xl bg-gradient-to-r from-green-500 to-blue-500  bg-clip-text text-transparent basis-2 font-bold hover:">
+          <Link href="/">BoGemStore</Link>
         </div>
 
         <form className="basis-full sm:basis-1/3 h-auto mt-2 sm:mt-0">
