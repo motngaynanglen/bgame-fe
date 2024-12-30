@@ -7,7 +7,7 @@ import React from "react";
 export default function Home() {
   return (
     <div>
-      <main className="md:container md:mx-auto pt-5 ">
+      <main className="md:container md:mx-auto pt-1 bg-sky-100">
         <Banner />
         <HotDeal />
       </main>
