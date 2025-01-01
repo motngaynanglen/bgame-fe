@@ -1,5 +1,6 @@
 
 "use client"
+import { CreateButton } from "@/src/components/admin/Button";
 import { InvoicesTableSkeleton, TableSkeleton } from "@/src/components/admin/layout/skeletons";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import SearchBar from "@/src/components/admin/table/search";
@@ -108,6 +109,15 @@ const data: DataType[] = [
     },
 
 ];
+
+const Header = () => {
+    return (
+        <>
+            
+            header
+        </>
+    )
+}
 export default function AdminTableUser() {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
 
@@ -129,6 +139,7 @@ export default function AdminTableUser() {
             <Suspense>
                 <SearchBar placeholder={"searching something..."} />
             </Suspense>
+            <CreateButton link="#" title="add"/>
             <br />
             {useData === undefined ? (
                 <TableSkeleton />
