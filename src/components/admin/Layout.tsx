@@ -1,6 +1,6 @@
 'use client'
 // import node module libraries
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 
 import NavbarVertical from './layout/NavbarVertical';
 import NavbarTop from './layout/NavbarTop';
@@ -10,7 +10,6 @@ import { Layout } from 'antd';
 import { Content, Footer, Header } from 'antd/es/layout/layout';
 // import { useMediaQuery } from 'react-responsive';
 import Sider from 'antd/es/layout/Sider';
-import AdminLoading from '@/src/app/admin/loading';
 
 export default function DashboardLayout({ children, menu }: { children: React.ReactNode, menu: DashboardRouter }) {
 	const [showMenu, setShowMenu] = useState(true);
@@ -23,15 +22,13 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 			{/* <!-- ===== Page Wrapper Start ===== --> */}
 			<Layout className='min-h-screen'>
 				{/* <!-- ===== Sidebar Start ===== --> */}
-				<Suspense fallback={<AdminLoading />}>
-					<Sider collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
+				<Sider collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
 
-						<NavbarVertical sidebarOpen={showMenu}
-							setSidebarOpen={(value: boolean) => setShowMenu(value)}
-							menu={menu} />
+					<NavbarVertical sidebarOpen={showMenu}
+						setSidebarOpen={(value: boolean) => setShowMenu(value)}
+						menu={menu} />
 
-					</Sider>
-				</Suspense>
+				</Sider>
 				{/* <!-- ===== Sidebar End ===== --> */}
 				<Layout>
 					<Header className='p-0 bg-white'>
@@ -43,7 +40,7 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 					<Content>
 						{/* <!-- ===== Main Content Start ===== --> */}
 
-						<div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+						<div className="mx-auto max-w-screen-2xl px-4 py-4 md:px-6 2xl:px-10 ">
 							{children}
 						</div>
 

@@ -4,9 +4,12 @@ import { CreateButton } from "@/src/components/admin/Button";
 import { InvoicesTableSkeleton, TableSkeleton } from "@/src/components/admin/layout/skeletons";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import SearchBar from "@/src/components/admin/table/search";
-import { Pagination, Space, Table, Tag } from "antd";
+import { HomeOutlined, UserOutlined } from "@ant-design/icons";
+import { Breadcrumb, Col, Pagination, Row, Space, Table, Tag } from "antd";
 import type { TableProps } from "antd"
+import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { Suspense, useEffect, useState } from "react";
+
 interface DataType {
     key: string;
     name: string;
@@ -110,14 +113,30 @@ const data: DataType[] = [
 
 ];
 
-const Header = () => {
-    return (
-        <>
-            
-            header
-        </>
-    )
-}
+const role: string = "admin";
+const baseUrl: string = "/" + role + "/" + "users";
+const createUrl: string = baseUrl + "/" + "create";
+
+const breadcrumb: BreadcrumbItemType[] =
+    [
+        {
+            href: '/admin',
+            title: <HomeOutlined />,
+        },
+        {
+            // href: baseUrl,
+            title: (
+                <>
+                    <UserOutlined />
+                    <span>Users List</span>
+                </>
+            ),
+        },
+
+    ];
+
+
+
 export default function AdminTableUser() {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
 
@@ -136,10 +155,17 @@ export default function AdminTableUser() {
     }, []);
     return (
         <>
-            <Suspense>
-                <SearchBar placeholder={"searching something..."} />
-            </Suspense>
-            <CreateButton link="#" title="add"/>
+            <Breadcrumb items={breadcrumb} className="pb-4" />
+            <Row gutter={[16, 16]}>
+                <Col flex={"auto"}>
+                    <Suspense>
+                        <SearchBar placeholder={"searching something..."} />
+                    </Suspense>
+                </Col>
+                <Col flex={"150px"}>
+                    <CreateButton link={createUrl} title="add" />
+                </Col>
+            </Row>
             <br />
             {useData === undefined ? (
                 <TableSkeleton />

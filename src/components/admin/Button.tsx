@@ -6,19 +6,12 @@ import { AiOutlinePlus } from 'react-icons/ai';
 export function CreateButton({ link, title = '' }: { link: string; title: string }) {
     return (
         <>
-            <Link href={link ? link : "#"}>
+            <Link className='flex h-10 justify-center items-center rounded-lg px-4 text-sm font-medium text-white bg-blue-600 transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600' href={link ? link : "#"}>
                 {/* <Button type="dashed"> */}
                     <span className="md:block flex items-center">{title}</span>{' '}
                     <AiOutlinePlus />
                 {/* </Button> */}
             </Link>
-            {/* <Link
-            href={link ? link : "#"}
-            className="btn btn-primary d-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus:outline-none focus-ring-2 focus-ring-offset-2 focus-ring-blue-600"
-        >
-            <span className="hidden md:block d-flex align-items-center">{title}</span>{' '}
-            <Plus className="h-5 md:ml-4" />
-        </Link> */}
         </>
 
     );
