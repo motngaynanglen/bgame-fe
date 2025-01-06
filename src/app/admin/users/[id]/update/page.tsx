@@ -1,7 +1,7 @@
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
 import { Breadcrumb } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
-import UserForm from "../userForm";
+import UserForm from "../../userForm";
 
 const url = {
     home: "/admin",
@@ -24,15 +24,23 @@ const breadcrumb: BreadcrumbItemType[] =
             ),
         },
         {
-            title: "Create user"
+            title: "Update user"
         },
 
     ];
+const RegisterBodyData = {
+    username: "Đây là Bách",
+    email: "B@gmail.com",
+    password: "",
+    fullname: "",
+    phoneNumber: "",
+    confirmPassword: ""
+};
 export default function AdminCreateUser() {
     return (
         <>
             <Breadcrumb items={breadcrumb} className="pb-4" />
-            <UserForm/>
+            <UserForm user={RegisterBodyData}/>
         </>
     )
 }
