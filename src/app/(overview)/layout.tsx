@@ -9,8 +9,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />
-      <Suspense fallback={<Loading/>}>{children}</Suspense>
-
+      <Suspense fallback={<Loading />}>{children}</Suspense>
       <FloatButtonContact />
       <Footer />
     </>

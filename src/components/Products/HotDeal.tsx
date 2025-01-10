@@ -1,4 +1,4 @@
-import { Carousel } from "antd";
+import { Carousel, Divider } from "antd";
 import Link from "next/link";
 import CardProduct from "./CardProduct";
 
@@ -28,18 +28,25 @@ import CardProduct from "./CardProduct";
 //   nextArrow: <SampleNextArrow />,
 //   prevArrow: <SamplePrevArrow />,
 // };
-export default function HotDeal() {
+export default function HotDeal({ category }: { category: string }) {
   const items = [1, 2, 3, 4];
 
   return (
-    <div className="relative pt-3  ">
-      <div className=" text-white p-4 flex justify-between items-center bg-gradient-to-r from-green-500 to-blue-500 rounded-md">
-        <h1 className="text-xl font-bold">Hot deal</h1>
+    <div className="container md:p-3  ">
+      {/* <div className=" text-black pt-4 flex justify-between items-center">
+        <h1 className="text-2xl p-1 font-bold uppercase bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">{category}</h1>
 
-        <Link className="text-white" href="/products">
+        <Link className="hover:underline " href="/products">
           View All
         </Link>
-      </div>
+      </div> */}
+      <Divider style={{ borderColor: "#7cb305" }}>
+        {" "}
+        <h1 className="text-2xl p-1 font-bold uppercase bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+          {category}
+        </h1>
+      </Divider>
+
       <Carousel
         autoplay
         arrows
@@ -59,6 +66,7 @@ export default function HotDeal() {
               image="/assets/images/tqs.jpg"
               price={800000}
               title="Tam quốc sát"
+              soldOut={false}
             />
             {/* <Card
               hoverable
@@ -82,6 +90,13 @@ export default function HotDeal() {
           </div>
         ))}
       </Carousel>
+      <div className="flex justify-center">
+        <Link className="hover:underline " href="/products">
+          <button className="bg-green-500 text-white font-semibold hover:bg-green-600 rounded-full   px-5 py-2 mt-2">
+            Xem Tất cả
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
