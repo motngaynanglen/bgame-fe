@@ -4,9 +4,9 @@ import React from "react";
 
 export default function ProductsDetailPage() {
   return (
-    <div className="container mx-auto bg-sky-100">
+    <div className="container p-3 bg-sky-100">
       <ProductDetails />
-      {/* <SingleProductDescription /> */}
+      <SingleProductDescription />
     </div>
   );
 }
