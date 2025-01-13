@@ -1,5 +1,4 @@
 import Link from "next/link";
-import React from "react";
 
 export default function LoginPage() {
   return (
@@ -7,7 +6,7 @@ export default function LoginPage() {
       <div className="w-1/2 h-screen hidden lg:block">
         <img
           src="/assets/images/bg-login.jpg"
-          alt="Placeholder Image"
+          alt="Placeholder img"
           className="object-cover w-full h-full"
         />
       </div>

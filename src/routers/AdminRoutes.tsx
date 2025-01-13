@@ -290,7 +290,7 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	// },
 ]
 export const AdminRouter: DashboardRouter = {
-	role: "Admin",
+	role: "admin",
 	route: AdminMenuAntd,
 }
 

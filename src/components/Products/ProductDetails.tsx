@@ -3,6 +3,7 @@ import { Image, InputNumber, Rate } from "antd";
 import Link from "next/link";
 import React, { useState } from "react";
 
+
 const boardGameInfo = {
   image: "/assets/images/tqs.jpg",
   title: "Tam Quốc Sát",
@@ -22,6 +23,7 @@ function ProductDetails() {
     }
   };
   return (
+
     <div className="grid lg:grid-cols-12 p-4 gap-10 mb-12 text-gray-800">
       {/* Image Section */}
       <div className="col-start-2 col-end-7">
@@ -29,8 +31,6 @@ function ProductDetails() {
           <div>
             <Image
               src={`/assets/images/tqs.jpg`}
-              alt="Thumbnail"
-              className="w- h-10 object-cover rounded-lg "
             />
           </div>
 
