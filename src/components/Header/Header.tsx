@@ -33,10 +33,7 @@ const items: MenuItem[] = [
     label: "Phụ kiện",
     key: "accessory",
   },
-  {
-    label: "Giảm giá",
-    key: "deal",
-  },
+
   {
     label: "Tin Tức",
     key: "news",
@@ -87,7 +84,15 @@ export default function Header() {
         </form>
 
         <div className="flex justify-items-center space-x-6 sm:space-x-6 lg:space-x-10">
-          <BsBag className="size-7 fill-green-700" />
+          <Link href="/rental">
+            <button className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded">
+              Thuê board game
+            </button>
+          </Link>
+          <Link href="/cart">
+            <BsBag className="size-7 fill-green-700" />
+          </Link>
+
           <Link href="/login">
             <BsPersonCircle
               className="size-7

@@ -12,7 +12,7 @@ export default function FloatButtonContact() {
         icon={<AiFillMessage />
         }
       >
-        <FloatButton icon={<img src="/assets/icon/Facebook.svg"/>} href="https://www.facebook.com/fptboardgameclub"/>
+        <FloatButton icon={<img src="/assets/icon/facebook.svg"/>} href="https://www.facebook.com/fptboardgameclub"/>
         <FloatButton icon={<img src="/assets/icon/Icon_of_Zalo.svg" />}  href="https://zalo.me/g/alwzje618"/>
       </FloatButtonGroup>
     </div>

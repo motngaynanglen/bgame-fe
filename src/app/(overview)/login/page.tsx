@@ -23,6 +23,7 @@ export default function LoginPage() {
             <label htmlFor="username" className="block text-gray-600">
               Tài Khoản
             </label>
+            {/* nhap username */}
             <input
               type="text"
               id="username"
@@ -34,6 +35,7 @@ export default function LoginPage() {
             <label htmlFor="password" className="block text-gray-800">
               Mật Khẩu
             </label>
+            {/* nhap password */}
             <input
               type="password"
               id="password"
@@ -53,6 +55,7 @@ export default function LoginPage() {
             </label>
           </div>
           <div className="mb-6 text-blue-500">
+            {/* forgot password */}
             <Link href="#" className="hover:underline">
               Ai biểu đặt mật khẩu dài rồi quên?
             </Link>
