@@ -4,32 +4,9 @@ import { DashboardRouter } from './route.schema';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
-/**
- *  All Dashboard Routes
- *
- *  Understanding title/value pairs for Dashboard routes
- *
- *  Applicable for main/root/level 1 routes
- *  icon 		: String - It's only for main menu or you can consider 1st level menu item to specify icon title.
- *
- *  Applicable for main/root/level 1 and subitems routes
- * 	key 			: Number - You can use '' as value to generate unique key using uuid library, you can also assign constant unique key for react dynamic objects.
- *  title 		: String - If menu contains childern use title to provide main menu title.
- *  badge 		: String - (Optional - Default - '') If you specify badge value it will be displayed beside the menu title or menu item.
- * 	badgecolor 	: String - (Optional - Default - 'primary' ) - Used to specify badge background color.
- *
- *  Applicable for subitems / children items routes
- *  title 		: String - If it's menu item in which you are specifiying link, use title ( don't use title for that )
- *  children	: Array - Use to specify submenu items
- *
- *  Used to segrigate menu groups
- *  grouptitle : Boolean - (Optional - Default - false ) If you want to group menu items you can use grouptitle = true,
- *  ( Use title : value to specify group title  e.g. COMPONENTS , DOCUMENTATION that we did here. )
- *
- */
-// export const AdminMenu: MenuItem[] = [
+
 // 	{
-// 		id: "admin-dashboard",
+// 		id: "Manager-dashboard",
 // 		title: 'Bảng Thống Kê',
 // 		icon: (
 // 			<svg
@@ -58,7 +35,7 @@ import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
 // 				/>
 // 			</svg>
 // 		),
-// 		link: '/admin'
+// 		link: '/Manager'
 // 	},
 // 	{
 // 		id: '1',
@@ -88,7 +65,7 @@ import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
 // 			</svg>
 // 		),
 // 		children: [
-// 			{ id: '123', link: '/admin/users', title: 'Danh sách người dùng' },
+// 			{ id: '123', link: '/Manager/users', title: 'Danh sách người dùng' },
 
 // 		]
 // 	},
@@ -115,8 +92,8 @@ import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
 // 			</svg>
 // 		),
 // 		children: [
-// 			{ id: '22', link: '/admin/partners', title: 'Danh sách đối tác' },
-// 			{ id: '23', link: '/admin/partners/pending-partners', title: 'Danh sách chờ duyệt' },
+// 			{ id: '22', link: '/Manager/partners', title: 'Danh sách đối tác' },
+// 			{ id: '23', link: '/Manager/partners/pending-partners', title: 'Danh sách chờ duyệt' },
 
 
 // 		]
@@ -144,17 +121,17 @@ import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
 // 			</svg>
 // 		),
 // 		children: [
-// 			{ id: '34', link: '/admin/care-centers', title: 'Danh sách trung tâm' },
-// 			{ id: '35', link: '/admin/care-centers/pending-centers', title: 'Danh sách chờ duyệt' },
+// 			{ id: '34', link: '/Manager/care-centers', title: 'Danh sách trung tâm' },
+// 			{ id: '35', link: '/Manager/care-centers/pending-centers', title: 'Danh sách chờ duyệt' },
 
 // 		]
 // 	},
 
 // ];
-export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
+export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	{
-		key: "admin-dashboard",
-		label: (<Link href={"/admin"} className={clsx("font-medium text-lg")}>Bảng thống kê</Link>),
+		key: "Manager-dashboard",
+		label: (<Link href={"/manager"} className={clsx("font-medium text-lg")}>Bảng thống kê</Link>),
 		icon: (
 			<svg
 				className="fill-current"
@@ -195,12 +172,12 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	},
 	{
 		key: "group-11",
-		label: (<Link href={"/admin/content/aboutus"} className={clsx("font-medium text-lg")}>Quản lý Trang Chủ</Link>),
+		label: (<Link href={"/manager"} className={clsx("font-medium text-lg")}>Quản lý Trang Chủ</Link>),
 		icon: (<ReconciliationOutlined />),
 	},
 	{
 		key: "group-12",
-		label: (<Link href={"/admin/users"} className={clsx("font-medium text-lg")}>Quản lý người dùng</Link>),
+		label: (<Link href={"/manager/users"} className={clsx("font-medium text-lg")}>Quản lý người dùng</Link>),
 		icon: (<UserOutlined />),
 	},
 	
@@ -227,7 +204,7 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	// 		</svg>
 	// 	  ),
 	// 	children: [
-	// 		{ key: '123', link: '/admin/users', title: 'Danh sách người dùng' },
+	// 		{ key: '123', link: '/Manager/users', title: 'Danh sách người dùng' },
 
 	// 	]
 	// },
@@ -254,8 +231,8 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	// 		</svg>
 	// 	  ),
 	// 	children: [
-	// 		{ key: '22', link: '/admin/partners', title: 'Danh sách đối tác' },
-	// 		{ key: '23', link: '/admin/partners/pending-partners', title: 'Danh sách chờ duyệt' },
+	// 		{ key: '22', link: '/Manager/partners', title: 'Danh sách đối tác' },
+	// 		{ key: '23', link: '/Manager/partners/pending-partners', title: 'Danh sách chờ duyệt' },
 
 
 	// 	]
@@ -283,15 +260,15 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	// 		</svg>
 	// 	  ),
 	// 	children: [
-	// 		{ key: '34', link: '/admin/care-centers', title: 'Danh sách trung tâm' },
-	// 		{ key: '35', link: '/admin/care-centers/pending-centers', title: 'Danh sách chờ duyệt' },
+	// 		{ key: '34', link: '/Manager/care-centers', title: 'Danh sách trung tâm' },
+	// 		{ key: '35', link: '/Manager/care-centers/pending-centers', title: 'Danh sách chờ duyệt' },
 
 	// 	]
 	// },
 ]
-export const AdminRouter: DashboardRouter = {
-	role: "admin",
-	route: AdminMenuAntd,
+export const ManagerRouter: DashboardRouter = {
+	role: "manager",
+	route: ManagerMenuAntd,
 }
 
-export default AdminRouter;
+export default ManagerRouter;
