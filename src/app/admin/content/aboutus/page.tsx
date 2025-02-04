@@ -9,7 +9,8 @@ export default function AboutUs() {
     const fetchData = async () => {
       try {
         const response = await contentApiRequest.getAboutUs();
-        setContent(response.data);
+        console.log('Response:', response);
+        setContent(response);
       } catch (error) {
         console.error('Error fetching content', error);
       }

@@ -6,9 +6,12 @@ const configSchema = z.object({
   NEXT_URL: z.string()
 })
 
+const API = ((env == "development") ? process.env.NEXT_PUBLIC_DEVELOPMENT_API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT) as string;
+const URL = ((env == "development") ? process.env.NEXT_PUBLIC_DEVELOPMENT_URL : process.env.NEXT_PUBLIC_URL) as string;
+
 const configProject = configSchema.safeParse({
-  NEXT_API_ENDPOINT: (env == "development") ? process.env.NEXT_DEVELOPMENT_API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT,
-  NEXT_URL: (env == "development") ? process.env.NEXT_DEVELOPMENT_URL : process.env.NEXT_PUBLIC_URL
+  NEXT_API_ENDPOINT: API,
+  NEXT_URL: URL
 })
 
 if (!configProject.success) {

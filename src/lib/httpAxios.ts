@@ -54,7 +54,7 @@ export class EntityError extends HttpError {
 }
 
 // let clientLogoutRequest: null | Promise<any> = null
- const isClient = typeof window !== 'undefined'
+ const isClient = () => typeof window !== 'undefined'
 
 
 // Get base URL
@@ -64,12 +64,8 @@ const getBaseUrl = (customBaseUrl?: string): string => {
     if (customBaseUrl === undefined) {
         return envConfig.NEXT_API_ENDPOINT;
     }
-    if(!isClient){
-        return envConfig.NEXT_URL;
-    }
-    return customBaseUrl || '';
+    return customBaseUrl || envConfig.NEXT_URL;
 };
-
 const request = async <Response>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     url: string,
@@ -77,6 +73,7 @@ const request = async <Response>(
 ) => {
 
     const baseUrl = getBaseUrl(options?.baseUrl);
+    console.log("this is baseurl:"+ baseUrl)
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 
     let body: FormData | string | undefined = undefined

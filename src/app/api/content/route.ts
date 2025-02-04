@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const res = await request.json();
     const { title, content } = res.body;
     const newData = { title, content };
-
+    
     try {
         fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
         return new Response(

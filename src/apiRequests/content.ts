@@ -4,7 +4,7 @@ import { MessageResType } from '../schemaValidations/common.schema';
 const contentApiRequest = {
     getAboutUs: () =>
         http.get<MessageResType>('/api/content', {
-            baseUrl: ''
+            baseUrl: '',
         }),
 }
 export default contentApiRequest;
