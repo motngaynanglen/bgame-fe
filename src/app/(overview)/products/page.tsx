@@ -8,13 +8,13 @@
   import { BsPeople } from "react-icons/bs";
 
 
-  interface BoardGame {
-    id: string;
-    title: string;
-    price: number;
-    status: boolean;
-    image: string;
-  }
+  // interface BoardGame {
+  //   id: string;
+  //   title: string;
+  //   price: number;
+  //   status: boolean;
+  //   image: string;
+  // }
   type MenuItem = Required<MenuProps>["items"][number];
 
   const boardgames = [
@@ -23,7 +23,7 @@
       name: "Tam quốc sát",
       price: 800000,
       image: "/assets/images/tqs.jpg",
-      soldOut: false,
+      soldOut: true,
     },
     {
       id: 2,

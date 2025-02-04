@@ -48,7 +48,7 @@ export default function HotDeal({ category }: { category: string }) {
       </Divider>
 
       <Carousel
-        autoplay
+
         arrows
         slidesToShow={4}
         slidesToScroll={1}

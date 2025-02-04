@@ -1,7 +1,10 @@
+'use client';
 import { Button, Carousel, Col, Image, Row } from "antd";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function Banner() {
+  const router = useRouter()
   return (
     <div className="container mx-auto pt-5">
       <Row gutter={[16, 16]}>
@@ -19,14 +22,15 @@ export default function Banner() {
                 className="w-full h-[500px] object-cover"
               />
               <div className="absolute inset-0 flex flex-col items-start justify-center px-8 bg-gradient-to-r from-black/30 via-transparent to-transparent">
-                <h2 className="text-white text-3xl font-bold">
-                  Khai trí tưởng tượng <br /> Chạm vạn niềm vui
+                <h2 className="text-white text-3xl font-bold uppercase">
+                  Dịch vụ thuê board <br /> tại BoGamStore
                 </h2>
                 <Button
                   type="primary"
                   className="mt-4 bg-blue-500 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                  onClick={() => router.push("/rental")}
                 >
-                  Chạm ngay
+                  Trải ngiệm ngay
                 </Button>
               </div>
             </div>
@@ -38,12 +42,13 @@ export default function Banner() {
                 className="w-full h-[500px] object-cover"
               />
               <div className="absolute inset-0 flex flex-col items-start justify-center px-8 bg-gradient-to-r from-black/30 via-transparent to-transparent">
-                <h2 className="text-white text-3xl font-bold">
-                  Trí nhớ siêu phàm <br /> Tâm linh tương thông
+                <h2 className="text-white text-3xl font-bold uppercase">
+                  Khám phá thế giới board game <br /> BoGemStore
                 </h2>
                 <Button
                   type="primary"
                   className="mt-4 bg-blue-500 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                  onClick={() => router.push("/products")}
                 >
                   Mua ngay
                 </Button>

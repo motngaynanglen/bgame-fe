@@ -1,5 +1,6 @@
-'use client';
+"use client";
 import { Modal } from "antd";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
@@ -7,46 +8,46 @@ import { BsPeople } from "react-icons/bs";
 import { GoPeople } from "react-icons/go";
 import { LuBrain } from "react-icons/lu";
 
-function CardProduct({
+function CardProductRent({
   image,
   title,
   price,
-  soldOut,
+  isRented,
 }: {
   image: string;
   title: string;
   price: number;
-  soldOut: boolean;
+  isRented: boolean;
 }) {
   const formatPrice = (price: number) => {
-    return price.toLocaleString("vi-VN"); 
+    return price.toLocaleString("vi-VN");
   };
   const [openResponsive, setOpenResponsive] = useState(false);
 
   return (
     <div className="relative">
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
+      <div
+        onClick={() => setOpenResponsive(true)}
+        className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+      >
         <div className="relative h-full w-full">
           <img
             className={`mx-auto h-full object-cover transition-opacity ${
-              soldOut ? "opacity-50" : ""
+              isRented ? "opacity-50" : ""
             }`}
             src={image}
             alt=""
           />
-          {soldOut && (
+          {isRented && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white font-semibold">
-              Đã hết hàng
+              Đang được thuê
             </div>
           )}
         </div>
         <div className="pt-6">
-          <Link
-            className="uppercase text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
-            href="/product-detail"
-          >
+          <div className="uppercase text-lg font-semibold leading-tight text-gray-900  dark:text-white">
             {title}
-          </Link>
+          </div>
 
           <div className="mt-2 flex items-center gap-2">
             <div className="flex items-center">
@@ -71,7 +72,6 @@ function CardProduct({
               (455)
             </p>
           </div>
-
           <ul className="mt-2 flex items-center gap-4">
             <li className="flex items-center gap-2">
               <AiOutlineClockCircle />
@@ -106,12 +106,55 @@ function CardProduct({
 
           <div className="mt-4 flex items-center justify-between gap-4">
             <p className="text-2xl font-medium leading-tight text-gray-900 dark:text-white">
-            {formatPrice(price)} vnd            </p>
+              {formatPrice(price)} vnd
+            </p>
+          </div>
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <button  onClick={(e) => e.stopPropagation()}>
+              <Link
+                href="/product-detail"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                
+              >
+                Đặt trước
+              </Link>
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center rounded-lg bg-green-500 px-4  py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+            >
+              Thêm vào giỏ hàng
+            </button>
           </div>
         </div>
       </div>
+      <Modal
+        title="Giời thiệu về Tam Quốc Sát"
+        centered
+        open={openResponsive}
+        onOk={() => setOpenResponsive(false)}
+        onCancel={() => setOpenResponsive(false)}
+        // width={{
+        //   xs: '90%',
+        //   sm: '80%',
+        //   md: '70%',
+        //   lg: '60%',
+        //   xl: '50%',
+        //   xxl: '40%',
+        // }}
+      >
+        <p>
+          Tam Quốc Sát là một thể loại Card Game được ra mắt vào năm 2010 của
+          tác giả KayaK và do nhà phát hành Yoka Games phát triển tiếp. Nhưng
+          thực sự game chỉ bắt đầu nhận được sự tán đồng và hưởng ứng từ người
+          chơi từ năm 2015. Cũng trong năm này “Sát” đã trở thành 1 hiện tượng
+          và đạt được danh hiệu Board Game hay nhất năm do độc giả bình chọn.
+        </p>
+
+        <p>some contents...</p>
+      </Modal>
     </div>
   );
 }
 
-export default CardProduct;
+export default CardProductRent;

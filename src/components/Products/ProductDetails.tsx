@@ -15,13 +15,19 @@ const boardGameInfo = {
 }
 
 function ProductDetails() {
-  const [quantity, setQuantity] = useState(1); // Giá trị mặc định là 1
+  const [quantity, setQuantity] = useState(1); 
 
   const handleChange = (value: number | null) => {
     if (value !== null) {
       setQuantity(value);
     }
   };
+
+  const formatPrice = (price: number) => {
+    return price.toLocaleString("vi-VN"); 
+  };
+
+  
   return (
 
     <div className="grid lg:grid-cols-12 p-4 gap-10 mb-12 text-gray-800">
@@ -63,7 +69,7 @@ function ProductDetails() {
         </div>
 
         <div className="text-lg font-semibold">
-          {boardGameInfo.price} vnđ{/* gia tien o day */}
+        {formatPrice(boardGameInfo.price)}đ{/* gia tien o day */}
           {/* <span className="line-through text-gray-400">$80.00</span> */}
         </div>
 
