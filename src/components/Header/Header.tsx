@@ -1,6 +1,6 @@
 "use client";
 import type { MenuProps } from "antd";
-import { Menu } from "antd";
+import { Avatar, Badge, Menu } from "antd";
 import Link from "next/link";
 import { BsBag, BsPersonCircle, BsSearch } from "react-icons/bs";
 
@@ -71,7 +71,7 @@ export default function Header() {
               type="search"
               id="default-search"
               className=" w-full p-3 ps-10 text-sm text-gray-900  border-gray-300 rounded-md bg-gray-50  "
-              placeholder="Nhập tên board game..."
+              placeholder="Tím kiếm board game yêu thích của bạn ..."
               required
             />
             <button
@@ -90,7 +90,9 @@ export default function Header() {
             </button>
           </Link>
           <Link href="/cart">
-            <BsBag className="size-7 fill-green-700" />
+            <Badge count={0} showZero>
+              <BsBag className="size-7 fill-green-700" />
+            </Badge>
           </Link>
 
           <Link href="/login">
