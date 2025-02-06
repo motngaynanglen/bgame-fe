@@ -4,7 +4,7 @@ import HotDeal from "@/src/components/Products/HotDeal";
 export default function Home() {
   return (
     <div className="bg-sky-50">
-      <main className="container mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-">
+      <main className="">
         <Banner />
         <div className="">
           <div className="mb-8">

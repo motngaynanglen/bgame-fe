@@ -109,7 +109,7 @@ function CardProductRent({
               {formatPrice(price)} vnd
             </p>
           </div>
-          <div className="mt-4 flex items-center justify-between gap-4">
+          {/* <div className="mt-4 flex items-center justify-between gap-4">
             <button  onClick={(e) => e.stopPropagation()}>
               <Link
                 href="/product-detail"
@@ -125,7 +125,7 @@ function CardProductRent({
             >
               Thêm vào giỏ hàng
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
       <Modal
@@ -134,14 +134,6 @@ function CardProductRent({
         open={openResponsive}
         onOk={() => setOpenResponsive(false)}
         onCancel={() => setOpenResponsive(false)}
-        // width={{
-        //   xs: '90%',
-        //   sm: '80%',
-        //   md: '70%',
-        //   lg: '60%',
-        //   xl: '50%',
-        //   xxl: '40%',
-        // }}
       >
         <p>
           Tam Quốc Sát là một thể loại Card Game được ra mắt vào năm 2010 của

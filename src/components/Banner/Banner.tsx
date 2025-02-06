@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function Banner() {
-  const router = useRouter()
+  const router = useRouter();
+
   return (
-    <div className="container mx-auto pt-5">
+    <div className="pt-5">
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={18}>
           <Carousel
@@ -14,12 +15,11 @@ export default function Banner() {
             arrows
             className="rounded-lg overflow-hidden shadow-lg"
           >
-        
             <div className="relative">
               <img
                 src="/assets/images/carousel1.jpg"
                 alt="Banner 1"
-                className="w-full h-[500px] object-cover"
+                className="w-full h-[50vw] lg:h-[500px] object-cover"
               />
               <div className="absolute inset-0 flex flex-col items-start justify-center px-8 bg-gradient-to-r from-black/30 via-transparent to-transparent">
                 <h2 className="text-white text-3xl font-bold uppercase">
@@ -39,7 +39,7 @@ export default function Banner() {
               <img
                 src="/assets/images/carousel2.jpg"
                 alt="Banner 2"
-                className="w-full h-[500px] object-cover"
+                className="w-full h-[50vw] lg:h-[500px] object-cover"
               />
               <div className="absolute inset-0 flex flex-col items-start justify-center px-8 bg-gradient-to-r from-black/30 via-transparent to-transparent">
                 <h2 className="text-white text-3xl font-bold uppercase">
@@ -56,14 +56,19 @@ export default function Banner() {
             </div>
           </Carousel>
         </Col>
-        <Col xs={24} lg={6}>
+
+        {/* Two  Images */}
+        <Col xs={24} lg={6} className="hidden lg:block">
           <Image
             src="https://i.pinimg.com/736x/98/cf/03/98cf0386e7394df6a0fb5077c3cd3acf.jpg"
-            className="w-full h-[100px] object-cover rounded-lg"
+            className="w-full h-[50vw] lg:h-[245px] object-cover rounded-lg"
+            style={{height: '245px'}}
           />
           <Image
             src="https://i.pinimg.com/736x/8f/f8/9d/8ff89d23c2aeed786214bfbfe8f8064c.jpg"
-            className="w-full h-[190px] object-cover rounded-lg"
+            className="w-full h-[50vw] lg:h-[245px] object-cover rounded-lg mt-4"
+            style={{height: '245px'}}
+
           />
         </Col>
       </Row>

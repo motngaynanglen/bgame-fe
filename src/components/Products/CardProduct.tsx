@@ -1,6 +1,7 @@
 'use client';
 import { Modal } from "antd";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
@@ -19,30 +20,31 @@ function CardProduct({
   soldOut: boolean;
 }) {
   const formatPrice = (price: number) => {
-    return price.toLocaleString("vi-VN"); 
+    return price.toLocaleString("vi-VN");
   };
-  const [openResponsive, setOpenResponsive] = useState(false);
+
+  const router = useRouter();
 
   return (
     <div className="relative">
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
+      <div onClick={() => router.push("/product-detail")} className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
         <div className="relative h-full w-full">
           <img
-            className={`mx-auto h-full object-cover transition-opacity ${
+            className={`mx-auto h-full object-cover transition-opacity rounded-t-md ${
               soldOut ? "opacity-50" : ""
             }`}
             src={image}
             alt=""
           />
           {soldOut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white font-semibold">
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white font-semibold rounded-t-md">
               Đã hết hàng
             </div>
           )}
         </div>
-        <div className="pt-6">
+        <div className="pt-4">
           <Link
-            className="uppercase text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
+            className="uppercase text-base sm:text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
             href="/product-detail"
           >
             {title}
@@ -67,46 +69,45 @@ function CardProduct({
             <p className="text-sm font-medium text-gray-900 dark:text-white">
               5.0
             </p>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 hidden lg:block">
               (455)
             </p>
           </div>
 
-          <ul className="mt-2 flex items-center gap-4">
+          <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
               <AiOutlineClockCircle />
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 30-60
               </p>
             </li>
             <li className="flex items-center gap-2">
               <BsPeople />
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 2-12
               </p>
             </li>
           </ul>
 
-          <ul className="mt-2 flex justify-stretch items-center gap-4">
+          <ul className="mt-2 flex flex-wrap justify-stretch items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
               <GoPeople />
-
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 12+
               </p>
             </li>
             <li className="flex items-center gap-2">
               <LuBrain />
-
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 3.6/5
               </p>
             </li>
           </ul>
 
-          <div className="mt-4 flex items-center justify-between gap-4">
-            <p className="text-2xl font-medium leading-tight text-gray-900 dark:text-white">
-            {formatPrice(price)} vnd            </p>
+          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <p className="text-lg sm:text-2xl font-medium leading-tight text-gray-900 dark:text-white">
+              {formatPrice(price)} vnd
+            </p>
           </div>
         </div>
       </div>

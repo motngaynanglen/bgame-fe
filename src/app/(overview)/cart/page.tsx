@@ -1,4 +1,6 @@
-import { InputNumber } from "antd";
+"use client";
+import { useCartStore } from "@/src/store/cartStore";
+import { Button, Empty, InputNumber, Typography } from "antd";
 import Link from "next/link";
 import React from "react";
 
@@ -11,11 +13,13 @@ const items = [
 ];
 
 export default function ShoppingCart() {
+  const { cart, removeFromCart, clearCart } = useCartStore();
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="min-h-screen bg-sky-50 text-white p-8">
+      <div className="max-w-5xl mx-auto space-y-8  border-4 border-gray-800 p-8 rounded-lg bg-gray-900">
         {/* Shopping Cart Header */}
-        <h2 className="text-2xl font-bold">Giỏ Hàng  </h2>
+        <h2 className="text-2xl font-bold">Giỏ Hàng </h2>
         <div className="grid grid-cols-5 bg-gray-800 p-4 rounded-lg">
           <div className="flex items-center justify-start ">
             <h1 className="">Tên sản phẩm</h1>
@@ -23,9 +27,7 @@ export default function ShoppingCart() {
           <div className="flex items-center justify-center space-x-4">
             Số lượng
           </div>
-          <div className="flex items-center justify-center space-x-4">
-            Giá
-          </div>
+          <div className="flex items-center justify-center space-x-4">Giá</div>
 
           <div className="flex items-center justify-center space-x-4">
             Giá sau khi giảm
@@ -33,52 +35,57 @@ export default function ShoppingCart() {
         </div>
         {/* Cart Items */}
         <div className="space-y-4">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-5 bg-gray-800 p-4 rounded-lg"
-            >
-              {/* Item Details */}
-              <div className="flex items-center justify-start space-x-4">
-                <div className="w-12 h-12 bg-gray-700 rounded-md"></div>
-                <span className="font-medium">{item.name}</span>
-              </div>
-
-              {/* Quantity Selector */}
-              <div className="flex items-center justify-center space-x-2">
-                <InputNumber min={1} max={10} defaultValue={1} />
-              </div>
-
-              {/* Price */}
-              <span className="flex items-center justify-center font-semibold">
-                ${item.price}
-              </span>
-
-              <span className="flex items-center justify-center font-semibold">
-                ${item.price}
-              </span>
-
-              {/* Delete Icon */}
-              <div className="flex items-center justify-center">
-                <button className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
+          {cart.length === 0 ? (
+            <div className="text-white">
+              <Empty
+                description="No items in cart"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              >
+                <Button type="primary">Tìm mua sản phẩm</Button>
+              </Empty>
             </div>
-          ))}
+          ) : (
+            <div>
+              {cart.map((item, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-5 bg-gray-800 p-4 rounded-lg"
+                >
+                  <div className="flex items-center justify-start">
+                    <h1>{item.name}</h1>
+                  </div>
+                  <div className="flex items-center justify-center space-x-4">
+                    <InputNumber min={1} defaultValue={item.quantity} />
+                  </div>
+                  <div className="flex items-center justify-center space-x-4">
+                    {item.price}
+                  </div>
+                  <div className="flex items-center justify-center space-x-4">
+                    {item.price * item.quantity}
+                  </div>
+                  {/* Delete Icon */}
+                  <div className="flex items-center justify-center">
+                    <button className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600" onClick={() => removeFromCart(item.id)}>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Order Summary */}

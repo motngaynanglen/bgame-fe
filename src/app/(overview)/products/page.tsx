@@ -1,9 +1,12 @@
   "use client";
+import CategoryFilter from "@/src/components/Filter/CategoryFilter";
   import CardProduct from "@/src/components/Products/CardProduct";
-  import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
-  import { Checkbox, Layout, Menu, MenuProps, Pagination } from "antd";
+import CardProductRent from "@/src/components/Products/CardProductRent";
+  import { AppstoreOutlined, FilterOutlined, MailOutlined } from "@ant-design/icons";
+  import { Button, Checkbox, Drawer, Layout, Menu, MenuProps, Pagination } from "antd";
   import { Content } from "antd/es/layout/layout";
   import Sider from "antd/es/layout/Sider";
+import { useState } from "react";
   import { AiOutlineClockCircle } from "react-icons/ai";
   import { BsPeople } from "react-icons/bs";
 
@@ -158,51 +161,68 @@
     const onClick: MenuProps["onClick"] = (e) => {
       console.log("click ", e);
     };
-    // const data = await fetch('https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame')
-    // const boardgames: BoardGame[] = await data.json();
+   
+
+    const [open, setOpen] = useState(false);
+    
+      const showDrawer = () => {
+        setOpen(true);
+      };
+    
+      const onClose = () => {
+        setOpen(false);
+      };
+    
 
     return (
       <div className="flex ">
-        {/* Sidebar */}
-        <Layout>
-          <Sider className="h-screen w-20" width={250} theme="light">
-            <Menu
-              onClick={onClick}
-              // defaultSelectedKeys={["1", "2"]}
-              defaultOpenKeys={["sub1", "sub2"]}
-              mode="inline"
-              items={items}
-            />
-          </Sider>
-          <Layout>
-            <Content>
-              <main className=" p-4">
-                <div className=" text-white p-4 flex justify-between items-center bg-gradient-to-r from-green-500 to-blue-500 rounded-md mb-2">
-                  <h1 className="text-xl font-bold">Hot deal</h1>
-                </div>
-                {/* Product Cards */}
-                <div className="grid grid-cols-4 gap-4">
-                  {boardgames.map((boardgame, index) => (
-                    <CardProduct
-                      key={index}
-                      image="/assets/images/tqs.jpg"
-                      price={boardgame.price}
-                      title={boardgame.name}
-                      soldOut={boardgame.soldOut}
-                    />
-                  ))}
-                </div>
-                {/* Pagination */}
-                <Pagination
-                  className="m-5"
-                  align="center"
-                  defaultCurrent={1}
-                  total={50}
+         <main className="pt-4">
+          <div className="flex flex-col lg:flex-row">
+            {/* Filter */}
+            <div className="hidden lg:block lg:basis-1/4 pr-4">
+              <CategoryFilter />
+            </div>
+            <div className="block lg:hidden mb-4">
+              <Button
+                type="primary"
+                icon={<FilterOutlined />}
+                onClick={showDrawer}
+              >
+                Bộ Lọc
+              </Button>
+            </div>
+
+            {/* Drawer cho mobile */}
+            <Drawer
+              title="Bộ Lọc"
+              placement="left"
+              onClose={onClose}
+              open={open}
+            >
+              <CategoryFilter />
+            </Drawer>
+            {/* Product Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {boardgames.map((boardgame, index) => (
+                <CardProduct
+                  key={index}
+                  image="/assets/images/tqs.jpg"
+                  price={boardgame.price}
+                  title={boardgame.name}
+                  soldOut={boardgame.soldOut}
                 />
-              </main>
-            </Content>
-          </Layout>
-        </Layout>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            className="m-5"
+            align="center"
+            defaultCurrent={1}
+            total={50}
+          />
+        </main>
       </div>
     );
   }

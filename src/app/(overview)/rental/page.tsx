@@ -1,14 +1,15 @@
 "use client";
 import CardProduct from "@/src/components/Products/CardProduct";
-import { Checkbox, Layout, Menu, MenuProps, Pagination } from "antd";
+import { Button, Checkbox, Drawer, Layout, Menu, MenuProps, Pagination } from "antd";
 import { Content } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
-import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, FilterOutlined, MailOutlined } from "@ant-design/icons";
 import CategoryFilter from "@/src/components/Filter/CategoryFilter";
 import CardProductRent from "@/src/components/Products/CardProductRent";
+import { useState } from "react";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -148,6 +149,17 @@ const items: MenuItem[] = [
 ];
 
 export default function BoardGameRental() {
+
+  const [open, setOpen] = useState(false);
+
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    setOpen(false);
+  };
+
   const onClick: MenuProps["onClick"] = (e) => {
     console.log("click ", e);
   };
@@ -155,40 +167,53 @@ export default function BoardGameRental() {
     <div>
       <Breadcrumb />
       <div className="flex ">
-        {/* Sidebar */}
-        <Layout>
-          <Layout>
-            <Content>
-              <main className="pt-4">
-                {/* Product Cards */}
-                <div className="flex flex-row ">
-                  <div className="basis-1/2 pr-4">
-                    <CategoryFilter />
-                  </div>
-                  <div className="grid grid-cols-4 gap-4">
-                    {boardgames.map((boardgame, index) => (
-                      <CardProductRent
-                        key={index}
-                        image="/assets/images/tqs.jpg"
-                        price={boardgame.price}
-                        title={boardgame.name}
-                        isRented={boardgame.soldOut}
-                      />
-                    ))}
-                  </div>
-                </div>
+        <main className="pt-4">
+          <div className="flex flex-col lg:flex-row">
+            {/* Filter */}
+            <div className="hidden lg:block lg:basis-1/4 pr-4">
+              <CategoryFilter />
+            </div>
+            <div className="block lg:hidden mb-4">
+              <Button
+                type="primary"
+                icon={<FilterOutlined />}
+                onClick={showDrawer}
+              >
+                Bộ Lọc
+              </Button>
+            </div>
 
-                {/* Pagination */}
-                <Pagination
-                  className="m-5"
-                  align="center"
-                  defaultCurrent={1}
-                  total={50}
+            {/* Drawer cho mobile */}
+            <Drawer
+              title="Bộ Lọc"
+              placement="left"
+              onClose={onClose}
+              open={open}
+            >
+              <CategoryFilter />
+            </Drawer>
+            {/* Product Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {boardgames.map((boardgame, index) => (
+                <CardProductRent
+                  key={index}
+                  image="/assets/images/tqs.jpg"
+                  price={boardgame.price}
+                  title={boardgame.name}
+                  isRented={boardgame.soldOut}
                 />
-              </main>
-            </Content>
-          </Layout>
-        </Layout>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            className="m-5"
+            align="center"
+            defaultCurrent={1}
+            total={50}
+          />
+        </main>
       </div>
     </div>
   );
