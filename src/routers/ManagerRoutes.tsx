@@ -172,12 +172,17 @@ export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	},
 	{
 		key: "group-11",
-		label: (<Link href={"/manager"} className={clsx("font-medium text-lg")}>Quản lý Trang Chủ</Link>),
+		label: (<Link href={"/manager/shop"} className={clsx("font-medium text-md")}>Cửa hàng của tôi</Link>),
 		icon: (<ReconciliationOutlined />),
 	},
 	{
 		key: "group-12",
-		label: (<Link href={"/manager/users"} className={clsx("font-medium text-lg")}>Quản lý người dùng</Link>),
+		label: (<Link href={"/manager/boardgames"} className={clsx("font-medium text-md")}>Quản lý trò chơi</Link>),
+		icon: (<ReconciliationOutlined />),
+	},
+	{
+		key: "group-13",
+		label: (<Link href={"/manager/staffs"} className={clsx("font-medium text-md")}>Quản lý nhân sự</Link>),
 		icon: (<UserOutlined />),
 	},
 	

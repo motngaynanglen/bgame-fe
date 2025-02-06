@@ -20,7 +20,7 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 	return (
 		<>
 			{/* <!-- ===== Page Wrapper Start ===== --> */}
-			<Layout className='min-h-screen'>
+			<Layout style={{minHeight:"100vh"}}>
 				{/* <!-- ===== Sidebar Start ===== --> */}
 				<Sider collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
 
@@ -31,7 +31,7 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 				</Sider>
 				{/* <!-- ===== Sidebar End ===== --> */}
 				<Layout>
-					<Header className='p-0 bg-white'>
+					<Header style={{padding:0, backgroundColor:"white"}}>
 						{/* <!-- ===== Header Start ===== --> */}
 						<NavbarTop sidebarOpen={showMenu} setSidebarOpen={ToggleMenu} />
 						{/* <!-- ===== Header End ===== --> */}
