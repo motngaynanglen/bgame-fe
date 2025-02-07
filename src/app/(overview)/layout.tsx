@@ -9,13 +9,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />
-      <div className="bg-sky-50">
-      <main className="container mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 ">
       <Suspense fallback={<Loading />}>{children}</Suspense>
-      </main>
-      </div>
-     
-      
       <FloatButtonContact />
       <Footer />
     </>
