@@ -10,7 +10,7 @@ function SingleProductDescription() {
         key: "1",
         label: "Mô tả sản phẩm",
         children: (
-          <div id="description" className="space-y-4">
+          <div id="description" className="space-y-4" >
             <p className="text-gray-600">TAM QUỐC SÁT QUỐC SÁT</p>
             <p className="text-gray-600">
               ✔️ Hội tụ đầy đủ tứ đại Quân Chủ: Lưu Bị (Thục), Trương Giác (Quần
@@ -107,8 +107,8 @@ function SingleProductDescription() {
   );
 
   return (
-    <div className="space-y-8 mb-32">
-      <Tabs defaultActiveKey="1" items={items} type="card" size="large" />
+    <div className="space-y-8 mb-32 ">
+      <Tabs defaultActiveKey="1" items={items} type="card" size="large" className="fill-slate-800"/>
     </div>
   );
 }

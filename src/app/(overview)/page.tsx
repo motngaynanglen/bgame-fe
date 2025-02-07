@@ -3,11 +3,17 @@ import HotDeal from "@/src/components/Products/HotDeal";
 
 export default function Home() {
   return (
-    <div>
-      <main className="md:container md:mx-auto pt-1 bg-sky-100">
+    <div className="bg-sky-50">
+      <main className="">
         <Banner />
-        <HotDeal category="Sản phẩm nổi bật"/>
-        <HotDeal category="Sản phẩm mới về"/>
+        <div className="">
+          <div className="mb-8">
+            <HotDeal category="Sản phẩm nổi bật" />
+          </div>
+          <div className="">
+            <HotDeal category="Sản phẩm mới về" />
+          </div>
+        </div>
       </main>
     </div>
   );
