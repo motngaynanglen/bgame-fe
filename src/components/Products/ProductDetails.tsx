@@ -2,36 +2,85 @@
 import { Image, InputNumber, Rate } from "antd";
 import Link from "next/link";
 import React, { useState } from "react";
+import { useCartStore } from "../../store/cartStore";
+import { useRouter } from "next/router";
+
+// const boardGameInfo = {
+//   id: "1",
+//   image: "/assets/images/tqs.jpg",
+//   title: "Tam Quốc Sát",
+//   price: 800000,
+//   publisher: "Yoka Games",
+//   productCode: "TQS-001",
+//   category: "Board Game",
+//   status: "Còn hàng",
+// };
 
 
-const boardGameInfo = {
-  image: "/assets/images/tqs.jpg",
-  title: "Tam Quốc Sát",
-  price: 800000,
-  publisher: "Yoka Games",
-  productCode: "TQS-001",
-  category: "Board Game",
-  status: "Còn hàng",
+interface BoardGameInfo {
+  id: string;
+  title: string;
+  price: number ;
+  status: boolean;
+  image: string;
+  publisher: string; 
+  category: string;
 }
 
-function ProductDetails() {
-  const [quantity, setQuantity] = useState(1); // Giá trị mặc định là 1
 
+
+function ProductDetails({productId}: {productId: string | string[] | undefined}) {
+  const [quantity, setQuantity] = useState(1);
+  const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
+
+  const { addToCart } = useCartStore();
   const handleChange = (value: number | null) => {
     if (value !== null) {
       setQuantity(value);
     }
   };
-  return (
 
-    <div className="grid lg:grid-cols-12 p-4 gap-10 mb-12 text-gray-800">
+  const formatPrice = (price: number) => {
+    return price.toLocaleString("vi-VN");
+  };
+
+  const handleAddProduct = () => {
+    if (boardgame) {
+      const product = {
+        id: boardgame.id,
+        name: boardgame.title,
+        price: boardgame.price,
+        quantity: quantity,
+        image: boardgame.image,
+      };
+      addToCart(product, quantity); // Thêm sản phẩm với số lượng được chọn
+      alert("Đã thêm vào giỏ hàng!");
+    }
+  };
+
+  const fetchBoardGame = async () => {
+    try {
+      const res = await fetch(`https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`);
+      const data = await res.json();
+      console.log(data);
+      setBoardgame(data); 
+    } catch (error) {
+      console.error("lỗi nè: "+error);
+    }
+  }
+
+  React.useEffect(() => {
+    fetchBoardGame();
+  }, []);
+
+
+  return (
+    <div className="grid lg:grid-cols-12 p-4 gap-6 lg:gap-10 mb-12 text-gray-800">
       {/* Image Section */}
-      <div className="col-start-2 col-end-7">
+      <div className="lg:col-start-1 lg:col-end-7 col-span-12">
         <div className="space-y-4 col-start-2">
-          <div>
-            <Image
-              src={`/assets/images/tqs.jpg`}
-            />
+          <div >
+            <Image src={`/assets/images/tqs.jpg`}  />
           </div>
 
           <div className="flex space-x-4">
@@ -41,7 +90,7 @@ function ProductDetails() {
                 className="border rounded-lg overflow-hidden focus:ring-2 focus:ring-orange-500"
               >
                 <Image
-                  src={boardGameInfo.image}
+                  src={boardgame?.image}
                   alt="Thumbnail"
                   className="w-full h-full object-cover"
                 />
@@ -52,9 +101,11 @@ function ProductDetails() {
       </div>
 
       {/* Details Section */}
-      <div className="space-y-6 col-end-11 col-span-4">
+      <div className="space-y-6 lg:col-end-12 lg:col-span-5 col-span-12">
         {/* name product */}
-        <h3 className="text-5xl uppercase font-bold">{boardGameInfo.title}</h3>
+        <h3 className="text-3xl lg:text-5xl uppercase font-bold">
+          {boardgame?.title}
+        </h3>
         <div className="flex items-center space-x-2">
           <Rate disabled defaultValue={5} />
           <Link href="#" className="text-sm text-gray-500 hover:underline">
@@ -62,32 +113,29 @@ function ProductDetails() {
           </Link>
         </div>
 
-        <div className="text-lg font-semibold">
-          {boardGameInfo.price} vnđ{/* gia tien o day */}
+        <div className="text-2xl font-semibold">
+          {formatPrice(boardgame?.price ?? 0)}đ{/* gia tien o day */}
           {/* <span className="line-through text-gray-400">$80.00</span> */}
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-gray-500">Thương hiệu:</span>
+          <span className="text-gray-500">Nhà phát hành:</span>
           <Link href="#" className="text-orange-500 hover:underline">
-            {boardGameInfo.publisher}
+            {boardgame?.publisher}
           </Link>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-500">Mã sản phẩm:</span>
-          <span className="text-gray-900">TQS-001</span>
-        </div>
+
 
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Danh mục:</span>
           <Link href="#" className="text-orange-500 hover:underline">
-            {boardGameInfo.category}
+            {boardgame?.category}
           </Link>
         </div>
         {/* status */}
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Trạng thái:</span>
-          <span className="text-green-500">{boardGameInfo.status}</span>
+          <span className="text-green-500">{boardgame?.status ? <p>Hết hàng</p>: <p>Còn hàng</p>}</span>
         </div>
         {/* quality */}
         <div className="flex items-center space-x-2">
@@ -105,12 +153,12 @@ function ProductDetails() {
         <div className="flex items-center space-x-4">
           {/* <ProductPriceCount price={30} /> */}
 
-          <Link
-            href="/cart"
+          <button
+            onClick={handleAddProduct}
             className="bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600"
           >
-            Thêm vào giỏ hàng
-          </Link>
+            Thêm sản phẩm
+          </button>
 
           <Link
             href="/cart"
