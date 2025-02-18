@@ -1,0 +1,13 @@
+.my-ant-layout {
+    min-height: 100vh !important;
+}
+
+.my-ant-layout-header {
+    padding: 0 !important;
+    background-color: white !important;
+}
+
+.my-button {
+    padding: 0 15px;
+    height: 32px;
+}
