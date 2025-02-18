@@ -115,7 +115,7 @@ export function AntdCustomCard({
             lg={6}
             xl={6}
             className="mb-8">
-            <Card loading={false} bordered={false}>
+            <Card loading={false} variant='outlined'>
                 <div className="number">
                     <Row align="middle" gutter={[24, 0]}>
                         <Col xs={18}>
