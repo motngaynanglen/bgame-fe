@@ -12,11 +12,11 @@
 //   const formatter = new Intl.DateTimeFormat(locale, options)
 //   return formatter.format(date)
 // }
-export const formatStringToTimestamp = (timeString: string) => {
-  const [hours, minutes, seconds] = timeString.split(':').map(Number);
+// export const formatStringToTimestamp = (timeString: string) => {
+//   const [hours, minutes, seconds] = timeString.split(':').map(Number);
 
-  return seconds + (minutes * 60) + (hours * 60 * 60);
-}
+//   return seconds + (minutes * 60) + (hours * 60 * 60);
+// }
 export const generatePagination = (currentPage: number, totalPages: number) => {
   // If the total number of pages is 7 or less,
   // display all pages without any ellipsis.

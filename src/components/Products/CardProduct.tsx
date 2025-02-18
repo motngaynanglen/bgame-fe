@@ -9,15 +9,25 @@ import { GoPeople } from "react-icons/go";
 import { LuBrain } from "react-icons/lu";
 
 function CardProduct({
+  id,
   image,
   title,
   price,
   soldOut,
+  complexity,
+  age,
+  time,
+  player,
 }: {
+  id: string
   image: string;
   title: string;
   price: number;
   soldOut: boolean;
+  complexity: number;
+  age: number;
+  time: string;
+  player: string;
 }) {
   const formatPrice = (price: number) => {
     return price.toLocaleString("vi-VN");
@@ -27,10 +37,10 @@ function CardProduct({
 
   return (
     <div className="relative">
-      <div onClick={() => router.push("/product-detail")} className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
+      <div onClick={() =>  router.push(`/boardgame/${id}`) } className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
         <div className="relative h-full w-full">
           <img
-            className={`mx-auto h-full object-cover transition-opacity rounded-t-md ${
+            className={`w-full h-full object-cover transition-opacity rounded-t-md ${
               soldOut ? "opacity-50" : ""
             }`}
             src={image}
@@ -76,37 +86,37 @@ function CardProduct({
 
           <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
-              <AiOutlineClockCircle />
+              <AiOutlineClockCircle className="fill-black"/>
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                30-60
+                {time}
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <BsPeople />
+              <BsPeople className="fill-black"/>
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                2-12
+                {player}
               </p>
             </li>
           </ul>
 
           <ul className="mt-2 flex flex-wrap justify-stretch items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
-              <GoPeople />
+              <GoPeople className="fill-black"/>
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                12+
+                {age}+
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <LuBrain />
+              <LuBrain className="fill-black"/>
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                3.6/5
+                {complexity}/5
               </p>
             </li>
           </ul>
 
           <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <p className="text-lg sm:text-2xl font-medium leading-tight text-gray-900 dark:text-white">
-              {formatPrice(price)} vnd
+              {formatPrice(price)}đ
             </p>
           </div>
         </div>

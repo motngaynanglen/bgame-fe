@@ -1,8 +1,7 @@
 "use client";
 import { useCartStore } from "@/src/store/cartStore";
-import { Button, Empty, InputNumber, Typography } from "antd";
-import Link from "next/link";
-import React from "react";
+import { Button, Empty, InputNumber } from "antd";
+import { useRouter } from "next/navigation";
 
 const items = [
   { name: 'Tam quốc sát"', price: 1499, quantity: 1 },
@@ -13,8 +12,8 @@ const items = [
 ];
 
 export default function ShoppingCart() {
-  const { cart, removeFromCart, clearCart } = useCartStore();
-
+  const { cart, removeFromCart, clearCart,calculateTotal } = useCartStore();
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-sky-50 text-white p-8">
       <div className="max-w-5xl mx-auto space-y-8  border-4 border-gray-800 p-8 rounded-lg bg-gray-900">
@@ -41,7 +40,7 @@ export default function ShoppingCart() {
                 description="No items in cart"
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               >
-                <Button type="primary">Tìm mua sản phẩm</Button>
+                <Button onClick={() => router.push("/products")} type="primary">Tìm mua sản phẩm</Button>
               </Empty>
             </div>
           ) : (
@@ -90,8 +89,8 @@ export default function ShoppingCart() {
 
         {/* Order Summary */}
         <div className="bg-gray-800 p-6 rounded-lg space-y-4">
-          <h3 className="text-lg font-semibold">Order summary</h3>
-          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Hóa đơn</h3>
+          {/* <div className="space-y-2">
             <div className="flex justify-between">
               <span>Original price</span>
               <span>$6,592.00</span>
@@ -108,10 +107,10 @@ export default function ShoppingCart() {
               <span>Tax</span>
               <span>$799</span>
             </div>
-          </div>
+          </div> */}
           <div className="border-t border-gray-700 pt-4 flex justify-between font-bold text-lg">
-            <span>Total</span>
-            <span>$7,191.00</span>
+            <span>Tổng tiền: </span>
+            <span> {calculateTotal().toLocaleString("vi-VN")}₫</span>
           </div>
         </div>
 
