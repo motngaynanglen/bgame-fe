@@ -1,39 +1,51 @@
 "use client";
-import { Image, InputNumber, Rate } from "antd";
+import { Image, InputNumber, notification, Rate } from "antd";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useCartStore } from "../../store/cartStore";
 import { useRouter } from "next/router";
-
-// const boardGameInfo = {
-//   id: "1",
-//   image: "/assets/images/tqs.jpg",
-//   title: "Tam Quốc Sát",
-//   price: 800000,
-//   publisher: "Yoka Games",
-//   productCode: "TQS-001",
-//   category: "Board Game",
-//   status: "Còn hàng",
-// };
-
+import { useWishlistStore } from "@/src/store/wishlistStore";
 
 interface BoardGameInfo {
   id: string;
   title: string;
-  price: number ;
+  price: number;
   status: boolean;
   image: string;
-  publisher: string; 
+  publisher: string;
   category: string;
 }
 
-
-
-function ProductDetails({productId}: {productId: string | string[] | undefined}) {
+function ProductDetails({
+  productId,
+}: {
+  productId: string | string[] | undefined;
+}) {
   const [quantity, setQuantity] = useState(1);
   const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
+  const [api, contextHolder] = notification.useNotification();
+
+  type NotificationType = "success" | "info" | "warning" | "error";
+  const openNotificationWithIcon = (type: NotificationType) => {
+    api[type]({
+      message: "Thành công!",
+      description: `Bạn đã thêm "${boardgame?.title}" vào giỏ hàng.`,
+      placement: "bottomRight",
+      duration: 2,
+    });
+  };
+
+  const openNotificationAddWishList = (type: NotificationType) => {
+    api[type]({
+      message: "Thành công!",
+      description: `Bạn đã thêm "${boardgame?.title}" vào danh sách yêu thích.`,
+      placement: "bottomRight",
+      duration: 2,
+    });
+  };
 
   const { addToCart } = useCartStore();
+  const { addToWishlist } = useWishlistStore();
   const handleChange = (value: number | null) => {
     if (value !== null) {
       setQuantity(value);
@@ -54,48 +66,68 @@ function ProductDetails({productId}: {productId: string | string[] | undefined})
         image: boardgame.image,
       };
       addToCart(product, quantity); // Thêm sản phẩm với số lượng được chọn
-      alert("Đã thêm vào giỏ hàng!");
+      // alert("Đã thêm vào giỏ hàng!");
+      openNotificationWithIcon("success");
+      console.log(product);
     }
   };
 
+  const handleAddWishlist = () => {
+     if(boardgame){
+      const product = {
+        id: boardgame.id,
+        name: boardgame.title,
+        image: boardgame.image,
+        price: boardgame.price,
+      };
+      addToWishlist(product);
+      openNotificationAddWishList("success");
+  }
+};
+
   const fetchBoardGame = async () => {
     try {
-      const res = await fetch(`https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`);
+      const res = await fetch(
+        `https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`
+      );
       const data = await res.json();
       console.log(data);
-      setBoardgame(data); 
+      setBoardgame(data);
     } catch (error) {
-      console.error("lỗi nè: "+error);
+      console.error("lỗi nè: " + error);
     }
-  }
+  };
 
   React.useEffect(() => {
     fetchBoardGame();
   }, []);
 
-
   return (
     <div className="grid lg:grid-cols-12 p-4 gap-6 lg:gap-10 mb-12 text-gray-800">
+      {contextHolder}
       {/* Image Section */}
       <div className="lg:col-start-1 lg:col-end-7 col-span-12">
         <div className="space-y-4 col-start-2">
-          <div >
-            <Image src={`/assets/images/tqs.jpg`}  />
+          <div className="relative w-full aspect-square rounded-lg overflow-hidden">
+            <Image src={boardgame?.image} alt="Thumbnail" />
+            {/* <img src={boardgame?.image} alt="Thumbnail" className="w-full h-full object-contain" /> */}
           </div>
 
           <div className="flex space-x-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <button
-                key={i}
-                className="border rounded-lg overflow-hidden focus:ring-2 focus:ring-orange-500"
-              >
-                <Image
-                  src={boardgame?.image}
-                  alt="Thumbnail"
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
+            <Image.PreviewGroup>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <button
+                  key={i}
+                  className="border rounded-lg overflow-hidden focus:ring-2 focus:ring-orange-500"
+                >
+                  <Image
+                    src={boardgame?.image}
+                    alt="Thumbnail"
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </Image.PreviewGroup>
           </div>
         </div>
       </div>
@@ -124,8 +156,7 @@ function ProductDetails({productId}: {productId: string | string[] | undefined})
             {boardgame?.publisher}
           </Link>
         </div>
-
-
+        {/* category */}
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Danh mục:</span>
           <Link href="#" className="text-orange-500 hover:underline">
@@ -135,7 +166,9 @@ function ProductDetails({productId}: {productId: string | string[] | undefined})
         {/* status */}
         <div className="flex items-center space-x-2">
           <span className="text-gray-500">Trạng thái:</span>
-          <span className="text-green-500">{boardgame?.status ? <p>Hết hàng</p>: <p>Còn hàng</p>}</span>
+          <span className="text-green-500">
+            {boardgame?.status ? <p>Hết hàng</p> : <p>Còn hàng</p>}
+          </span>
         </div>
         {/* quality */}
         <div className="flex items-center space-x-2">
@@ -170,12 +203,9 @@ function ProductDetails({productId}: {productId: string | string[] | undefined})
 
         <ul className="flex space-x-6">
           <li>
-            <Link
-              href="#"
-              className="bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600"
-            >
+            <button onClick={handleAddWishlist} className="bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600">
               Thêm vào danh sách yêu thích
-            </Link>
+            </button>
           </li>
         </ul>
         <div>
