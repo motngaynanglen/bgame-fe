@@ -1,8 +1,10 @@
 "use client";
+import { useCartStore } from "@/src/store/cartStore";
 import type { MenuProps } from "antd";
-import { Avatar, Badge, Menu } from "antd";
+import { Badge, Menu } from "antd";
 import Link from "next/link";
 import { BsBag, BsPersonCircle, BsSearch } from "react-icons/bs";
+import AccountMenu from "./AccountMenu";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -55,6 +57,8 @@ const items: MenuItem[] = [
 ];
 
 export default function Header() {
+  const { cart } = useCartStore();
+  const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
   return (
     <div>
       <div className="bg-white flex flex-wrap justify-between items-center px-4 sm:px-10 py-2">
@@ -90,7 +94,7 @@ export default function Header() {
             </button>
           </Link>
           <Link href="/cart">
-            <Badge count={0} showZero>
+            <Badge count={totalQuantity} showZero>
               <BsBag className="size-7 fill-green-700" />
             </Badge>
           </Link>
@@ -101,6 +105,8 @@ export default function Header() {
            fill-green-700"
             />
           </Link>
+
+          <AccountMenu/>
         </div>
       </div>
       <Menu

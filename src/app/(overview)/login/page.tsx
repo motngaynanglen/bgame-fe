@@ -57,7 +57,7 @@ export default function LoginPage() {
           <div className="mb-6 text-blue-500">
             {/* forgot password */}
             <Link href="#" className="hover:underline">
-              Ai biểu đặt mật khẩu dài rồi quên?
+              Quên mật khẩu?
             </Link>
           </div>
           <button

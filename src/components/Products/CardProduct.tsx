@@ -1,5 +1,5 @@
 'use client';
-import { Modal } from "antd";
+import { Divider, Modal } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -113,7 +113,7 @@ function CardProduct({
               </p>
             </li>
           </ul>
-
+          <Divider />
           <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <p className="text-lg sm:text-2xl font-medium leading-tight text-gray-900 dark:text-white">
               {formatPrice(price)}đ
