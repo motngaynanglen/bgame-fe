@@ -54,19 +54,18 @@ export class EntityError extends HttpError {
 }
 
 // let clientLogoutRequest: null | Promise<any> = null
-export const isClient = () => typeof window !== 'undefined'
+ const isClient = () => typeof window !== 'undefined'
 
 
 // Get base URL
-// Nếu không truyền baseUrl (hoặc baseUrl = undefined) thì lấy từ envConfig.NEXT_PUBLIC_API_ENDPOINT
+// Nếu không truyền baseUrl (hoặc baseUrl = undefined) thì lấy từ envConfig.NEXT_API_ENDPOINT
 // Nếu truyền baseUrl thì lấy giá trị truyền vào, truyền vào '' thì đồng nghĩa với việc chúng ta gọi API đến Next.js Server
 const getBaseUrl = (customBaseUrl?: string): string => {
     if (customBaseUrl === undefined) {
-        return envConfig.NEXT_PUBLIC_API_ENDPOINT;
+        return envConfig.NEXT_API_ENDPOINT;
     }
-    return customBaseUrl || '';
+    return customBaseUrl || envConfig.NEXT_URL;
 };
-
 const request = async <Response>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     url: string,
@@ -74,6 +73,7 @@ const request = async <Response>(
 ) => {
 
     const baseUrl = getBaseUrl(options?.baseUrl);
+    console.log("this is baseurl:"+ baseUrl)
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 
     let body: FormData | string | undefined = undefined
@@ -102,8 +102,9 @@ const request = async <Response>(
     };
 
     try {
-        console.log(axiosConfig)
+        console.log(fullUrl)
         const response = await axiosInstance(axiosConfig);
+
         return response.data.payload ?? response.data;
     } catch (error: unknown) {
         //bởi vì axios sẽ nhảy trycatch nếu bị lỗi nên phải hander ở trong này.
