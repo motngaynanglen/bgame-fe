@@ -37,11 +37,11 @@ export default function RootLayout({
         /> */}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* {children} */}
+        {children}
         {/* <StyledComponentsRegistry>{children}</StyledComponentsRegistry> */}
-        <AntdRegistry>
+        {/* <AntdRegistry>
           <ConfigProvider>{children}</ConfigProvider>
-        </AntdRegistry>
+        </AntdRegistry> */}
       </body>
     </html>
   );
