@@ -4,20 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormProps, Input, Select, SelectProps } from "antd"
 import { useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
-import { RegisterBody, RegisterBodyType } from "@/src/schemaValidations/auth.schema";
 
-const RegisterBodyDefaults = {
-    BGName: "jsun969",
+const defaultValues = {
+    boardgameName: "jsun969",
     publisher: "",
     tags: [],
-    fullname: "",
-    phoneNumber: "",
-    confirmtags: ""
 };
-export default function BGameForm({ user }: { user?: RegisterBodyType }) {
+export default function BGameForm() {
     const { control, handleSubmit } = useForm({
-        defaultValues: user || RegisterBodyDefaults,
-        resolver: zodResolver(RegisterBody)
+        defaultValues: defaultValues
     });
 
     async function OnSubmit(value: any) {
@@ -45,7 +40,7 @@ export default function BGameForm({ user }: { user?: RegisterBodyType }) {
                 onFinish={handleSubmit(OnSubmit)}
                 autoComplete="off"
             >
-                <FormItem control={control} name="BGName" label="Tên Board Game">
+                <FormItem control={control} name="boardgameName" label="Tên Board Game">
                     <Input />
                 </FormItem>
                 <FormItem control={control} name="publisher" label="Nhà Phát Hành">
@@ -59,7 +54,7 @@ export default function BGameForm({ user }: { user?: RegisterBodyType }) {
                         onChange={handleChange}
                     />
                 </FormItem>
-                <FormItem control={control} name="fullname" label="Full Name">
+                {/* <FormItem control={control} name="fullname" label="Full Name">
                     <Input />
                 </FormItem>
                 <FormItem control={control} name="phoneNumber" label="phone">
@@ -68,7 +63,7 @@ export default function BGameForm({ user }: { user?: RegisterBodyType }) {
 
                 <FormItem control={control} name="confirmtags" label="Confirm tags">
                     <Input />
-                </FormItem>
+                </FormItem> */}
 
 
                 <Form.Item label={null}>
