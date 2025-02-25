@@ -99,7 +99,7 @@ function CardProduct({
             </li>
           </ul>
 
-          <ul className="mt-2 flex flex-wrap justify-stretch items-center gap-2 sm:gap-4">
+          <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
               <GoPeople className="fill-black"/>
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">

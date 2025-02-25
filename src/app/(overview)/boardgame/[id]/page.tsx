@@ -11,7 +11,7 @@ export default function BoardGameDetailPage() {
   return (
     <div className="container p-3 bg-sky-50">
       <ProductDetails productId={id} />
-      <SingleProductDescription />
+      <SingleProductDescription productId={id}/>
     </div>
   );
 }

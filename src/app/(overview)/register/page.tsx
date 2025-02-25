@@ -11,13 +11,14 @@ enum GenderEnum {
 }
 
 interface IFormInput {
-  firstName: string;
-  gender: GenderEnum;
+  username: string;
+  password: string;
+  email: string;
 }
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register, handleSubmit } = useForm<IFormInput>();
+  const { register, handleSubmit, formState: { errors }  } = useForm<IFormInput>();
   const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -70,7 +71,9 @@ export default function RegisterPage() {
                         type="text"
                         placeholder="Hãy tạo một tên tài khoản"
                         className="w-full h-11 px-4 text-sm text-gray-600 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        {...register('username', { required: true })}
                       />
+                       {errors.username && <span>This field is required</span>}
                     </div>
                     <div>
                       <label className="text-lg font-medium text-gray-800">
@@ -80,7 +83,9 @@ export default function RegisterPage() {
                         type="email"
                         placeholder="Hãy nhập Email của bạn"
                         className="w-full h-11 px-4 text-sm text-gray-600 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        {...register('email', { required: true })}
                       />
+                      {errors.email && <span>This field is required</span>}
                     </div>
                     <div>
                       <label className="text-lg font-medium text-gray-800">
