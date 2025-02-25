@@ -35,18 +35,18 @@ const items: MenuItem[] = [
     label: "Phụ kiện",
     key: "accessory",
   },
+  {
+    label: "Hệ thống cửa hàng",
+    key: "stores",
+  },
 
   {
     label: "Tin Tức",
     key: "news",
     children: [
       {
-        label: "Hệ thống cửa hàng",
-        key: "stores",
-      },
-      {
         label: "Giải đấu",
-        key: "tournament",
+        key: "tournament",    
       },
       {
         label: "Board Game",
@@ -62,8 +62,8 @@ export default function Header() {
   return (
     <div>
       <div className="bg-white flex flex-wrap justify-between items-center px-4 sm:px-10 py-2">
-        <div className="text-3xl bg-gradient-to-r from-green-500 to-blue-500  bg-clip-text text-transparent basis-2 font-bold hover:">
-          <Link href="/">BoGemStore</Link>
+        <div className="text-2xl bg-gradient-to-r from-green-500 to-blue-500  bg-clip-text text-transparent basis-2 font-bold hover:">
+          <Link href="/">BoardGameImpact</Link>
         </div>
 
         <form className="basis-full sm:basis-1/3 h-auto mt-2 sm:mt-0">
@@ -106,7 +106,7 @@ export default function Header() {
             />
           </Link>
 
-          <AccountMenu/>
+          <AccountMenu />
         </div>
       </div>
       <Menu

@@ -7,11 +7,12 @@ export default function ShoppingCart() {
   const { cart, removeFromCart, clearCart, calculateTotal } = useCartStore();
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-sky-50 text-white p-8">
-      <div className="max-w-5xl mx-auto space-y-8  border-4 border-gray-800 p-8 rounded-lg bg-gray-900">
+    <div className="min-h-screen bg-sky-50 text-white pt-2 sm:p-4">
+      <div className="max-w-5xl mx-auto space-y-8  border-4 border-gray-800 p-4 rounded-lg bg-gray-900">
         {/* Shopping Cart Header */}
-        <h2 className="text-2xl font-bold">Giỏ Hàng </h2>
-        <div className="grid grid-cols-5 bg-gray-800 p-4 rounded-lg">
+        <h2 className="text-2xl font-bold ">Giỏ Hàng </h2>
+        {/* tiêu đề */}
+        <div className="hidden sm:grid grid-cols-5 bg-gray-800 p-4 rounded-lg ">
           <div className="flex items-center justify-start ">
             <h1 className="">Sản phẩm</h1>
           </div>
@@ -42,30 +43,68 @@ export default function ShoppingCart() {
               {cart.map((item, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-5 bg-gray-800 p-4 rounded-lg mb-4"
+                  className="bg-gray-800 p-4 rounded-lg mb-4 flex flex-col sm:grid sm:grid-cols-5 items-center"
                 >
-                  <div className="flex items-center justify-start">
-                    <Space>
+                  {/* image and name */}
+                  <div className="flex flex-row sm:items-start sm:justify-around md:items-center md:justify-start">
+                    {/* <Space>
                       <img
                         src={item.image}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <h1>{item.name}</h1>
-                    </Space>
+                    </Space> */}
+
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
+                    />
+
+                    <div className="ml-4 sm:ml-0 mr-4">
+                      <h1 className="text-sm font-semibold">{item.name}</h1>
+                      <div className="text-blue-400 font-bold sm:hidden">
+                        {item.price.toLocaleString("vi-VN")}₫
+                      </div>
+                      <div className="flex items-center justify-center space-x-4 sm:hidden">
+                        <InputNumber min={1} defaultValue={item.quantity} />
+                      </div>
+                    </div>
+                    <button
+                      className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600 sm:hidden"
+                      onClick={() => removeFromCart(item.id)}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        ></path>
+                      </svg>
+                    </button>
                   </div>
-                  <div className="flex items-center justify-center space-x-4">
+
+                  {/* quantity */}
+                  <div className=" hidden sm:flex items-center justify-center space-x-4">
                     <InputNumber min={1} defaultValue={item.quantity} />
                   </div>
-                  <div className="flex items-center justify-center space-x-4">
+                  <div className="hidden sm:flex items-center justify-center space-x-4">
                     {item.price.toLocaleString("vi-VN")}
                   </div>
                   {/* tạm tính */}
-                  <div className="flex items-center justify-center space-x-4">
+                  <div className="hidden sm:flex items-center justify-center space-x-4 ">
                     {(item.price * item.quantity).toLocaleString("vi-VN")}
                   </div>
                   {/* Delete Icon */}
-                  <div className="flex items-center justify-center">
+                  <div className="hidden sm:flex items-center justify-center">
                     <button
                       className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600"
                       onClick={() => removeFromCart(item.id)}
@@ -94,7 +133,9 @@ export default function ShoppingCart() {
 
         {/* Order Summary */}
         <div className="bg-gray-800 p-6 rounded-lg space-y-4">
-          <h3 className="text-lg font-semibold">Hóa đơn</h3>
+          <h3 className="text-lg font-semibold text-center sm:text-left">
+            Hóa đơn
+          </h3>
           <div className="space-y-2">
             {/* <div className="flex justify-between">
               <span>Original price</span>
@@ -106,8 +147,13 @@ export default function ShoppingCart() {
             </div> */}
             <div className="flex justify-between">
               <span className="basis-2/3">Mã giảm giá</span>
-              <input type="text" id="standard_success" aria-describedby="standard_success_help" className="basis-1/2 block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-green-600 appearance-none dark:text-white dark:border-green-500 dark:focus:border-green-500 focus:outline-none focus:ring-0 focus:border-green-600 peer" placeholder="Nhập mã giảm giá" />
-
+              <input
+                type="text"
+                id="standard_success"
+                aria-describedby="standard_success_help"
+                className="basis-1/2 block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-green-600 appearance-none dark:text-white dark:border-green-500 dark:focus:border-green-500 focus:outline-none focus:ring-0 focus:border-green-600 peer"
+                placeholder="Nhập mã giảm giá"
+              />
             </div>
             <div className="flex justify-between">
               <span>Phí giao hàng</span>
