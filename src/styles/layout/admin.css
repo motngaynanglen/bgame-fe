@@ -11,3 +11,7 @@
     padding: 0 15px;
     height: 32px;
 }
+
+.my-ant-breadcrumb{
+    padding-bottom: 16px !important;
+}
