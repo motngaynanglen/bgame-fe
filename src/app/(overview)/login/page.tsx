@@ -1,6 +1,63 @@
+"use client";
+
+import axios from "@/src/apiRequests/axios";
 import Link from "next/link";
+import { useState } from "react";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  interface LoginFormElements extends HTMLFormControlsCollection {
+    username: HTMLInputElement;
+    password: HTMLInputElement;
+  }
+
+  interface LoginFormElement extends HTMLFormElement {
+    readonly elements: LoginFormElements;
+  }
+
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCredentials({
+      ...credentials,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<LoginFormElement>) => {
+    e.preventDefault();
+    // console.log(e.currentTarget.elements.username.value);
+    // console.log(e.currentTarget.elements.password.value);
+    try {
+      console.log(credentials);
+      const response = await axios.post(
+        "/api/Login/login",
+        credentials
+      );
+
+      const { jwt, refreshToken } = response.data.data;
+      
+      console.log("data nè: ", response.data);
+      console.log(JSON.stringify(response.data.data));
+      console.log("token nè: ", jwt);
+      // Store the tokens in localStorage or secure cookie for later use
+      localStorage.setItem("token", jwt);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      // await axios.get("/api/Login/GetUser", {});
+    } catch (error) {
+      console.log("lỗi nè: ", error);
+    }
+  };
   return (
     <div className="bg-sky-100 flex justify-center items-center ">
       <div className="w-1/2 h-screen hidden lg:block">
@@ -18,7 +75,7 @@ export default function LoginPage() {
           </span>
         </div>
         {/* <h1 className="text-2xl font-semibold mb-4 text-green-900">Login</h1> */}
-        <form action="#" method="POST">
+        <form action="#" method="POST" onSubmit={handleSubmit}>
           <div className="mb-4 bg-sky-100">
             <label htmlFor="username" className="block text-gray-600">
               Tài Khoản
@@ -28,7 +85,9 @@ export default function LoginPage() {
               type="text"
               id="username"
               name="username"
-              className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+              required
+              className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 text-black-2"
+              onChange={handleChange}
             />
           </div>
           <div className="mb-4">
@@ -36,12 +95,27 @@ export default function LoginPage() {
               Mật Khẩu
             </label>
             {/* nhap password */}
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                required
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 text-black-2"
+                onChange={handleChange}
+              />
+              {showPassword ? (
+                <AiFillEye
+                  className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={togglePasswordVisibility}
+                />
+              ) : (
+                <AiFillEyeInvisible
+                  className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={togglePasswordVisibility}
+                />
+              )}
+            </div>
           </div>
           <div className="mb-4 flex items-center">
             <input
@@ -56,7 +130,7 @@ export default function LoginPage() {
           </div>
           <div className="mb-6 text-blue-500">
             {/* forgot password */}
-            <Link href="#" className="hover:underline">
+            <Link href="/forgot-password" className="hover:underline">
               Quên mật khẩu?
             </Link>
           </div>

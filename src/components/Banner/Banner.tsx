@@ -44,7 +44,7 @@ export default function Banner() {
               />
               <div className="absolute inset-0 flex flex-col items-start justify-center px-8 bg-gradient-to-r from-black/30 via-transparent to-transparent">
                 <h2 className="text-white text-3xl font-bold uppercase">
-                  Khám phá thế giới board game <br /> BoGemStore
+                  Khám phá thế giới board game <br /> Board Game Impact
                 </h2>
                 <Button
                   type="primary"
