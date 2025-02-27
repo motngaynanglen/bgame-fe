@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
+import AppProvider from "./app-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,21 +27,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
+
   return (
     <html lang="en">
       <head>
-      {/* <link
+        {/* <link
           rel="preload"
           href="https://cdn.jsdelivr.net/npm/antd@5.24.1/dist/antd.min.css"
           as="style"
         /> */}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        {/* {children} */}
         {/* <StyledComponentsRegistry>{children}</StyledComponentsRegistry> */}
         {/* <AntdRegistry> */}
-          <ConfigProvider>{children}</ConfigProvider>
+        <ConfigProvider>
+          <AppProvider>
+
+            {children}
+
+          </AppProvider>
+        </ConfigProvider>
         {/* </AntdRegistry> */}
       </body>
     </html>

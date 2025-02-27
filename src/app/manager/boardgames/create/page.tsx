@@ -24,17 +24,17 @@ const breadcrumb: BreadcrumbItemType[] =
             ),
         },
         {
-            title: "Tạo BoardGame"
+            title: "Nhập BoardGame"
         },
 
     ];
 export default function ManagerCreateBGame() {
     return (
         <>
-            <Breadcrumb items={breadcrumb} className="pb-4" />
-            <Card>
-                <BGameForm />
-            </Card>
+            <Breadcrumb items={breadcrumb} />
+
+            <BGameForm/>
+
         </>
     )
 }

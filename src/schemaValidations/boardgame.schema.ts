@@ -1,21 +1,16 @@
-// import z from "zod";
-// export const RegisterBody = z
-//   .object({
-//     // username: z.string().trim().min(2).max(256),
-//     boardgameName: z.string(),
-//     publisher: z.string(),
-//     tags: z.string(),
-//     fullname: z.string().trim().min(2, "Tên không được dưới 2 kí tự.").max(50, "Tên không dài quá 50 kí tự."),
-//     phoneNumber: z.string().regex(phoneRegex, "Không đúng định dạng số điện thoại").optional(),
-//     confirmPassword: z.string().min(6).max(100).optional(),
-//   })
-//   .strict()
-//   .superRefine(({ confirmPassword, password }, ctx) => {
-//     if (confirmPassword !== password) {
-//       ctx.addIssue({
-//         code: "custom",
-//         message: "Mật khẩu không khớp",
-//         path: ["confirmPassword"],
-//       });
-//     }
-//   });
+import z from "zod";
+export const BoardGameBody = z
+    .object({
+        // username: z.string().trim().min(2).max(256),
+        id: z.string().optional(),
+        code: z.string().optional(),
+        productName: z.string(),
+        image: z.string(),
+        description: z.string(),
+        rentPrice: z.string().optional(),
+        price: z.string().optional(),
+        condition: z.string().optional(),
+        publisher: z.string(),
+        tags: z.string().array(),
+    });
+    export type BoardGameBodyType = z.TypeOf<typeof BoardGameBody>
