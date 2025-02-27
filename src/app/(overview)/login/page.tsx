@@ -4,9 +4,12 @@ import axios from "@/src/apiRequests/axios";
 import Link from "next/link";
 import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { useAppContext } from "../../app-provider";
+import authApiRequest from "@/src/apiRequests/auth";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const { setUser } = useAppContext();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -39,19 +42,35 @@ export default function LoginPage() {
     // console.log(e.currentTarget.elements.password.value);
     try {
       console.log(credentials);
-      const response = await axios.post(
-        "/api/Login/login",
-        credentials
-      );
-
-      const { jwt, refreshToken } = response.data.data;
       
-      console.log("data nè: ", response.data);
-      console.log(JSON.stringify(response.data.data));
-      console.log("token nè: ", jwt);
-      // Store the tokens in localStorage or secure cookie for later use
-      localStorage.setItem("token", jwt);
-      localStorage.setItem("refreshToken", refreshToken);
+      // LOGIN BẮT ĐẦU TỪ ĐÂY
+      const result = await authApiRequest.login(credentials);
+      console.log(result);
+      const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
+
+      await authApiRequest.auth({
+        sessionToken: result.data.jwt,
+        sessionRole: "customer",
+        expiresAt: expires,
+      });
+      setUser({
+        id: result.data.name,
+        name: result.data.name,
+        role: result.data.role,
+      });
+      // KẾT THÚC SAU KHI SET COOKIE
+      // const response = await axios.post(
+      //   "/api/Login/login",
+      //   credentials
+      // );
+      // const { jwt, refreshToken } = response.data;
+      
+      // console.log("data nè: ", response.data);
+      // console.log(JSON.stringify(response.data.data));
+      // console.log("token nè: ", jwt);
+      // // Store the tokens in localStorage or secure cookie for later use
+      // localStorage.setItem("token", jwt);
+      // localStorage.setItem("refreshToken", refreshToken);
 
       // await axios.get("/api/Login/GetUser", {});
     } catch (error) {
