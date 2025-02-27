@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BsBag, BsPersonCircle, BsSearch } from "react-icons/bs";
 import AccountMenu from "./AccountMenu";
 import HeaderSearch from "./HeaderSearch";
+import { Suspense } from "react";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -47,7 +48,7 @@ const items: MenuItem[] = [
     children: [
       {
         label: "Giải đấu",
-        key: "tournament",    
+        key: "tournament",
       },
       {
         label: "Board Game",
@@ -67,9 +68,9 @@ export default function Header() {
           <Link href="/">BoardGameImpact</Link>
         </div>
 
-       
-          <HeaderSearch placeholder="Tìm kiếm board game yêu thích của bạn ..."/>
-        
+        <Suspense>
+          <HeaderSearch placeholder="Tìm kiếm board game yêu thích của bạn ..." />
+        </Suspense>
 
         <div className="flex justify-items-center space-x-6 sm:space-x-6 lg:space-x-10">
           <Link href="/rental">
@@ -99,7 +100,7 @@ export default function Header() {
         mode="horizontal"
         defaultSelectedKeys={["2"]}
         items={items}
-        // style={{ display: "flex", minWidth: 0, justifyContent: "center" }}
+      // style={{ display: "flex", minWidth: 0, justifyContent: "center" }}
       />
     </div>
   );
