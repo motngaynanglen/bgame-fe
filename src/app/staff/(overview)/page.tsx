@@ -1,6 +1,6 @@
 import { Col, Row } from "antd";
 import CardWrapper from "./card";
-import StaffDashboardRemainGame from "./remainGame";
+import StaffDashboardRemainGame from "./remainGameChart";
 import StaffDashboardToDayOrder from "./todayOrder";
 
 export default function StaffManageDashboard() {
