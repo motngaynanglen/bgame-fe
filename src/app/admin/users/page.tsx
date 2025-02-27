@@ -137,7 +137,14 @@ const breadcrumb: BreadcrumbItemType[] =
 
 
 
-export default function AdminTableUser() {
+export default function AdminTableUser({
+    searchParams,
+}: {
+    searchParams?: {
+        query?: string;
+        page?: string;
+    };
+}) {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
 
     useEffect(() => {
