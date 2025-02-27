@@ -1,38 +1,88 @@
 "use client";
-import { Modal } from "antd";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useState } from "react";
+import type { DatePickerProps, GetProps } from "antd";
+import { Button, DatePicker, Divider, Modal, notification } from "antd";
+import dayjs from "dayjs";
+import { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
 import { GoPeople } from "react-icons/go";
 import { LuBrain } from "react-icons/lu";
+
+type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
+
+const disabledDate: RangePickerProps["disabledDate"] = (current) => {
+  // ham nay chi cho phep chon sau ngay hien tai
+  return current && current <= dayjs().endOf("day");
+};
+
+const disabledDateTime = () => ({
+  disabledHours: () => {
+    const hours = [];
+    for (let i = 0; i < 24; i++) {
+      if (i < 8 || i >= 21) {
+        hours.push(i);
+      }
+    }
+    return hours;
+  },
+});
 
 function CardProductRent({
   image,
   title,
   price,
   isRented,
+  complexity,
+  age,
+  time,
+  player,
 }: {
   image: string;
   title: string;
   price: number;
   isRented: boolean;
+  complexity: number;
+  age: number;
+  time: string;
+  player: string;
 }) {
+  const [api, contextHolder] = notification.useNotification();
   const formatPrice = (price: number) => {
     return price.toLocaleString("vi-VN");
   };
+  type NotificationType = "success" | "info" | "warning" | "error";
+
+  const openNotificationWithIcon = (type: NotificationType) => {
+    api[type]({
+      message: "Thành công!",
+      description: `Bạn đã đặt lịch thành công.`,
+      placement: "bottomRight",
+      duration: 2,
+    });
+  };
+  
   const [openResponsive, setOpenResponsive] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
+  const handleSubmit = () => {
+    // console.log("Đặt trước thành công");
+    openNotificationWithIcon("success");
+    setOpenResponsive(false);
+    // sau này mà có api thì call api ở đây
+    // và set lại isRented = true
+    //  nếu đã có người đặt trùng giờ thì thông báo lỗi
+  };
 
   return (
     <div className="relative">
+      {contextHolder} 
+      {/* thg nay de hien thong bao ra  */}
       <div
         onClick={() => setOpenResponsive(true)}
         className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
       >
         <div className="relative h-full w-full">
           <img
-            className={`mx-auto h-full object-cover transition-opacity ${
+            className={`w-full h-full object-cover transition-opacity rounded-t-md ${
               isRented ? "opacity-50" : ""
             }`}
             src={image}
@@ -44,7 +94,7 @@ function CardProductRent({
             </div>
           )}
         </div>
-        <div className="pt-6">
+        <div className="pt-4">
           <div className="uppercase text-lg font-semibold leading-tight text-gray-900  dark:text-white">
             {title}
           </div>
@@ -72,43 +122,41 @@ function CardProductRent({
               (455)
             </p>
           </div>
-          <ul className="mt-2 flex items-center gap-4">
+          <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
-              <AiOutlineClockCircle />
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                30-60
+              <AiOutlineClockCircle className="fill-black" />
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+                {time}
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <BsPeople />
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                2-12
-              </p>
-            </li>
-          </ul>
-
-          <ul className="mt-2 flex justify-stretch items-center gap-4">
-            <li className="flex items-center gap-2">
-              <GoPeople />
-
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                12+
-              </p>
-            </li>
-            <li className="flex items-center gap-2">
-              <LuBrain />
-
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                3.6/5
+              <BsPeople className="fill-black" />
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+                {player}
               </p>
             </li>
           </ul>
 
-          <div className="mt-4 flex items-center justify-between gap-4">
+          <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
+            <li className="flex items-center gap-2">
+              <GoPeople className="fill-black" />
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+                {age}+
+              </p>
+            </li>
+            <li className="flex items-center gap-2">
+              <LuBrain className="fill-black" />
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+                {complexity}/5
+              </p>
+            </li>
+          </ul>
+
+          {/* <div className="mt-4 flex items-center justify-between gap-4">
             <p className="text-2xl font-medium leading-tight text-gray-900 dark:text-white">
               {formatPrice(price)} vnd
             </p>
-          </div>
+          </div> */}
           {/* <div className="mt-4 flex items-center justify-between gap-4">
             <button  onClick={(e) => e.stopPropagation()}>
               <Link
@@ -134,6 +182,11 @@ function CardProductRent({
         open={openResponsive}
         onOk={() => setOpenResponsive(false)}
         onCancel={() => setOpenResponsive(false)}
+        footer={
+          <Button onClick={handleSubmit} disabled={!selectedDate}>
+            Đặt trước
+          </Button>
+        }
       >
         <p>
           Tam Quốc Sát là một thể loại Card Game được ra mắt vào năm 2010 của
@@ -142,8 +195,27 @@ function CardProductRent({
           chơi từ năm 2015. Cũng trong năm này “Sát” đã trở thành 1 hiện tượng
           và đạt được danh hiệu Board Game hay nhất năm do độc giả bình chọn.
         </p>
+        <Divider />
+        <p>Thời gian chơi: 30 phút</p>
+        <p>Số lượng người chơi: 2-4 người</p>
+        <p>Độ tuổi khuyến nghị: 10+</p>
+        <p>Độ phức tạp: 3/5</p>
+        <Divider />
 
-        <p>some contents...</p>
+        <p className="text-lg text-green-800">Phí thuê: 30.000đ</p>
+        <p className="mt-4">
+          Chọn thời gian thuê:{" "}
+          <DatePicker
+            format="YYYY-MM-DD HH:mm"
+            disabledDate={disabledDate}
+            disabledTime={disabledDateTime}
+            showTime={{
+              format: "HH:mm",
+              defaultValue: dayjs("00:00", "HH:mm"),
+            }}
+            onChange={(date) => setSelectedDate(date)}
+          />
+        </p>
       </Modal>
     </div>
   );

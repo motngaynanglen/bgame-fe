@@ -1,10 +1,9 @@
 "use client";
+import { useWishlistStore } from "@/src/store/wishlistStore";
 import { Image, InputNumber, notification, Rate } from "antd";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useCartStore } from "../../store/cartStore";
-import { useRouter } from "next/router";
-import { useWishlistStore } from "@/src/store/wishlistStore";
 
 interface BoardGameInfo {
   id: string;

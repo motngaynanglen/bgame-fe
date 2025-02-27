@@ -14,8 +14,6 @@ export default function layout({ children }: { children: React.ReactNode }) {
       <Suspense fallback={<Loading />}>{children}</Suspense>
       </main>
       </div>
-     
-      
       <FloatButtonContact />
       <Footer />
     </>

@@ -1,14 +1,27 @@
 "use client";
 import { Descriptions, Rate, Tabs, TabsProps } from "antd";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { DescriptionsProps } from "antd";
+
+
+interface BoardGameInfo {
+  id: string;
+  title: string;
+  price: number;
+  status: boolean;
+  image: string;
+  publisher: string;
+  category: string;
+}
 
 function SingleProductDescription({
   productId,
 }: {
   productId: string | string[] | undefined;
 }) {
+    const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
+  
   const items: DescriptionsProps["items"] = useMemo(
     () => [
       {
@@ -142,13 +155,30 @@ function SingleProductDescription({
     []
   );
 
+   const fetchBoardGame = async () => {
+      try {
+        const res = await fetch(
+          `https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`
+        );
+        const data = await res.json();
+        console.log(data);
+        setBoardgame(data);
+      } catch (error) {
+        console.error("lỗi nè: " + error);
+      }
+    };
+  
+    React.useEffect(() => {
+      fetchBoardGame();
+    }, []);
+
   return (
     <div className="space-y-8 mb-32 ">
       {/* <Tabs defaultActiveKey="1" items={items} type="card" size="large" className="fill-slate-800"/> */}
       <Descriptions title="Description" bordered items={items} column={1} />
       <p className="text-gray-600">
         Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
+        industry. Lorem Ipsum has been the industrys standard dummy text ever
         since the 1500s, when an unknown printer took a galley of type and
         scrambled it to make a type specimen book. It has survived not only five
         centuries, but also the leap into electronic typesetting, remaining

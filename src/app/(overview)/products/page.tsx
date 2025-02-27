@@ -27,7 +27,6 @@ interface BoardGame {
 }
 type MenuItem = Required<MenuProps>["items"][number];
 
-
 const items: MenuItem[] = [
   {
     key: "sub1",
@@ -104,12 +103,11 @@ const items: MenuItem[] = [
   },
 ];
 
-export default  function ProductsPage() {
+export default function ProductsPage() {
   const onClick: MenuProps["onClick"] = (e) => {
     console.log("click ", e);
   };
   const [boardgames, setBoardgames] = useState<BoardGame[]>([]); // sau khi fetch xong sẽ set vào đây
-
 
   const [open, setOpen] = useState(false);
 
@@ -123,30 +121,35 @@ export default  function ProductsPage() {
 
   const fetchBoardGames = async () => {
     try {
-      const res = await fetch("https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame");
+      const res = await fetch(
+        "https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame"
+      );
       const data = await res.json();
       console.log(data);
-      setBoardgames(data); 
+      setBoardgames(data);
     } catch (error) {
-      console.error("lỗi nè: "+error);
+      console.error("lỗi nè: " + error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchBoardGames();
   }, []);
 
- 
-
   return (
     <div className="flex ">
       <main className="pt-4">
+        <div className=" mb-4">
+          <Button type="primary" icon={<FilterOutlined />} onClick={showDrawer}>
+            Bộ Lọc
+          </Button>
+        </div>
         <div className="flex flex-col lg:flex-row">
           {/* Filter */}
-          <div className="hidden lg:block lg:basis-1/4 pr-4">
+          {/* <div className="hidden lg:block lg:basis-1/4 pr-4">
             <CategoryFilter />
-          </div>
-          <div className="block lg:hidden mb-4">
+          </div> */}
+          {/* <div className="block lg:hidden mb-4">
             <Button
               type="primary"
               icon={<FilterOutlined />}
@@ -154,7 +157,7 @@ export default  function ProductsPage() {
             >
               Bộ Lọc
             </Button>
-          </div>
+          </div> */}
 
           {/* Drawer cho mobile */}
           <Drawer title="Bộ Lọc" placement="left" onClose={onClose} open={open}>
