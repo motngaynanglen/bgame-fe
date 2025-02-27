@@ -1,7 +1,5 @@
 'use client';
 
-
-import Link from 'next/link';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { BsSearch } from 'react-icons/bs';
 import { useDebouncedCallback } from 'use-debounce';
@@ -20,6 +18,7 @@ export default function HeaderSearch({ placeholder }: { placeholder: string }) {
             params.delete('query');
         }
         replace(`/products?${params.toString()}`);
+
     }, 300);
     return (
         <form className="basis-full sm:basis-1/3 h-auto mt-2 sm:mt-0">
@@ -37,12 +36,17 @@ export default function HeaderSearch({ placeholder }: { placeholder: string }) {
                         handleSearch(e.target.value);
                     }}
                 />
-                <button
-                    type='submit'
-                    className="text-white absolute end-2.5 bottom-2 bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-1  dark:focus:ring-blue-800"
-                >
-                    Tìm Kiếm
-                </button>
+                {!searchParams.get('query') || (
+                    <button
+                        type='reset'
+                        className="text-white absolute end-2.5 bottom-2 bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-1  dark:focus:ring-blue-800"
+                        onClick={() => handleSearch("")}
+                    >
+                        Xóa
+                    </button>
+                )
+                }
+
 
             </div>
         </form>
