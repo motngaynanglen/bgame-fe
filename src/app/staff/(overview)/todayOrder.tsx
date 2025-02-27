@@ -2,6 +2,7 @@
 
 import { formatTimeStringRemoveSeconds, formatTimeStringToTimestamp } from "@/src/lib/utils";
 import { Button, Card, Col, Row, Space, Table, TableProps, Tag, Typography } from "antd";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AiFillEye } from "react-icons/ai";
 import { LuSettings2 } from "react-icons/lu";
@@ -11,6 +12,7 @@ interface DataType {
     name: string;
     tags: string[];
     time: string;
+    imagehref: string | undefined;
 }
 
 const columns: TableProps<DataType>['columns'] = [
@@ -18,7 +20,18 @@ const columns: TableProps<DataType>['columns'] = [
         title: 'Sản Phẩm',
         dataIndex: 'name',
         key: 'name',
-        render: (text) => <a>{text}</a>,
+        render: (_, record) => (
+            <div className="flex justify-start">
+                <Image
+                    width={28}
+                    height={28}
+                    src={(record.imagehref) ?? '/assets/images/blog-author.png'}
+                    className="rounded-full me-2"
+                    alt={""}
+                />
+                <p>{_}</p>
+            </div>
+        ),
     },
     {
         title: 'Thời gian',
@@ -37,6 +50,7 @@ const columns: TableProps<DataType>['columns'] = [
         title: 'Phân loại',
         key: 'tags',
         dataIndex: 'tags',
+        filterMode: "menu",
         render: (_, { tags }) => (
             <>
                 {tags.map((tag) => {
@@ -52,6 +66,16 @@ const columns: TableProps<DataType>['columns'] = [
                 })}
             </>
         ),
+        filters: [
+            {
+                text: 'Theo giờ',
+                value: 'time',
+            },
+            {
+                text: 'Thoải mái',
+                value: 'day',
+            },
+        ],
     },
     {
         title: <></>,
@@ -70,36 +94,42 @@ const data: DataType[] = [
         name: 'John Brown',
         time: "07:11:00",
         tags: ['nice', 'developer'],
+        imagehref: undefined,
     },
     {
         key: '2',
-        name: 'Jim Green',
+        name: 'PHÚC THIỆN',
         time: "10:11:00",
         tags: ['loser'],
+        imagehref: undefined,
     },
     {
         key: '3',
         name: 'Joe Black',
         time: "14:00:00",
         tags: ['cool', 'teacher'],
+        imagehref: undefined,
     },
     {
         key: '4',
         name: 'John Brown',
         time: "09:45:00",
         tags: ['nice', 'developer'],
+        imagehref: undefined,
     },
     {
         key: '5',
         name: 'Jim Green',
         time: "17:11:00",
         tags: ['loser'],
+        imagehref: undefined,
     },
     {
         key: '6',
         name: 'Joe Black',
         time: "18:51:00",
         tags: ['cool', 'teacher'],
+        imagehref: undefined,
     },
 
 ];
@@ -124,16 +154,17 @@ export default function StaffDashboardToDayOrder() {
             <>
                 <div className="flex justify-between max-h-150">
                     <div className="text-center">
-                        <h4 >Lịch thuê hôm nay <span>: 14 đơn</span> </h4> 
-                       
+                        <h4 >Lịch thuê hôm nay <span>: 14 đơn</span> </h4>
+
                     </div>
                     <Row gutter={12}>
                         <Col>
-                            <Button className="text-base font-medium py-4" loading={false} icon={<LuSettings2 />}>Tải lại</Button>
+                            <Button className="text-base font-medium py-4">Tải lại</Button>
                         </Col>
                         <Col>
-                            <Button className="text-base font-medium py-4">Xem tất cả</Button>
+                            <Button className="text-base font-medium py-4" loading={false} icon={<LuSettings2 />}>Xem tất cả</Button>
                         </Col>
+
                     </Row>
                 </div>
             </>

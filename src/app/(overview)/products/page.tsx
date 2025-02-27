@@ -103,7 +103,14 @@ const items: MenuItem[] = [
   },
 ];
 
-export default function ProductsPage() {
+export default  function ProductsPage({
+  searchParams,
+}: {
+  searchParams?: {
+      query?: string;
+      page?: string;
+  };
+}) {
   const onClick: MenuProps["onClick"] = (e) => {
     console.log("click ", e);
   };

@@ -15,25 +15,25 @@ const STATUS_CODES = {
     SERVER_ERROR: 500,
 } as const;
 
-interface HttpPayload {
+interface Httpdata {
     [key: string]: unknown // "unknown" an toàn hơn "any"
 }
 
 export class HttpError extends Error {
     status: number
     message: string
-    payload: HttpPayload
+    data: Httpdata
 
-    constructor({ status, message, payload }: { status: number; message: string; payload: HttpPayload }) {
+    constructor({ status, message, data }: { status: number; message: string; data: Httpdata }) {
         super(message || 'Http Error')
         this.status = status
         this.message = message
-        this.payload = payload
+        this.data = data
     }
 }
 
 // Config HTTP ENTITY ERROR
-type EntityErrorPayload = {
+type EntityErrordata = {
     message: string
     errors: EntityErrorField[]
 }
@@ -44,12 +44,12 @@ type EntityErrorField = {
 export class EntityError extends HttpError {
     status: 422
     message: string
-    payload: EntityErrorPayload
-    constructor({ status, message, payload }: { status: 422; message: string; payload: EntityErrorPayload }) {
-        super({ status, message, payload })
+    data: EntityErrordata
+    constructor({ status, message, data }: { status: 422; message: string; data: EntityErrordata }) {
+        super({ status, message, data })
         this.status = status
         this.message = message
-        this.payload = payload
+        this.data = data
     }
 }
 
@@ -89,7 +89,7 @@ const request = async <Response>(
         };
     const axiosInstance: AxiosInstance = axios.create({
         timeout: 10000, // Timeout in milliseconds => 10s
-        withCredentials: true
+        // withCredentials: true
     });
     const axiosConfig = {
         method,
@@ -102,38 +102,40 @@ const request = async <Response>(
     };
 
     try {
-        console.log(fullUrl)
+        console.log(fullUrl);
         const response = await axiosInstance(axiosConfig);
+        // const response = await axios(axiosConfig);
 
-        return response.data.payload ?? response.data;
+        return response.data;
+
     } catch (error: unknown) {
         //bởi vì axios sẽ nhảy trycatch nếu bị lỗi nên phải hander ở trong này.
         if (error instanceof AxiosError && error.response) {
-            const { status, data: payload } = error.response;
+            const { status, data: data } = error.response;
 
             if (status === STATUS_CODES.ENTITY_ERROR) {
                 throw new EntityError({
                     status: STATUS_CODES.ENTITY_ERROR,
-                    message: payload.message || 'Validation error',
-                    payload: payload as EntityErrorPayload,
+                    message: data.message || 'Validation error',
+                    data: data as EntityErrordata,
                 });
             } else if (status === STATUS_CODES.SERVER_ERROR) {
                 throw new HttpError({
                     status: STATUS_CODES.SERVER_ERROR,
                     message: 'Server error',
-                    payload: payload,
+                    data: data,
                 });
             } else if (status === STATUS_CODES.AUTHENTICATION_FAIL) {
                 throw new HttpError({
                     status: STATUS_CODES.AUTHENTICATION_FAIL,
                     message: 'Invalid credentials',
-                    payload: payload,
+                    data: data,
                 });
             } else if (status === STATUS_CODES.NOT_FOUND) {
                 throw new HttpError({
                     status: STATUS_CODES.NOT_FOUND,
                     message: 'Resource not found',
-                    payload: payload,
+                    data: data,
                 });
             }
         }

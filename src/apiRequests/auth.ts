@@ -8,7 +8,7 @@ import {
 import { MessageResType } from '@/src/schemaValidations/common.schema'
 
 const authApiRequest = {
-  login: (body: LoginBodyType) => http.post<LoginResType>('/api/Auth/login', body),
+  login: (body: LoginBodyType) => http.post<LoginResType>('/api/Login/login', body),
   register: (body: RegisterBodyType) =>
     http.post<RegisterResType>('/api/Auth/register', body),
   auth: (body: { sessionToken: string; sessionRole: string; expiresAt: string }) =>

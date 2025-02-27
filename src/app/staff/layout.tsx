@@ -1,10 +1,10 @@
 
 import Layout from "@/src/components/admin/Layout";
-import ManagerRouter from "@/src/routers/ManagerRoutes";
+import StaffRouter from "@/src/routers/StaffRoutes";
 
 export default function StaffRouteLayout({ children }: { children: React.ReactNode; }) {
     return (
-        <Layout menu={ManagerRouter}>
+        <Layout menu={StaffRouter}>
             {children}
         </Layout>
     );
