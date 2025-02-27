@@ -54,7 +54,7 @@ export class EntityError extends HttpError {
 }
 
 // let clientLogoutRequest: null | Promise<any> = null
- const isClient = () => typeof window !== 'undefined'
+export const isClient = () => typeof window !== 'undefined'
 
 
 // Get base URL
@@ -73,7 +73,7 @@ const request = async <Response>(
 ) => {
 
     const baseUrl = getBaseUrl(options?.baseUrl);
-    console.log("this is baseurl:"+ baseUrl)
+    console.log("this is baseurl:" + baseUrl)
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 
     let body: FormData | string | undefined = undefined
