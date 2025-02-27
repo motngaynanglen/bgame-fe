@@ -5,6 +5,8 @@ import { Badge, Menu } from "antd";
 import Link from "next/link";
 import { BsBag, BsPersonCircle, BsSearch } from "react-icons/bs";
 import AccountMenu from "./AccountMenu";
+import HeaderSearch from "./HeaderSearch";
+import { Suspense } from "react";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -46,7 +48,7 @@ const items: MenuItem[] = [
     children: [
       {
         label: "Giải đấu",
-        key: "tournament",    
+        key: "tournament",
       },
       {
         label: "Board Game",
@@ -66,26 +68,9 @@ export default function Header() {
           <Link href="/">BoardGameImpact</Link>
         </div>
 
-        <form className="basis-full sm:basis-1/3 h-auto mt-2 sm:mt-0">
-          <div className="relative">
-            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-              <BsSearch className="fill-green-700" />
-            </div>
-            <input
-              type="search"
-              id="default-search"
-              className=" w-full p-3 ps-10 text-sm text-gray-900  border-gray-300 rounded-md bg-gray-50  "
-              placeholder="Tím kiếm board game yêu thích của bạn ..."
-              required
-            />
-            <button
-              type="submit"
-              className="text-white absolute end-2.5 bottom-2 bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-1  dark:focus:ring-blue-800"
-            >
-              Tìm Kiếm
-            </button>
-          </div>
-        </form>
+        <Suspense>
+          <HeaderSearch placeholder="Tìm kiếm board game yêu thích của bạn ..." />
+        </Suspense>
 
         <div className="flex justify-items-center space-x-6 sm:space-x-6 lg:space-x-10">
           <Link href="/rental">
@@ -115,7 +100,7 @@ export default function Header() {
         mode="horizontal"
         defaultSelectedKeys={["2"]}
         items={items}
-        // style={{ display: "flex", minWidth: 0, justifyContent: "center" }}
+      // style={{ display: "flex", minWidth: 0, justifyContent: "center" }}
       />
     </div>
   );

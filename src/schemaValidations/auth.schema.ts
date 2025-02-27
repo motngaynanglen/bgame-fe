@@ -37,10 +37,11 @@ export type RegisterPartnerBodyType = z.TypeOf<typeof RegisterPartnerBody>;
 
 export const RegisterRes = z.object({
   data: z.object({
-    token: z.string(),
-    expiresAt: z.string(),
-    name: z.string(),
-    role: z.string(),
+    jwt: z.string(),
+    refreshToken: z.string(),
+    name: z.string().optional(),
+    role: z.string().optional(),
+    avatar: z.string().optional(),
   }),
   message: z.string(),
 });
