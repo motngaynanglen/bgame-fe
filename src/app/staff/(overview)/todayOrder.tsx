@@ -159,11 +159,12 @@ export default function StaffDashboardToDayOrder() {
                     </div>
                     <Row gutter={12}>
                         <Col>
-                            <Button className="text-base font-medium py-4" loading={false} icon={<LuSettings2 />}>Tải lại</Button>
+                            <Button className="text-base font-medium py-4">Tải lại</Button>
                         </Col>
                         <Col>
-                            <Button className="text-base font-medium py-4">Xem tất cả</Button>
+                            <Button className="text-base font-medium py-4" loading={false} icon={<LuSettings2 />}>Xem tất cả</Button>
                         </Col>
+
                     </Row>
                 </div>
             </>

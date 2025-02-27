@@ -33,12 +33,13 @@ export default function StaffDashboardRemainGame() {
                 <div className="flex justify-between">
                     <h4>Thống kê kho</h4>
                     <Row gutter={12}>
-                        <Col>
-                            <Button className="text-base font-medium py-4" loading={false} icon={<LuSettings2 />}>Tải lại</Button>
+                    <Col>
+                            <Button className="text-base font-medium py-4" loading={false}>Tải lại</Button>
                         </Col>
                         <Col>
-                            <Button className="text-base font-medium py-4">Xem tất cả</Button>
+                            <Button className="text-base font-medium py-4" loading={false} icon={<LuSettings2 />}>Quản lý</Button>
                         </Col>
+                        
                     </Row>
                 </div>
             </>
@@ -48,18 +49,17 @@ export default function StaffDashboardRemainGame() {
         <>
             <Card title={ChartTitle()}>
                 <Doughnut style={{ maxHeight: "300px" }} data={data} options={options} />
-                <Divider style={{ borderColor: "black" }} variant="solid"> Công cụ</Divider>
+                <Divider style={{ borderColor: "black" }} variant="solid">Công cụ nhanh</Divider>
                 <Row gutter={24}>
                     <Col span={8}>
-                        <Button className="w-full">Xem tất cả</Button>
+                        <Button className="w-full py-5" color="green" variant="solid">Tạo đơn thuê</Button>
                     </Col>
                     <Col span={8}>
-                        <Button className="w-full">Xem </Button>
+                        <Button className="w-full py-5" color="yellow" variant="solid">Gia hạn thuê </Button>
 
                     </Col>
                     <Col span={8}>
-                        <Button className="w-full"></Button>
-
+                        <Button className="w-full py-5" color="red" variant="solid">Hoàn thành thuê</Button>
                     </Col>
                 </Row>
             </Card>
