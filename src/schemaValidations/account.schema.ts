@@ -5,7 +5,8 @@ export const AccountRes = z
     data: z.object({
       id: z.string(),
       name: z.string(),
-      role: z.string()
+      role: z.string(),
+      avatar: z.string().optional(),
     }),
     message: z.string()
   })

@@ -1,3 +1,4 @@
+"use client"
 import { SettingOutlined } from "@ant-design/icons";
 import { Dropdown, MenuProps } from "antd";
 import Link from "next/link";
@@ -7,8 +8,9 @@ import { BsBox2Fill } from "react-icons/bs";
 import { IoSettings } from "react-icons/io5";
 import { IoLogOut } from "react-icons/io5";
 import { BsHeartFill } from "react-icons/bs";
-
-
+import Image from "next/image";
+import UserImage from "@/src/public/assets/images/blog-author.png"
+import { useAppContext } from "@/src/app/app-provider";
 
 
 const items: MenuProps["items"] = [
@@ -53,15 +55,23 @@ const items: MenuProps["items"] = [
   },
 ];
 
-export default function AccountMenu() {
+export default function AccountMenu({ hidden }: { hidden: boolean }) { 
+  const profile = useAppContext().user
   return (
-    <div>
-      <Dropdown menu={{ items }} trigger={["click"]}>
+    <div hidden={hidden}>
+      <Dropdown menu={{ items }} trigger={["hover"]}>
         <a onClick={(e) => e.preventDefault()}>
-          <BsPersonCircle
+          <Image
+            width={34}
+            height={34}
+            className="rounded-full"
+            src={profile?.avatar ?? UserImage}
+            alt="User"
+          />
+          {/* <BsPersonCircle
             className="size-7
                      fill-green-700"
-          />
+          /> */}
         </a>
       </Dropdown>
     </div>
