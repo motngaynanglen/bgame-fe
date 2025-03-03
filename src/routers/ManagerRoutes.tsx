@@ -130,7 +130,7 @@ import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
 // ];
 export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	{
-		key: "Manager-dashboard",
+		key: "default",
 		label: (<Link href={"/manager"} className={clsx("font-medium text-lg")}>Bảng thống kê</Link>),
 		icon: (
 			<svg

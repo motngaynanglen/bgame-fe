@@ -11,7 +11,7 @@ import { Content, Footer, Header } from 'antd/es/layout/layout';
 // import { useMediaQuery } from 'react-responsive';
 import Sider from 'antd/es/layout/Sider';
 
-export default function DashboardLayout({ children, menu }: { children: React.ReactNode, menu: DashboardRouter }) {
+export default function DashboardLayout({ children, menu, theme }: { children: React.ReactNode, menu: DashboardRouter, theme?: "light" | "dark" }) {
 	const [showMenu, setShowMenu] = useState(true);
 	const ToggleMenu = () => {
 		return setShowMenu(!showMenu);
@@ -27,7 +27,7 @@ export default function DashboardLayout({ children, menu }: { children: React.Re
 
 						<NavbarVertical sidebarOpen={showMenu}
 							setSidebarOpen={(value: boolean) => setShowMenu(value)}
-							menu={menu} />
+							menu={menu} theme={theme === "light" ? "light" : "dark"} />
 
 					</Sider>
 					{/* <!-- ===== Sidebar End ===== --> */}
