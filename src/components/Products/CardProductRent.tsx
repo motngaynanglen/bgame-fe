@@ -1,6 +1,7 @@
 "use client";
 import type { DatePickerProps, GetProps } from "antd";
-import { Button, DatePicker, Divider, Modal, notification } from "antd";
+import { Button, DatePicker, Divider, Modal, notification, Radio } from "antd";
+import type { CheckboxGroupProps } from "antd/es/checkbox";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
@@ -10,22 +11,106 @@ import { LuBrain } from "react-icons/lu";
 
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
-const disabledDate: RangePickerProps["disabledDate"] = (current) => {
-  // ham nay chi cho phep chon sau ngay hien tai
-  return current && current <= dayjs().endOf("day");
+const { RangePicker } = DatePicker;
+
+const disabledDate: RangePickerProps["disabledDate"] = (
+  current,
+  selectedDates
+) => {
+  const today = dayjs().startOf("day");
+
+  if (!selectedDates || !selectedDates.from) {
+    return current && current.isBefore(today, "day");
+  }
+
+  const selectedDate = selectedDates.from;
+  return current && !current.isSame(selectedDate, "day");
 };
 
-const disabledDateTime = () => ({
+const disabledDateTime1 = () => ({
   disabledHours: () => {
     const hours = [];
+
     for (let i = 0; i < 24; i++) {
       if (i < 8 || i >= 21) {
         hours.push(i);
       }
     }
+
     return hours;
   },
 });
+
+const disabledDateTime: RangePickerProps["disabledTime"] = (
+  date,
+  range,
+  info
+) => {
+  const today = dayjs().startOf("day");
+  const currentHour = dayjs().hour();
+
+  if (!date) {
+    return {
+      disabledHours: () => {
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+          if (i < 8 || i >= 21) {
+            hours.push(i);
+          }
+        }
+        return hours;
+      },
+      disabledMinutes: () => [],
+      disabledSeconds: () => [],
+    };
+  }
+
+  if (date.isSame(today, "day")) {
+    return {
+      disabledHours: () => {
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+          if (i < 8 || i < currentHour || i >= 21) {
+            hours.push(i);
+          }
+        }
+        return hours;
+      },
+      disabledMinutes: (selectedHour) => {
+        if (selectedHour === currentHour) {
+          const minutes = [];
+          for (let i = 0; i < 60; i++) {
+            if (i <= dayjs().minute()) {
+              minutes.push(i);
+            }
+          }
+          return minutes;
+        }
+        return [];
+      },
+      disabledSeconds: () => [],
+    };
+  } else {
+    return {
+      disabledHours: () => {
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+          if (i < 8 || i >= 21) {
+            hours.push(i);
+          }
+        }
+        return hours;
+      },
+      disabledMinutes: () => [],
+      disabledSeconds: () => [],
+    };
+  }
+};
+
+const options: CheckboxGroupProps<string>["options"] = [
+  { label: "Thuê theo ngày", value: "days" },
+  { label: "Thuê theo giờ", value: "hours" },
+];
 
 function CardProductRent({
   image,
@@ -60,10 +145,17 @@ function CardProductRent({
       duration: 2,
     });
   };
-  
+  const [selectedOption, setSelectedOption] = useState<string>("days");
   const [openResponsive, setOpenResponsive] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
+  const [selectedDate, setSelectedDate] = useState<
+    [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
+  >(null);
   const handleSubmit = () => {
+    if (selectedDate) {
+      const [start, end] = selectedDate;
+      console.log("Selected Start Time: ", start);
+      console.log("Selected End Time: ", end);
+    }
     // console.log("Đặt trước thành công");
     openNotificationWithIcon("success");
     setOpenResponsive(false);
@@ -72,9 +164,11 @@ function CardProductRent({
     //  nếu đã có người đặt trùng giờ thì thông báo lỗi
   };
 
+  const { RangePicker } = DatePicker;
+
   return (
     <div className="relative">
-      {contextHolder} 
+      {contextHolder}
       {/* thg nay de hien thong bao ra  */}
       <div
         onClick={() => setOpenResponsive(true)}
@@ -182,11 +276,11 @@ function CardProductRent({
         open={openResponsive}
         onOk={() => setOpenResponsive(false)}
         onCancel={() => setOpenResponsive(false)}
-        footer={
+        footer={[
           <Button onClick={handleSubmit} disabled={!selectedDate}>
             Đặt trước
-          </Button>
-        }
+          </Button>,
+        ]}
       >
         <p>
           Tam Quốc Sát là một thể loại Card Game được ra mắt vào năm 2010 của
@@ -201,21 +295,37 @@ function CardProductRent({
         <p>Độ tuổi khuyến nghị: 10+</p>
         <p>Độ phức tạp: 3/5</p>
         <Divider />
-
-        <p className="text-lg text-green-800">Phí thuê: 30.000đ</p>
-        <p className="mt-4">
-          Chọn thời gian thuê:{" "}
+        <Radio.Group
+          options={options}
+          defaultValue="days"
+          optionType="button"
+          buttonStyle="solid"
+          onChange={(e) => setSelectedOption(e.target.value)}
+        />
+        <p className="mt-4">Chọn thời gian thuê: </p>
+        {selectedOption === "days" && (
           <DatePicker
             format="YYYY-MM-DD HH:mm"
+            disabledDate={disabledDate}
+            disabledTime={disabledDateTime1}
+            showTime={{ format: "HH:mm" }}
+            onChange={(date) => setSelectedDate(date ? [date, date] : null)}
+          />
+        )}
+
+        {selectedOption === "hours" && (
+          <RangePicker
             disabledDate={disabledDate}
             disabledTime={disabledDateTime}
             showTime={{
               format: "HH:mm",
-              defaultValue: dayjs("00:00", "HH:mm"),
+              defaultValue: [dayjs("08:00", "HH:mm"), dayjs("22:00", "HH:mm")],
             }}
+            format="YYYY-MM-DD HH:mm"
             onChange={(date) => setSelectedDate(date)}
           />
-        </p>
+        )}
+        <p className="text-lg text-green-800 mt-4">Phí thuê: 30.000đ</p>
       </Modal>
     </div>
   );

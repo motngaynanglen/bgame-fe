@@ -1,11 +1,10 @@
 "use client";
 
-import axios from "@/src/apiRequests/axios";
+import authApiRequest from "@/src/apiRequests/auth";
 import Link from "next/link";
 import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useAppContext } from "../../app-provider";
-import authApiRequest from "@/src/apiRequests/auth";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);

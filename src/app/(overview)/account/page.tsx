@@ -1,7 +1,10 @@
+'use client';
 import React from "react";
+import { useAppContext } from "../../app-provider";
 
 export default function AccountInformation() {
-  
+  const user = useAppContext().user;
+  console.log(user)
   return (
     <div className="min-h-screen flex flex-col items-center bg-sky-50">
       <div className="w-full max-w-4xl bg-white mt-6 p-6 rounded-lg shadow-md">
@@ -18,9 +21,9 @@ export default function AccountInformation() {
             <button className="bg-blue-500 text-white px-4 py-2 rounded mr-2">
               Cập nhật ảnh đại diện
             </button>
-            <button className="bg-gray-300 text-black px-4 py-2 rounded">
+            {/* <button className="bg-gray-300 text-black px-4 py-2 rounded">
               Remove
-            </button>
+            </button> */}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
