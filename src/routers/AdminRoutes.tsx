@@ -153,7 +153,7 @@ import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
 // ];
 export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	{
-		key: "admin-dashboard",
+		key: "default",
 		label: (<Link href={"/admin"} className={clsx("font-medium text-lg")}>Bảng thống kê</Link>),
 		icon: (
 			<svg

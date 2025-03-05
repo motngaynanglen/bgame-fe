@@ -6,7 +6,8 @@ import Link from "next/link";
 import { BsBag, BsPersonCircle, BsSearch } from "react-icons/bs";
 import AccountMenu from "./AccountMenu";
 import HeaderSearch from "./HeaderSearch";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useAppContext } from "@/src/app/app-provider";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -59,6 +60,11 @@ const items: MenuItem[] = [
 ];
 
 export default function Header() {
+  const user = useAppContext().user;
+  const [isLogin, setIsLogin] = useState<boolean>(false);
+  useEffect(() => {
+    setIsLogin(user == null ? true : false)
+  }, [user])
   const { cart } = useCartStore();
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
   return (
@@ -84,15 +90,17 @@ export default function Header() {
               </Badge>
             </Link>
 
-            <Link href="/login">
-              <BsPersonCircle
-                className="size-7
-            fill-green-700"
-              />
-            </Link>
 
-            <AccountMenu />
-          </div>
+          <Link href="/login" hidden={!isLogin}>
+            <BsPersonCircle
+              className="size-7
+           fill-green-700"
+            />
+          </Link>
+
+          <AccountMenu hidden={isLogin} />
+
+
         </div>
         <Menu
           className="flex flex-wrap justify-center xl:space-x-32 lg:space-x-10 sm:space-x-10 uppercase"
