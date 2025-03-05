@@ -103,19 +103,15 @@ const items: MenuItem[] = [
   },
 ];
 
-export default  function ProductsPage({
+export default function ProductsPage({
   searchParams,
 }: {
   searchParams?: {
-      query?: string;
-      page?: string;
+    query?: string;
+    page?: string;
   };
 }) {
-  const onClick: MenuProps["onClick"] = (e) => {
-    console.log("click ", e);
-  };
   const [boardgames, setBoardgames] = useState<BoardGame[]>([]); // sau khi fetch xong sẽ set vào đây
-
   const [open, setOpen] = useState(false);
 
   const showDrawer = () => {
