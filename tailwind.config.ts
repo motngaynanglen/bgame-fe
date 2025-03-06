@@ -54,6 +54,9 @@ const config: Config = {
       ...defaultTheme.screens,
     },
     extend: {
+      textColor: {
+        'default': '#010101', // Đặt màu đen làm màu chữ mặc định
+      },
       colors: {
         current: "currentColor",
         transparent: "transparent",

@@ -245,7 +245,7 @@ export default function BoardGameRental() {
                   style={{ width: 400  }}
                   // onChange={handleChange}
                   options={[
-                    { value: "CN1", label: "9 Nguyễn Tất Thành, Quận 1, Tp.HCM" },
+                    { value: "CN1", label: "9 Nguyễn Tất Thành, Quận 1, Tp.HCM",  },
                     { value: "CN2", label: "81c Nguyễn Văn Tư, Quận 2, Tp.HCM" },
                     { value: "CN3", label: "121 Phạm Văn Thuận, Quận 5, Tp.HCM" },
                     { value: "CN4", label: "145-147-149 Hùng Vương, Tp.Thủ Đức" },
@@ -283,6 +283,7 @@ export default function BoardGameRental() {
               {boardgames.map((boardgame, index) => (
                 <CardProductRent
                   key={index}
+                  id={boardgame.id}
                   image={boardgame.image}
                   price={boardgame.price}
                   title={boardgame.title}

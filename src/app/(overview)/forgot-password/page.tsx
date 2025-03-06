@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function page() {
+export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-sky-100">
       <div className="flex justify-center pt-10">

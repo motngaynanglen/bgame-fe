@@ -11,6 +11,8 @@ import { BsHeartFill } from "react-icons/bs";
 import Image from "next/image";
 import UserImage from "@/src/public/assets/images/blog-author.png"
 import { useAppContext } from "@/src/app/app-provider";
+import { FaRegCalendarCheck } from "react-icons/fa6";
+
 
 
 const items: MenuProps["items"] = [
@@ -42,12 +44,18 @@ const items: MenuProps["items"] = [
   },
   {
     key: "5",
+    label: <Link href={"/rental-history"}>Lịch đặt thuê board game</Link>,
+    icon: <FaRegCalendarCheck />,
+    // extra: "⌘S",
+  },
+  {
+    key: "6",
     label: "Cài đặt",
     icon: <IoSettings />,
     // extra: "⌘S",
   },
   {
-    key: "6",
+    key: "7",
     label: "Đăng xuất",
     icon: <IoLogOut />,
     // ref: "/logout",
