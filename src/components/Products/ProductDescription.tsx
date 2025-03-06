@@ -1,14 +1,27 @@
 "use client";
 import { Descriptions, Rate, Tabs, TabsProps } from "antd";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { DescriptionsProps } from "antd";
+
+
+interface BoardGameInfo {
+  id: string;
+  title: string;
+  price: number;
+  status: boolean;
+  image: string;
+  publisher: string;
+  category: string;
+}
 
 function SingleProductDescription({
   productId,
 }: {
   productId: string | string[] | undefined;
 }) {
+    const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
+  
   const items: DescriptionsProps["items"] = useMemo(
     () => [
       {
@@ -141,6 +154,23 @@ function SingleProductDescription({
     ],
     []
   );
+
+   const fetchBoardGame = async () => {
+      try {
+        const res = await fetch(
+          `https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`
+        );
+        const data = await res.json();
+        console.log(data);
+        setBoardgame(data);
+      } catch (error) {
+        console.error("lỗi nè: " + error);
+      }
+    };
+  
+    React.useEffect(() => {
+      fetchBoardGame();
+    }, []);
 
   return (
     <div className="space-y-8 mb-32 ">

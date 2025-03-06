@@ -1,8 +1,7 @@
-'use client';
-import { Divider, Modal } from "antd";
+"use client";
+import { Divider } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
 import { GoPeople } from "react-icons/go";
@@ -19,7 +18,7 @@ function CardProduct({
   time,
   player,
 }: {
-  id: string
+  id: string;
   image: string;
   title: string;
   price: number;
@@ -37,7 +36,10 @@ function CardProduct({
 
   return (
     <div className="relative">
-      <div onClick={() =>  router.push(`/boardgame/${id}`) } className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
+      <div
+        onClick={() => router.push(`/boardgame/${id}`)}
+        className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300"
+      >
         <div className="relative h-full w-full">
           <img
             className={`w-full h-full object-cover transition-opacity rounded-t-md ${
@@ -86,13 +88,13 @@ function CardProduct({
 
           <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
-              <AiOutlineClockCircle className="fill-black"/>
+              <AiOutlineClockCircle className="fill-black" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 {time}
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <BsPeople className="fill-black"/>
+              <BsPeople className="fill-black" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 {player}
               </p>
@@ -101,13 +103,13 @@ function CardProduct({
 
           <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
-              <GoPeople className="fill-black"/>
+              <GoPeople className="fill-black" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 {age}+
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <LuBrain className="fill-black"/>
+              <LuBrain className="fill-black" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 {complexity}/5
               </p>
