@@ -1,5 +1,10 @@
 import Banner from "@/src/components/Banner/Banner";
 import HotDeal from "@/src/components/Products/HotDeal";
+import AboutUs from "../admin/content/aboutus/page";
+import AboutComponent from "@/src/components/About/AboutComponent";
+import { Divide } from "react-feather";
+import AboutRental from "@/src/components/About/AboutRental";
+import { Space } from "antd";
 
 export default function Home() {
   return (
@@ -7,12 +12,17 @@ export default function Home() {
       <main className="">
         <Banner />
         <div className="">
-          <div className="mb-8">
+          <Space/>
+          <AboutComponent />
+          <Space />
+          <div className="pb-2">
             <HotDeal category="Sản phẩm nổi bật" />
           </div>
-          <div className="">
+          <Space />
+          <AboutRental />
+          {/* <div className="pb-8">
             <HotDeal category="Sản phẩm mới về" />
-          </div>
+          </div> */}
         </div>
       </main>
     </div>

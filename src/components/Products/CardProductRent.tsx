@@ -1,4 +1,5 @@
 "use client";
+import { useRentalStore } from "@/src/store/rentalStore";
 import type { DatePickerProps, GetProps } from "antd";
 import { Button, DatePicker, Divider, Modal, notification, Radio } from "antd";
 import type { CheckboxGroupProps } from "antd/es/checkbox";
@@ -13,6 +14,7 @@ type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
 const { RangePicker } = DatePicker;
 
+// ham nay de gioi han ngay la ngay hien tai va sau
 const disabledDate: RangePickerProps["disabledDate"] = (
   current,
   selectedDates
@@ -27,6 +29,7 @@ const disabledDate: RangePickerProps["disabledDate"] = (
   return current && !current.isSame(selectedDate, "day");
 };
 
+// ham nay de gioi han gio la 8h toi 21h
 const disabledDateTime1 = () => ({
   disabledHours: () => {
     const hours = [];
@@ -41,11 +44,8 @@ const disabledDateTime1 = () => ({
   },
 });
 
-const disabledDateTime: RangePickerProps["disabledTime"] = (
-  date,
-  range,
-  info
-) => {
+// ham nay gioi ham o tren
+const disabledDateTime: RangePickerProps["disabledTime"] = (date, type) => {
   const today = dayjs().startOf("day");
   const currentHour = dayjs().hour();
 
@@ -70,7 +70,7 @@ const disabledDateTime: RangePickerProps["disabledTime"] = (
       disabledHours: () => {
         const hours = [];
         for (let i = 0; i < 24; i++) {
-          if (i < 8 || i < currentHour || i >= 21) {
+          if (i < 8 || i > currentHour || i >= 21) {
             hours.push(i);
           }
         }
@@ -113,6 +113,7 @@ const options: CheckboxGroupProps<string>["options"] = [
 ];
 
 function CardProductRent({
+  id,
   image,
   title,
   price,
@@ -122,6 +123,7 @@ function CardProductRent({
   time,
   player,
 }: {
+  id: string;
   image: string;
   title: string;
   price: number;
@@ -131,10 +133,9 @@ function CardProductRent({
   time: string;
   player: string;
 }) {
+  // cai nay la de hien thong bao ra
   const [api, contextHolder] = notification.useNotification();
-  const formatPrice = (price: number) => {
-    return price.toLocaleString("vi-VN");
-  };
+
   type NotificationType = "success" | "info" | "warning" | "error";
 
   const openNotificationWithIcon = (type: NotificationType) => {
@@ -145,17 +146,30 @@ function CardProductRent({
       duration: 2,
     });
   };
-  const [selectedOption, setSelectedOption] = useState<string>("days");
+  //----------------------------------------------
+
+  //dong nay la state de hien thi modal va chon ngay
+  const [selectedOption, setSelectedOption] = useState<"days" | "hours">("days");
   const [openResponsive, setOpenResponsive] = useState(false);
   const [selectedDate, setSelectedDate] = useState<
     [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
   >(null);
+  //----------------------------------------------
+
+  //dong nay la ham xu ly khi nhan nut dat truoc
+  const { addRental } = useRentalStore();
   const handleSubmit = () => {
-    if (selectedDate) {
-      const [start, end] = selectedDate;
-      console.log("Selected Start Time: ", start);
-      console.log("Selected End Time: ", end);
-    }
+    if (!selectedDate) return;
+
+  const rentalData = {
+    title,
+    method: selectedOption,
+    startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
+    endDate: selectedOption === "hours" && selectedDate[1] ? selectedDate[1].format("YYYY-MM-DD HH:mm") : undefined,
+    price: 30000, // Giá mẫu
+  };
+
+  addRental(rentalData);
     // console.log("Đặt trước thành công");
     openNotificationWithIcon("success");
     setOpenResponsive(false);
@@ -239,7 +253,7 @@ function CardProductRent({
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <LuBrain className="fill-black" />
+              <LuBrain className="" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 {complexity}/5
               </p>
@@ -271,29 +285,30 @@ function CardProductRent({
         </div>
       </div>
       <Modal
-        title="Giời thiệu về Tam Quốc Sát"
+        title={`Đặt trước ${title}`}
         centered
         open={openResponsive}
         onOk={() => setOpenResponsive(false)}
         onCancel={() => setOpenResponsive(false)}
+        key={id}
         footer={[
-          <Button onClick={handleSubmit} disabled={!selectedDate}>
+          <Button key={'dat truoc'} onClick={handleSubmit} disabled={!selectedDate}>
             Đặt trước
           </Button>,
         ]}
       >
         <p>
-          Tam Quốc Sát là một thể loại Card Game được ra mắt vào năm 2010 của
-          tác giả KayaK và do nhà phát hành Yoka Games phát triển tiếp. Nhưng
-          thực sự game chỉ bắt đầu nhận được sự tán đồng và hưởng ứng từ người
-          chơi từ năm 2015. Cũng trong năm này “Sát” đã trở thành 1 hiện tượng
-          và đạt được danh hiệu Board Game hay nhất năm do độc giả bình chọn.
+          {title} là một thể loại Board Game được giới trẻ săn đón khi mới ra
+          mắt và do nhà phát hành Publicsher phát triển tiếp. Nhưng thực sự game
+          chỉ bắt đầu nhận được sự tán đồng và hưởng ứng từ người chơi từ năm
+          được ra mắt. Cũng trong năm này {title} đã trở thành 1 hiện tượng và
+          đạt được danh hiệu Board Game hay nhất năm do độc giả bình chọn.
         </p>
         <Divider />
-        <p>Thời gian chơi: 30 phút</p>
-        <p>Số lượng người chơi: 2-4 người</p>
-        <p>Độ tuổi khuyến nghị: 10+</p>
-        <p>Độ phức tạp: 3/5</p>
+        <p>Thời gian chơi: {time} phút</p>
+        <p>Số lượng người chơi: {player} người</p>
+        <p>Độ tuổi khuyến nghị: {age}+</p>
+        <p>Độ phức tạp: {complexity}/5</p>
         <Divider />
         <Radio.Group
           options={options}
