@@ -109,7 +109,7 @@ function CardProduct({
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <LuBrain className="fill-black" />
+              <LuBrain className="" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 {complexity}/5
               </p>

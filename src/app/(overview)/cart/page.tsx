@@ -30,7 +30,11 @@ export default function ShoppingCart() {
           {cart.length === 0 ? (
             <div className="text-white">
               <Empty
-                description="No items in cart"
+                description={
+                  <span className="text-white">
+                    Không có sản phẩm trong giỏ hàng
+                  </span>
+                }
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               >
                 <Button onClick={() => router.push("/products")} type="primary">
@@ -172,10 +176,21 @@ export default function ShoppingCart() {
 
         {/* Action Buttons */}
         <div className="flex justify-between">
-          <button className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600">
+          <button
+            type="button"
+            className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600"
+          >
             Tiếp tục mua hàng
           </button>
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-500">
+          <button
+            className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${
+              cart.length === 0
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-blue-500"
+            }`}
+            disabled={cart.length === 0}
+            onClick={() => router.push("/check-out")}
+          >
             Tiến hành thanh toán
           </button>
         </div>
