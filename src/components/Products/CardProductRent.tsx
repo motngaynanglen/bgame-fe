@@ -9,10 +9,21 @@ import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
 import { GoPeople } from "react-icons/go";
 import { LuBrain } from "react-icons/lu";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
+dayjs.extend(customParseFormat);
+
 const { RangePicker } = DatePicker;
+
+const range = (start: number, end: number) => {
+  const result = [];
+  for (let i = start; i < end; i++) {
+    result.push(i);
+  }
+  return result;
+};
 
 // ham nay de gioi han ngay la ngay hien tai va sau
 const disabledDate: RangePickerProps["disabledDate"] = (
@@ -30,52 +41,28 @@ const disabledDate: RangePickerProps["disabledDate"] = (
 };
 
 // ham nay de gioi han gio la 8h toi 21h
-const disabledDateTime1 = () => ({
-  disabledHours: () => {
-    const hours = [];
-
-    for (let i = 0; i < 24; i++) {
-      if (i < 8 || i >= 21) {
-        hours.push(i);
-      }
-    }
-
-    return hours;
-  },
+const disabledDateTime = () => ({
+  disabledHours: () => range(0, 24).filter((hour) => hour < 8 || hour >= 21),
 });
 
 // ham nay gioi ham o tren
-const disabledDateTime: RangePickerProps["disabledTime"] = (date, type) => {
+const disabledRangeTime: RangePickerProps["disabledTime"] = (date, type) => {
   const today = dayjs().startOf("day");
   const currentHour = dayjs().hour();
 
   if (!date) {
     return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 8 || i >= 21) {
-            hours.push(i);
-          }
-        }
-        return hours;
-      },
-      disabledMinutes: () => [],
-      disabledSeconds: () => [],
+      disabledHours: () =>
+        range(0, 24).filter((hour) => hour < 8 || hour >= 21),
     };
   }
 
   if (date.isSame(today, "day")) {
     return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 8 || i > currentHour || i >= 21) {
-            hours.push(i);
-          }
-        }
-        return hours;
-      },
+      disabledHours: () =>
+        range(0, 24).filter(
+          (hour) => hour < 8 || hour < currentHour || hour >= 21
+        ),
       disabledMinutes: (selectedHour) => {
         if (selectedHour === currentHour) {
           const minutes = [];
@@ -92,15 +79,8 @@ const disabledDateTime: RangePickerProps["disabledTime"] = (date, type) => {
     };
   } else {
     return {
-      disabledHours: () => {
-        const hours = [];
-        for (let i = 0; i < 24; i++) {
-          if (i < 8 || i >= 21) {
-            hours.push(i);
-          }
-        }
-        return hours;
-      },
+      disabledHours: () =>
+        range(0, 24).filter((hour) => hour < 8 || hour >= 21),
       disabledMinutes: () => [],
       disabledSeconds: () => [],
     };
@@ -149,7 +129,9 @@ function CardProductRent({
   //----------------------------------------------
 
   //dong nay la state de hien thi modal va chon ngay
-  const [selectedOption, setSelectedOption] = useState<"days" | "hours">("days");
+  const [selectedOption, setSelectedOption] = useState<"days" | "hours">(
+    "days"
+  );
   const [openResponsive, setOpenResponsive] = useState(false);
   const [selectedDate, setSelectedDate] = useState<
     [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
@@ -161,15 +143,18 @@ function CardProductRent({
   const handleSubmit = () => {
     if (!selectedDate) return;
 
-  const rentalData = {
-    title,
-    method: selectedOption,
-    startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
-    endDate: selectedOption === "hours" && selectedDate[1] ? selectedDate[1].format("YYYY-MM-DD HH:mm") : undefined,
-    price: 30000, // Giá mẫu
-  };
+    const rentalData = {
+      title,
+      method: selectedOption,
+      startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
+      endDate:
+        selectedOption === "hours" && selectedDate[1]
+          ? selectedDate[1].format("YYYY-MM-DD HH:mm")
+          : undefined,
+      price: 30000, // Giá mẫu
+    };
 
-  addRental(rentalData);
+    addRental(rentalData);
     // console.log("Đặt trước thành công");
     openNotificationWithIcon("success");
     setOpenResponsive(false);
@@ -259,14 +244,7 @@ function CardProductRent({
               </p>
             </li>
           </ul>
-
-          {/* <div className="mt-4 flex items-center justify-between gap-4">
-            <p className="text-2xl font-medium leading-tight text-gray-900 dark:text-white">
-              {formatPrice(price)} vnd
-            </p>
-          </div> */}
-          {/* <div className="mt-4 flex items-center justify-between gap-4">
-            <button  onClick={(e) => e.stopPropagation()}>
+          {/* <button  onClick={(e) => e.stopPropagation()}>
               <Link
                 href="/product-detail"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -274,14 +252,7 @@ function CardProductRent({
               >
                 Đặt trước
               </Link>
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center rounded-lg bg-green-500 px-4  py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-            >
-              Thêm vào giỏ hàng
-            </button>
-          </div> */}
+            </button> */}
         </div>
       </div>
       <Modal
@@ -292,7 +263,11 @@ function CardProductRent({
         onCancel={() => setOpenResponsive(false)}
         key={id}
         footer={[
-          <Button key={'dat truoc'} onClick={handleSubmit} disabled={!selectedDate}>
+          <Button
+            key={"dat truoc"}
+            onClick={handleSubmit}
+            disabled={!selectedDate}
+          >
             Đặt trước
           </Button>,
         ]}
@@ -322,8 +297,9 @@ function CardProductRent({
           <DatePicker
             format="YYYY-MM-DD HH:mm"
             disabledDate={disabledDate}
-            disabledTime={disabledDateTime1}
+            disabledTime={disabledDateTime}
             showTime={{ format: "HH:mm" }}
+            minuteStep={10}
             onChange={(date) => setSelectedDate(date ? [date, date] : null)}
           />
         )}
@@ -331,11 +307,12 @@ function CardProductRent({
         {selectedOption === "hours" && (
           <RangePicker
             disabledDate={disabledDate}
-            disabledTime={disabledDateTime}
+            disabledTime={disabledRangeTime}
             showTime={{
               format: "HH:mm",
               defaultValue: [dayjs("08:00", "HH:mm"), dayjs("22:00", "HH:mm")],
             }}
+            minuteStep={10}
             format="YYYY-MM-DD HH:mm"
             onChange={(date) => setSelectedDate(date)}
           />
