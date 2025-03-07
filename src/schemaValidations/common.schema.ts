@@ -14,6 +14,7 @@ export const IsSucceedRes = z.object({
 
 export const CommonRes = z
   .object({
+    status: z.any(),
     message: z.string(),
     data: z.any()
   })

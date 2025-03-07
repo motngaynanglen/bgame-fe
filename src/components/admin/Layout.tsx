@@ -25,7 +25,8 @@ export default function DashboardLayout({ children, menu, theme }: { children: R
 					{/* <!-- ===== Sidebar Start ===== --> */}
 					<Sider collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
 
-						<NavbarVertical sidebarOpen={showMenu}
+						<NavbarVertical
+							sidebarOpen={showMenu}
 							setSidebarOpen={(value: boolean) => setShowMenu(value)}
 							menu={menu} theme={theme === "light" ? "light" : "dark"} />
 
