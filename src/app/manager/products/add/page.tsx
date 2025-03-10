@@ -4,6 +4,7 @@ import { Breadcrumb, Button, Card, Dropdown, MenuProps, Select } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useState } from "react";
 import { CiSettings } from "react-icons/ci";
+import AddProductTemplate from "./pTempForm";
 
 
 const url = {
@@ -65,7 +66,9 @@ export default function ManagerCreateBGame() {
     return (
         <>
             <Breadcrumb items={breadcrumb} />
-            <Card title={pageTitle()}></Card>
+            <Card title={pageTitle()}>
+                <AddProductTemplate />
+            </Card>
 
         </>
     )
