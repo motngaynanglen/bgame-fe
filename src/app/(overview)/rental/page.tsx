@@ -24,6 +24,9 @@ import {
 import CategoryFilter from "@/src/components/Filter/CategoryFilter";
 import CardProductRent from "@/src/components/Products/CardProductRent";
 import { useEffect, useState } from "react";
+import storeApiRequest from "@/src/apiRequests/stores";
+import { set } from "zod";
+import productApiRequest from "@/src/apiRequests/product";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -175,10 +178,24 @@ const items: MenuItem[] = [
     ],
   },
 ];
-
+const storeSearchBody = {
+  search: "",
+  filter: [
+    ""
+  ]
+}
+interface Store {
+  id: string;
+  store_name: string;
+  address: string;
+}
+interface SelectStores {
+  value: string;
+  label: string;
+}
 export default function BoardGameRental() {
   const [boardgames, setBoardgames] = useState<BoardGame[]>([]); // sau khi fetch xong sẽ set vào đây
-
+  const [stores, setStores] = useState<SelectStores[]>([]);
   const [open, setOpen] = useState(false);
 
   const showDrawer = () => {
@@ -192,7 +209,37 @@ export default function BoardGameRental() {
   const onClick: MenuProps["onClick"] = (e) => {
     console.log("click ", e);
   };
+  const fetchRentalStore = async () => {
+    try {
+      const res = await storeApiRequest.getList(storeSearchBody);
+      const dropdownItems = (res.data).map((item: Store) => ({
+        value: item.id,
+        label: `${item.store_name} - ${item.address}`,
+      }));
+      setStores(dropdownItems);
+      console.log(stores);
+    } catch (error) {
+      console.error("lỗi store: " + error);
+    }
+  }
+  const fetchBoardGamesByStoreId = async (id: string) => {
+    const apiBody = {
+      storeId : id
+    }
+    try {
+      const res = await productApiRequest.getListByStoreId(apiBody);
+      console.log(res.data);
+      const dropdownItems = (res.data).map((item: Store) => ({
+        value: item.id,
+        label: `${item.store_name} - ${item.address}`,
+      }));
+      setBoardgames(dropdownItems);
+      console.log(stores);
+    } catch (error) {
+      console.error("lỗi store: " + error);
+    }
 
+  }
   const fetchBoardGames = async () => {
     try {
       const res = await fetch(
@@ -207,6 +254,7 @@ export default function BoardGameRental() {
   };
 
   useEffect(() => {
+    fetchRentalStore();
     fetchBoardGames();
   }, []);
   return (
@@ -224,32 +272,15 @@ export default function BoardGameRental() {
                 >
                   Bộ Lọc
                 </Button>
-
-                {/* <Select
-                  defaultValue="lucy"
-                  style={{ width: 120 }}
-                  // onChange={handleChange}
-                  options={[
-                    { value: "CN1", label: "Jack" },
-                    { value: "", label: "Lucy" },
-                    { value: "Yiminghe", label: "yiminghe" },
-                    { value: "disabled", label: "Disabled", disabled: true },
-                  ]}
-                /> */}
                 <p className="text-black font-semibold">
-                Địa điểm cửa hàng cho thuê:
+                  Địa điểm cửa hàng cho thuê:
                 </p>
-                
+
                 <Select
-                  defaultValue="145-147-149 Hùng Vương, Tp.Thủ Đức"
-                  style={{ width: 400  }}
+                  defaultActiveFirstOption
+                  style={{ width: 400 }}
                   // onChange={handleChange}
-                  options={[
-                    { value: "CN1", label: "9 Nguyễn Tất Thành, Quận 1, Tp.HCM",  },
-                    { value: "CN2", label: "81c Nguyễn Văn Tư, Quận 2, Tp.HCM" },
-                    { value: "CN3", label: "121 Phạm Văn Thuận, Quận 5, Tp.HCM" },
-                    { value: "CN4", label: "145-147-149 Hùng Vương, Tp.Thủ Đức" },
-                  ]}
+                  options={stores}
                 />
               </Space>
             </div>
@@ -296,7 +327,6 @@ export default function BoardGameRental() {
               ))}
             </div>
           </div>
-
           {/* Pagination */}
           <Pagination
             className="m-5"

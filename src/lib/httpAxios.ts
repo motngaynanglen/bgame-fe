@@ -105,7 +105,7 @@ const request = async <Response>(
         console.log(fullUrl);
         const response = await axiosInstance(axiosConfig);
         // const response = await axios(axiosConfig);
-
+        console.log(response)
         return response.data;
 
     } catch (error: unknown) {

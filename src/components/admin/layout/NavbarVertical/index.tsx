@@ -22,13 +22,14 @@ function NavbarVertical(props: SidebarProps) {
 					<div className="flex items-center justify-center w-full gap-2 py-5 min-h-16 absolute z-999999">
 						<div className="">
 							<Link href={`/${props.menu.role}`} type='button' className="">
-								<p className={clsx('text-xl font-black m-0 text-white', inter,)}>
-									{props.sidebarOpen && "BGame"}
-									<span className={clsx('text-xl font-black m-0 text-white', inter,)}>
-										{" " + props.menu.role}
-									</span>
-								</p>
-
+								{(!props.sidebarOpen) || (
+									<p className={clsx('text-xl font-black m-0 text-white', inter,)}>
+										{props.sidebarOpen && "BGame"}
+										<span className={clsx('text-xl font-black m-0 text-white', inter,)}>
+											{(" " + props.menu.role )}
+										</span>
+									</p>
+								)}
 							</Link>
 						</div>
 
@@ -55,7 +56,7 @@ function NavbarVertical(props: SidebarProps) {
 				</div>
 				<Menu
 					className='min-h-full pt-16'
-					
+
 					theme={props.theme ?? "dark"}
 					mode="inline"
 					defaultSelectedKeys={['default']}
