@@ -4,7 +4,7 @@ import { Breadcrumb, Button, Card, Dropdown, MenuProps, Select } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useState } from "react";
 import { CiSettings } from "react-icons/ci";
-import AddProductTemplate from "./pTempForm";
+import AddProductTemplate from "./ProductTemplateForm";
 
 
 const url = {
