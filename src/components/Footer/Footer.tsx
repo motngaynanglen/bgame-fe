@@ -11,24 +11,24 @@ export default function Footer() {
               <div className="col-span-2">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
-                    BoGemStore
+                    Board Game Impact
                   </h2>
 
                   <p className="mt-4 text-gray-500">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Esse non cupiditate quae nam molestias.
+                    Liên hệ với chúng tôi qua email hoặc số điện thoại dưới đây,
+                    nếu bạn muốn tổ chức giải đấu hoặc sự kiện tại chúng tôi.
                   </p>
                 </div>
               </div>
 
               <div className="col-span-2 lg:col-span-3 lg:flex lg:items-end">
                 <form className="w-full">
-                  <div className="border border-gray-100 p-2 focus-within:ring sm:flex sm:items-center sm:gap-4">
+                  <div className="border   p-2  sm:flex sm:items-center sm:gap-4">
                     <input
                       type="email"
                       id="UserEmail"
                       placeholder="john@rhcp.com"
-                      className="w-full border-none focus:border-transparent focus:ring-transparent sm:text-sm"
+                      className="w-full p-3 text-sm text-gray-900  border-gray-300 rounded-md bg-gray-50 "
                     />
 
                     <button className="mt-1 w-full bg-teal-500 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-none hover:bg-teal-600 sm:mt-0 sm:w-auto sm:shrink-0">
@@ -67,7 +67,6 @@ export default function Footer() {
                     >
                       Accounts Review
                     </Link>
-                   
                   </li>
                 </ul>
               </div>

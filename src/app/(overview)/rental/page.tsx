@@ -193,20 +193,20 @@ export default function BoardGameRental() {
     console.log("click ", e);
   };
 
-  const fetchBoardGames = async () => {
-    try {
-      const res = await fetch(
-        "https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame"
-      );
-      const data = await res.json();
-      console.log(data);
-      setBoardgames(data);
-    } catch (error) {
-      console.error("lỗi nè: " + error);
-    }
-  };
-
   useEffect(() => {
+    const fetchBoardGames = async () => {
+      try {
+        const res = await fetch(
+          "https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame"
+        );
+        const data = await res.json();
+        console.log(data);
+        setBoardgames(data);
+      } catch (error) {
+        console.error("lỗi nè: " + error);
+      }
+    };
+
     fetchBoardGames();
   }, []);
   return (
@@ -237,18 +237,30 @@ export default function BoardGameRental() {
                   ]}
                 /> */}
                 <p className="text-black font-semibold">
-                Địa điểm cửa hàng cho thuê:
+                  Địa điểm cửa hàng cho thuê:
                 </p>
-                
+
                 <Select
                   defaultValue="145-147-149 Hùng Vương, Tp.Thủ Đức"
-                  style={{ width: 400  }}
+                  style={{ width: 400 }}
                   // onChange={handleChange}
                   options={[
-                    { value: "CN1", label: "9 Nguyễn Tất Thành, Quận 1, Tp.HCM",  },
-                    { value: "CN2", label: "81c Nguyễn Văn Tư, Quận 2, Tp.HCM" },
-                    { value: "CN3", label: "121 Phạm Văn Thuận, Quận 5, Tp.HCM" },
-                    { value: "CN4", label: "145-147-149 Hùng Vương, Tp.Thủ Đức" },
+                    {
+                      value: "CN1",
+                      label: "9 Nguyễn Tất Thành, Quận 1, Tp.HCM",
+                    },
+                    {
+                      value: "CN2",
+                      label: "81c Nguyễn Văn Tư, Quận 2, Tp.HCM",
+                    },
+                    {
+                      value: "CN3",
+                      label: "121 Phạm Văn Thuận, Quận 5, Tp.HCM",
+                    },
+                    {
+                      value: "CN4",
+                      label: "145-147-149 Hùng Vương, Tp.Thủ Đức",
+                    },
                   ]}
                 />
               </Space>

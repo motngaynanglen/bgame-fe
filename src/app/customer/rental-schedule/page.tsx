@@ -8,11 +8,13 @@ const RentalHistory = () => {
   const { rentals } = useRentalStore();
   const router = useRouter();
   return (
-    <div className=" min-h-screen p-4">
+    <div className=" p-4 w-full max-w-4xl bg-white mt-2 rounded-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Lịch sử thuê</h2>
       {rentals.length === 0 ? (
         <Empty description={<span>Bạn chưa có đơn đặt thuê</span>}>
-          <Button onClick={() => router.push('/rental')} type="primary">Tìm thuê board game</Button>
+          <Button onClick={() => router.push("/rental")} type="primary">
+            Tìm thuê board game
+          </Button>
         </Empty>
       ) : (
         <table className="w-full border-collapse border border-gray-300">
@@ -27,7 +29,7 @@ const RentalHistory = () => {
 
           <tbody>
             {rentals.map((rental, index) => (
-              <tr key={index} className="border">
+              <tr key={index} className="border text-center">
                 <td className="border p-2">{rental.title}</td>
                 <td className="border p-2">
                   {rental.method === "hours"
@@ -45,6 +47,7 @@ const RentalHistory = () => {
           </tbody>
         </table>
       )}
+      
     </div>
   );
 };

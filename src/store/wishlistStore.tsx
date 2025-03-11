@@ -1,4 +1,5 @@
-import {create} from "zustand";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface WishlistItem {
   id: string;
@@ -14,23 +15,42 @@ interface WishlistStore {
   clearWishlist: () => void;
 }
 
-export const useWishlistStore = create<WishlistStore>((set, get) => ({
-    wishlist: [],
-    addToWishlist: (product: WishlistItem) =>
-        set((state: WishlistStore) => {
-            const existingItem: WishlistItem | undefined = state.wishlist.find((item: WishlistItem) => item.id === product.id);
+export const useWishlistStore = create<WishlistStore>()(
+  persist(
+    (set, get) => ({
+      wishlist: [],
+      addToWishlist: (product: WishlistItem) =>
+        set((state) => {
+          const existingItem: WishlistItem | undefined = state.wishlist.find(
+            (item) => item.id === product.id
+          );
 
-            if (existingItem) {
-                // Nếu sản phẩm đã có, không thêm vào danh sách
-                return { wishlist: state.wishlist };
-            } else {
-                // Nếu sản phẩm chưa có, thêm sản phẩm mới
-                return { wishlist: [...state.wishlist, product] };
-            }
+          if (existingItem) {
+            return { wishlist: state.wishlist };
+          } else {
+            return { wishlist: [...state.wishlist, product] };
+          }
         }),
-    removeFromWishlist: (productId: string) =>
-        set((state: WishlistStore) => ({
-            wishlist: state.wishlist.filter((item: WishlistItem) => item.id !== productId),
+      removeFromWishlist: (productId: string) =>
+        set((state) => ({
+          wishlist: state.wishlist.filter((item) => item.id !== productId),
         })),
-    clearWishlist: () => set({ wishlist: [] }),
-}));
+      clearWishlist: () => set({ wishlist: [] }),
+    }),
+    {
+      name: 'wishlist',
+      storage: {
+        getItem: (name: string) => {
+          const item = sessionStorage.getItem(name);
+          return item ? JSON.parse(item) : null;
+        },
+        setItem: (name: string, value: any) => {
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name: string) => {
+          sessionStorage.removeItem(name);
+        },
+      },
+    }
+  )
+);

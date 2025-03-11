@@ -1,97 +1,105 @@
 import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
-import { Checkbox, Menu, MenuProps } from "antd";
-import React from "react";
+import { Menu, MenuProps, Button, Tag } from "antd";
+import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const items: MenuItem[] = [
-  {
-    key: "sub1",
-    label: "Thể loại",
-    icon: <MailOutlined />,
-    children: [
-      {
-        key: "family",
-        label: (
-          <div>
-            <Checkbox>Gia Đình</Checkbox>
-          </div>
-        ),
-      },
-      {
-        key: "party",
-        label: (
-          <div>
-            <Checkbox>Party</Checkbox>
-          </div>
-        ),
-      },
-      {
-        key: "twoPlayer",
-        label: (
-          <div>
-            <Checkbox>Hai người</Checkbox>
-          </div>
-        ),
-      },
-    ],
-  },
-  {
-    key: "sub2",
-    label: "Giá tiền",
-    icon: <AppstoreOutlined />,
-    children: [
-      { key: "5", label: "Tất cả" },
-      { key: "6", label: "Dưới 100,000đ" },
-      { key: "7", label: "100,000đ - 500,000đ" },
-      { key: "8", label: "500,000đ - 1,000,000đ" },
-      { key: "9", label: "1,000,000đ - 5,000,000đ" },
-      { key: "10", label: "5,000,000đ - 10,000,000đ" },
-      { key: "11", label: "Trên 10,000,000đ" },
-    ],
-  },
-  // {
-  //   type: "divider",
-  // },
-  {
-    key: "sub3",
-    label: "Thời gian",
-    icon: <AiOutlineClockCircle />,
-    children: [
-      { key: "15", label: "Tất cả" },
-      { key: "16", label: "Dưới 30 phút" },
-      { key: "17", label: "30 - 60 phút" },
-      { key: "18", label: "60 - 120 phút" },
-      { key: "19", label: "Trên 120 phút" },
-    ],
-  },
-  {
-    key: "sub4",
-    label: "Số người chơi",
-    icon: <BsPeople />,
-    children: [
-      { key: "20", label: "Tất cả" },
-      { key: "21", label: "1 người" },
-      { key: "22", label: "2 người" },
-      { key: "23", label: "2-4 người" },
-      { key: "24", label: "5-8 người" },
-      { key: "25", label: "8+ người" },
-    ],
-  },
-];
-
 export default function CategoryFilter() {
-  const onClick: MenuProps["onClick"] = (e) => {
-    console.log("click ", e);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // Hàm xử lý chọn tag
+  const handleMenuClick: MenuProps["onClick"] = (e) => {
+    setSelectedTags((prev) =>
+      prev.includes(e.key)
+        ? prev.filter((tag) => tag !== e.key)
+        : [...prev, e.key]
+    );
   };
+
+  // Định nghĩa menu
+  const items: MenuItem[] = [
+    {
+      key: "sub1",
+      label: "Thể loại",
+      icon: <MailOutlined />,
+      children: [
+        { key: "Gia đình", label: "Gia đình" },
+        { key: "Party", label: "Party" },
+        { key: "Hai Người", label: "Hai người" },
+      ],
+    },
+    {
+      key: "sub2",
+      label: "Giá tiền",
+      icon: <AppstoreOutlined />,
+      children: [
+        // { key: "5", label: "Tất cả" },
+        { key: "Dưới 100,000đ", label: "Dưới 100,000đ" },
+        { key: "100,000đ - 500,000đ", label: "100,000đ - 500,000đ" },
+        { key: "500,000đ - 1,000,000đ", label: "500,000đ - 1,000,000đ" },
+        { key: "1,000,000đ - 5,000,000đ", label: "1,000,000đ - 5,000,000đ" },
+        { key: "5,000,000đ - 10,000,000đ", label: "5,000,000đ - 10,000,000đ" },
+        { key: "Trên 10,000,000đ", label: "Trên 10,000,000đ" },
+      ],
+    },
+    {
+      key: "sub3",
+      label: "Thời gian",
+      icon: <AiOutlineClockCircle />,
+      children: [
+        // { key: "15", label: "Tất cả" },
+        { key: "Dưới 30 phút", label: "Dưới 30 phút" },
+        { key: "30 - 60 phút", label: "30 - 60 phút" },
+        { key: "60 - 120 phút", label: "60 - 120 phút" },
+        { key: "Trên 120 phút", label: "Trên 120 phút" },
+      ],
+    },
+    {
+      key: "sub4",
+      label: "Số người chơi",
+      icon: <BsPeople />,
+      children: [
+        { key: "Tất cả", label: "Tất cả" },
+        { key: "1 người", label: "1 người" },
+        { key: "2 người", label: "2 người" },
+        { key: "2-4 người", label: "2-4 người" },
+        { key: "5-8 người", label: "5-8 người" },
+        { key: "8+ người", label: "8+ người" },
+      ],
+    },
+  ];
+
   return (
-    <div className="">
+    <div className="relative">
+      {/* Phần hiển thị tags đã chọn */}
+      <div className="sticky top-0 bg-white p-3 shadow-md z-10">
+        <p className="font-semibold">Mục :</p>
+        <div className="flex flex-wrap ">
+          {selectedTags.length > 0 ? (
+            selectedTags.map((tag) => (
+              <Tag closeIcon key={tag} color="green">
+                {tag}
+              </Tag>
+            ))
+          ) : (
+            <span className="text-gray-400 text-sm">Chưa chọn</span>
+          )}
+        </div>
+        <Button
+          type="primary"
+          className="mt-2 w-full"
+          onClick={() => console.log("Tags selected:", selectedTags)}
+        >
+          Áp dụng bộ lọc
+        </Button>
+      </div>
+
+      {/* Menu */}
       <Menu
-        onClick={onClick}
-        // defaultSelectedKeys={["1", "2"]}
-        defaultOpenKeys={["sub1", "sub2"]}
+        onClick={handleMenuClick}
+        defaultOpenKeys={["sub1", "sub2", "sub3", "sub4"]}
         mode="inline"
         items={items}
       />
