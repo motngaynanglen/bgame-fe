@@ -1,6 +1,9 @@
+'use client'
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function AboutRental() {
+  const router = useRouter();
   return (
     <div className="hidden lg:block pb-6 ">
       <div className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
@@ -22,7 +25,7 @@ export default function AboutRental() {
                 <p className="mt-2 text-gray-700">Cửa hàng</p>
               </div>
             </div> */}
-          <button className="mt-4 bg-orange-500 border-none rounded-md text-white px-4 py-2">
+          <button onClick={() => router.push('/rental')} className="mt-4 bg-orange-500 border-none rounded-md text-white px-4 py-2">
             Đặt lịch thuê board game
             {/* <i className="fas fa-arrow-right"></i> */}
           </button>

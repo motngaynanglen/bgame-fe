@@ -1,8 +1,9 @@
-import { create } from "zustand";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type Rental = {
   title: string;
-  method: "days" | "hours";
+  method: 'days' | 'hours';
   startDate: string;
   endDate?: string;
   price: number;
@@ -13,8 +14,27 @@ type RentalStore = {
   addRental: (rental: Rental) => void;
 };
 
-export const useRentalStore = create<RentalStore>((set) => ({
-  rentals: [],
-  addRental: (rental) =>
-    set((state) => ({ rentals: [...state.rentals, rental] })),
-}));
+export const useRentalStore = create<RentalStore>()(
+  persist(
+    (set) => ({
+      rentals: [],
+      addRental: (rental) =>
+        set((state) => ({ rentals: [...state.rentals, rental] })),
+    }),
+    {
+      name: 'rental', // Tên của store trong session storage
+      storage: {
+        getItem: (name) => {
+          const item = sessionStorage.getItem(name);
+          return item ? JSON.parse(item) : null;
+        },
+        setItem: (name, value) => {
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          sessionStorage.removeItem(name);
+        },
+      }, // Sử dụng sessionStorage
+    }
+  )
+);

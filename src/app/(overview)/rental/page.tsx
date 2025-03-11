@@ -239,6 +239,7 @@ export default function BoardGameRental() {
       console.error("lỗi store: " + error);
     }
 
+
   }
   const fetchBoardGames = async () => {
     try {

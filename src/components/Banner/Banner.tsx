@@ -9,8 +9,8 @@ export default function Banner() {
 
   return (
     <div className="pt-5">
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={18}>
+      {/* <Row gutter={[16, 16]}> */}
+        {/* <Col xs={24} lg={18}> */}
           <Carousel
             autoplay
             arrows
@@ -56,10 +56,10 @@ export default function Banner() {
               </div>
             </div>
           </Carousel>
-        </Col>
+        {/* </Col> */}
 
         {/* Two  Images */}
-        <Col xs={24} lg={6} className="hidden lg:block">
+        {/* <Col xs={24} lg={6} className="hidden lg:block">
           <Image
             src="https://i.pinimg.com/736x/98/cf/03/98cf0386e7394df6a0fb5077c3cd3acf.jpg"
             className="w-full h-[50vw] lg:h-[245px] object-cover rounded-lg"
@@ -71,8 +71,8 @@ export default function Banner() {
             style={{height: '245px'}}
 
           />
-        </Col>
-      </Row>
+        </Col> */}
+      {/* </Row> */}
     </div>
   );
 }

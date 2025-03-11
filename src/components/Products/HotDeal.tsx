@@ -38,7 +38,7 @@ export default function HotDeal({ category }: { category: string }) {
 
   return (
     <div className="container md:p-3">
-      <Divider style={{ borderColor: "#7cb305" }}>
+      <Divider variant="dashed" style={{ borderColor: "#7cb305" }}>
         <h1 className="text-2xl p-1 font-bold uppercase bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
           {category}
         </h1>

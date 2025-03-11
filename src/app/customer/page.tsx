@@ -1,15 +1,16 @@
-'use client';
+"use client";
 import React from "react";
-import { useAppContext } from "../../app-provider";
-// cai page nay k phai la page chinh cua app
-// cai nay la page cua account fake
-export default function AccountInformation() {
+import { useAppContext } from "../app-provider";
+
+export default function ProfilePage() {
   const user = useAppContext().user;
-  console.log(user)
+  console.log(user);
   return (
     <div className="min-h-screen flex flex-col items-center bg-sky-50">
-      <div className="w-full max-w-4xl bg-white mt-6 p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-semibold mb-4 text-black-2">Thông tin cá nhân</h1>
+      <div className="w-full max-w-4xl bg-white mt-2 p-6 rounded-lg shadow-md">
+        <h1 className="text-2xl font-semibold mb-4 text-black-2">
+          Thông tin cá nhân
+        </h1>
         <div className="flex items-center mb-6">
           <img
             alt="User avatar"
@@ -23,8 +24,8 @@ export default function AccountInformation() {
               Cập nhật ảnh đại diện
             </button>
             {/* <button className="bg-gray-300 text-black px-4 py-2 rounded">
-              Remove
-            </button> */}
+                Remove
+              </button> */}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -33,7 +34,7 @@ export default function AccountInformation() {
             <input
               className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
               type="text"
-              value="Sẽ thêm vào sau"
+              value={user?.name}
             />
           </div>
           <div>
@@ -70,15 +71,15 @@ export default function AccountInformation() {
             </select>
           </div>
           {/* <div className="col-span-1 md:col-span-2">
-            <label className="block text-gray-700">Welcome Message</label>
-            <textarea
-              className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-              rows={3}
-            >
-              Welcome to my scheduling page. Please follow the instruction to
-              add an event calendar
-            </textarea>
-          </div> */}
+              <label className="block text-gray-700">Welcome Message</label>
+              <textarea
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                rows={3}
+              >
+                Welcome to my scheduling page. Please follow the instruction to
+                add an event calendar
+              </textarea>
+            </div> */}
         </div>
         <div className="flex justify-between mt-6">
           <button className="bg-blue-500 text-white px-4 py-2 rounded">
@@ -88,8 +89,8 @@ export default function AccountInformation() {
             Cancel
           </button>
           {/* <button className="bg-red-500 text-white px-4 py-2 rounded">
-            Delete Account
-          </button> */}
+              Delete Account
+            </button> */}
         </div>
       </div>
     </div>
