@@ -88,7 +88,7 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
 		),
 		children: [
 			{
-				key: '34', label: (<Link href={"/staff/users"}
+				key: '34', label: (<Link href={"/staff/timetable"}
 					className={clsx("font-medium text-base")}>Quản lý người dùng</Link>),
 				icon: (<AiOutlineUnorderedList />),
 			},

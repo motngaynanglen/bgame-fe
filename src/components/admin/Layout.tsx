@@ -21,7 +21,7 @@ export default function DashboardLayout({ children, menu, theme }: { children: R
 		<>
 			{/* <!-- ===== Page Wrapper Start ===== --> */}
 			<ConfigProvider prefixCls="my-ant">
-				<Layout >
+				<Layout style={{minHeight:"100vh"}}>
 					{/* <!-- ===== Sidebar Start ===== --> */}
 					<Sider collapsedWidth={0} collapsible collapsed={!showMenu} width={"16.125rem"} trigger={null}>
 

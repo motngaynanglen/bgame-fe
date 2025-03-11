@@ -59,7 +59,7 @@ const columns: TableProps<DataType>['columns'] = [
         key: 'action',
         render: (_, record) => (
             <Space size="middle">
-                <a>Invite {record.name}</a>
+                <a>llll</a>
                 <a>Delete</a>
             </Space>
         ),
@@ -140,7 +140,7 @@ const AddButtons: CollapseProps['items'] = [
         label: <p className="p-0 m-0">Bổ xung sản phẩm mới</p>,
         children: (
             <>
-                <Row gutter={[12,12]}>
+                <Row gutter={[12, 12]}>
                     <Col>
                         <Button>
                             Thêm mới sản phẩm chưa có sẵn
@@ -197,15 +197,18 @@ export default function ManagerTableBoardgame() {
             </Row>
 
             <br />
-            {useData === undefined ? (
+            <Table<DataType> loading={true} columns={columns} dataSource={useData} pagination={false} />
+            <br />
+            <AntdCustomPagination totalPages={20} />
+            {/* {useData === undefined ? (
                 <TableSkeleton />
             ) : (
                 <>
-                    <Table<DataType> columns={columns} dataSource={useData} pagination={false} />
+                    <Table<DataType> loading={true} columns={columns} dataSource={useData} pagination={false} />
                     <br />
                     <AntdCustomPagination totalPages={20} />
                 </>
-            )}
+            )} */}
         </>
     )
 }

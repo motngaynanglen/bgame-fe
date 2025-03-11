@@ -4,18 +4,14 @@ import { useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
 
 const defaultValues = {
-    productGroupRefId: "",
-    storeId: "",
-    productName: "",
-    publisher: "",
-    image: "",
-    price: "",
-    tags: ['a10', 'c12'],
-    description: "",
-    packageName: "",
-    quantity: 20,
-    totalPrice: "",
-    supplyCode: "",
+    groupName: "string",
+    groupId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    prefix: "string",
+    groupRefName: "string",
+    productGroupRefId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    productName: "string",
+    image: "string",
+    price: 0
 };
 const productTemplate = {
     productGroupRefId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -47,7 +43,20 @@ export default function AddProductTemplate() {
     function ProductTemplateForm() {
         return (
             <Form>
-                <FormItem control={boardGame.control} name="productName" label="Tên Board Game">
+                <FormItem control={boardGame.control} name="groupName" label="Tên Board Game">
+                    <Input />
+                </FormItem>
+                <FormItem control={boardGame.control} name="groupRefName" label="Tên Phân loại Board Game">
+                    <Input />
+                </FormItem>
+                <FormItem control={boardGame.control} name="productName" label="Tên Board Game Chi tiết">
+                    <Input />
+                </FormItem>
+                
+                <FormItem control={boardGame.control} name="price" label="Giá cơ bản">
+                    <Input />
+                </FormItem>
+                <FormItem control={boardGame.control} name="image" label="Hình ảnh">
                     <Input />
                 </FormItem>
             </Form>
