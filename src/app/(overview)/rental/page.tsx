@@ -1,100 +1,40 @@
 "use client";
-import CardProduct from "@/src/components/Products/CardProduct";
-import {
-  Button,
-  Checkbox,
-  Drawer,
-  Layout,
-  Menu,
-  MenuProps,
-  Pagination,
-  Select,
-  Space,
-} from "antd";
-import { Content } from "antd/es/layout/layout";
-import Sider from "antd/es/layout/Sider";
-import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
-import { AiOutlineClockCircle } from "react-icons/ai";
-import { BsPeople } from "react-icons/bs";
+import productApiRequest from "@/src/apiRequests/product";
+import storeApiRequest from "@/src/apiRequests/stores";
+import CategoryFilter from "@/src/components/Filter/CategoryFilter";
+import CardProductRent from "@/src/components/Products/CardProductRent";
 import {
   AppstoreOutlined,
   FilterOutlined,
   MailOutlined,
 } from "@ant-design/icons";
-import CategoryFilter from "@/src/components/Filter/CategoryFilter";
-import CardProductRent from "@/src/components/Products/CardProductRent";
+import {
+  Button,
+  Checkbox,
+  Drawer,
+  MenuProps,
+  Pagination,
+  Select,
+  Space
+} from "antd";
 import { useEffect, useState } from "react";
-import storeApiRequest from "@/src/apiRequests/stores";
-import { set } from "zod";
-import productApiRequest from "@/src/apiRequests/product";
+import { AiOutlineClockCircle } from "react-icons/ai";
+import { BsPeople } from "react-icons/bs";
+import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
+import { useAppContext } from "../../app-provider";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-// const boardgames = [
-//   {
-//     id: 1,
-//     name: "Tam quốc sát",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: false,
-//   },
-//   {
-//     id: 2,
-//     name: "Catan",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: false,
-//   },
-//   {
-//     id: 3,
-//     name: "Splendor",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: false,
-//   },
-//   {
-//     id: 4,
-//     name: "Nana",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: false,
-//   },
-//   {
-//     id: 5,
-//     name: "Rummikub",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: false,
-//   },
-//   {
-//     id: 6,
-//     name: "Arcadia Quest",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: true,
-//   },
-//   {
-//     id: 7,
-//     name: "Root",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: false,
-//   },
-//   {
-//     id: 8,
-//     name: "7 Wonders",
-//     price: 800000,
-//     image: "/assets/images/tqs.jpg",
-//     soldOut: true,
-//   },
-// ];
-
 interface BoardGame {
   id: string;
-  title: string;
+  product_name: string;
+  product_group_ref_id: string;
+  quantity: number;
   price: number;
   status: boolean;
   image: string;
+  rent_price: number;
+  rent_price_per_hour: number;
   publisher: string;
   category: string;
   player: string;
@@ -178,12 +118,12 @@ const items: MenuItem[] = [
     ],
   },
 ];
+
 const storeSearchBody = {
   search: "",
-  filter: [
-    ""
-  ]
-}
+  filter: [""],
+};
+
 interface Store {
   id: string;
   store_name: string;
@@ -197,6 +137,8 @@ export default function BoardGameRental() {
   const [boardgames, setBoardgames] = useState<BoardGame[]>([]); // sau khi fetch xong sẽ set vào đây
   const [stores, setStores] = useState<SelectStores[]>([]);
   const [open, setOpen] = useState(false);
+  const [isLoadingStores, setIsLoadingStores] = useState(true);
+  const [selectedStoreId, setSelectedStoreId] = useState<string | undefined>(undefined);
 
   const showDrawer = () => {
     setOpen(true);
@@ -212,52 +154,42 @@ export default function BoardGameRental() {
   const fetchRentalStore = async () => {
     try {
       const res = await storeApiRequest.getList(storeSearchBody);
-      const dropdownItems = (res.data).map((item: Store) => ({
+      const dropdownItems = res.data.map((item: Store) => ({
         value: item.id,
         label: `${item.store_name} - ${item.address}`,
       }));
       setStores(dropdownItems);
+      if (dropdownItems.length > 0) {
+        setSelectedStoreId(dropdownItems[0].value);
+      }
+
       console.log(stores);
     } catch (error) {
       console.error("lỗi store: " + error);
-    }
-  }
-  const fetchBoardGamesByStoreId = async (id: string) => {
-    const apiBody = {
-      storeId : id
-    }
-    try {
-      const res = await productApiRequest.getListByStoreId(apiBody);
-      console.log(res.data);
-      const dropdownItems = (res.data).map((item: Store) => ({
-        value: item.id,
-        label: `${item.store_name} - ${item.address}`,
-      }));
-      setBoardgames(dropdownItems);
-      console.log(stores);
-    } catch (error) {
-      console.error("lỗi store: " + error);
-    }
-
-
-  }
-  const fetchBoardGames = async () => {
-    try {
-      const res = await fetch(
-        "https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame"
-      );
-      const data = await res.json();
-      console.log(data);
-      setBoardgames(data);
-    } catch (error) {
-      console.error("lỗi nè: " + error);
     }
   };
+  
+  const fetchBoardGamesByStoreId = async (storeId: string) => {
+    try {
+      const res = await productApiRequest.getListByStoreId({ storeId, isRent: true });
+      console.log("data: ",res);
+      setBoardgames(res.data);
+    } catch (error) {
+      console.error("lỗi store: " + error);
+    }
+  };
+  
+
 
   useEffect(() => {
-    fetchRentalStore();
-    fetchBoardGames();
+    fetchRentalStore().then(() => setIsLoadingStores(false));
   }, []);
+
+  useEffect(() => {
+    if (selectedStoreId) {
+      fetchBoardGamesByStoreId(selectedStoreId);
+    }
+  }, [selectedStoreId]);
   return (
     <div>
       <Breadcrumb />
@@ -277,12 +209,18 @@ export default function BoardGameRental() {
                   Địa điểm cửa hàng cho thuê:
                 </p>
 
-                <Select
-                  defaultActiveFirstOption
-                  style={{ width: 400 }}
-                  // onChange={handleChange}
-                  options={stores}
-                />
+                {isLoadingStores ? ( // Kiểm tra loading trước khi render Select
+                  <div>Loading stores...</div>
+                ) : (
+                  <Select
+                    defaultValue={
+                      stores.length > 0 ? stores[0].label : undefined
+                    }
+                    style={{ width: 400 }}
+                    options={stores}
+                    onChange={(value) => setSelectedStoreId(value)}
+                  />
+                )}
               </Space>
             </div>
           </div>
@@ -312,20 +250,27 @@ export default function BoardGameRental() {
             </Drawer>
             {/* Product Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {boardgames.map((boardgame, index) => (
-                <CardProductRent
-                  key={index}
-                  id={boardgame.id}
-                  image={boardgame.image}
-                  price={boardgame.price}
-                  title={boardgame.title}
-                  isRented={boardgame.status}
-                  complexity={boardgame.complexity}
-                  age={boardgame.age}
-                  time={boardgame.time}
-                  player={boardgame.player}
-                />
-              ))}
+            {isLoadingStores ? ( // Kiểm tra loading trước khi render Select
+                  <div>Loading stores...</div>
+                ) : ( boardgames.map((boardgame, index) => (
+                  <CardProductRent
+                    key={index}
+                    id={boardgame.id}
+                    idGroup={boardgame.product_group_ref_id}
+                    storeId={selectedStoreId ?? null}
+                    image={boardgame.image}
+                    price={boardgame.price}
+                    title={boardgame.product_name}
+                    isRented={boardgame.status}
+                    rent_price={boardgame.rent_price}
+                    rent_price_per_hour={boardgame.rent_price_per_hour}
+                    complexity={boardgame.complexity}
+                    age={boardgame.age}
+                    time={boardgame.time}
+                    player={boardgame.player}
+                  />
+                )))}
+             
             </div>
           </div>
           {/* Pagination */}
