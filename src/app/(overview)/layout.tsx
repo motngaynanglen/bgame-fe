@@ -1,8 +1,6 @@
 import FloatButtonContact from "@/src/components/Button/FloatButtonContact";
 import Footer from "@/src/components/Footer/Footer";
 import Header from "@/src/components/Header/Header";
-import { FloatButton } from "antd";
-import FloatButtonGroup from "antd/es/float-button/FloatButtonGroup";
 import React, { Suspense } from "react";
 import Loading from "./loading";
 
