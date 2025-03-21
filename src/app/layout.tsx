@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import AppProvider from "./app-provider";
 
@@ -20,6 +19,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Board Game Impact",
   description: "The website for board game lovers",
+  // icons: '/logo.png',
 };
 
 export default function RootLayout({
@@ -27,6 +27,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // const queryClient = useQueryClient()
+
   return (
     <html lang="en">
       <head>
@@ -43,7 +45,9 @@ export default function RootLayout({
         {/* <StyledComponentsRegistry>{children}</StyledComponentsRegistry> */}
         {/* <AntdRegistry> */}
         <ConfigProvider>
+          {/* <QueryClientProvider client={queryClient}> */}
           <AppProvider>{children}</AppProvider>
+          {/* </QueryClientProvider> */}
         </ConfigProvider>
         {/* </AntdRegistry> */}
       </body>

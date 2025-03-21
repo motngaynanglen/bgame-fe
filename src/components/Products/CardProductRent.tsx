@@ -1,7 +1,16 @@
 "use client";
 import { useRentalStore } from "@/src/store/rentalStore";
 import type { DatePickerProps, GetProps } from "antd";
-import { Button, DatePicker, Divider, Modal, notification, Radio } from "antd";
+import {
+  Button,
+  DatePicker,
+  Divider,
+  message,
+  Modal,
+  notification,
+  Radio,
+  Rate,
+} from "antd";
 import type { CheckboxGroupProps } from "antd/es/checkbox";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -10,6 +19,9 @@ import { BsPeople } from "react-icons/bs";
 import { GoPeople } from "react-icons/go";
 import { LuBrain } from "react-icons/lu";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { useAppContext } from "@/src/app/app-provider";
+import http from "@/src/lib/httpAxios";
+import bookListApiRequest from "@/src/apiRequests/bookList";
 
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
@@ -94,9 +106,14 @@ const options: CheckboxGroupProps<string>["options"] = [
 
 function CardProductRent({
   id,
+  idGroup,
+  storeId,
   image,
   title,
   price,
+  rent_price_per_hour,
+  // quantity,
+  rent_price,
   isRented,
   complexity,
   age,
@@ -104,9 +121,14 @@ function CardProductRent({
   player,
 }: {
   id: string;
+  idGroup: string;
+  storeId: string | null;
   image: string;
   title: string;
   price: number;
+  rent_price_per_hour: number;
+  // quantity: number;
+  rent_price: number;
   isRented: boolean;
   complexity: number;
   age: number;
@@ -115,6 +137,8 @@ function CardProductRent({
 }) {
   // cai nay la de hien thong bao ra
   const [api, contextHolder] = notification.useNotification();
+  const { user } = useAppContext();
+  console.log("storeID: ", storeId);
 
   type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -140,8 +164,35 @@ function CardProductRent({
 
   //dong nay la ham xu ly khi nhan nut dat truoc
   const { addRental } = useRentalStore();
-  const handleSubmit = () => {
-    if (!selectedDate) return;
+  const handleSubmit = async () => {
+    if (!selectedDate) {
+      message.error("Vui lòng chọn thời gian thuê.");
+      return;
+    }
+
+    
+    if (!user) {
+      message.error("Bạn cần đăng nhập để đặt trước.");
+      return;
+    }
+
+    const postData = {
+      customerId: user.id, // Lấy từ context
+      productTemplateIds: [idGroup], // ID sản phẩm
+      storeId: storeId, // Store ID (Cập nhật nếu cần)
+      from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
+      to: selectedDate ? selectedDate[1]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
+      bookType: selectedOption === "days" ? 0 : 1, // 0 = theo ngày, 1 = theo giờ
+    };
+
+    try {
+      const response = await bookListApiRequest.createBookList(postData);
+      message.success("Đặt trước thành công!");
+      setOpenResponsive(false); // Đóng modal sau khi thành công
+    } catch (error) {
+      console.error("Lỗi khi đặt trước:", error);
+      message.error("Đặt trước thất bại, vui lòng thử lại.");
+    }
 
     const rentalData = {
       title,
@@ -158,17 +209,20 @@ function CardProductRent({
     // console.log("Đặt trước thành công");
     openNotificationWithIcon("success");
     setOpenResponsive(false);
+
+    console.log("postData: ", postData);
     // sau này mà có api thì call api ở đây
     // và set lại isRented = true
     //  nếu đã có người đặt trùng giờ thì thông báo lỗi
   };
 
   const { RangePicker } = DatePicker;
+  //body post len api
 
   return (
     <div className="relative">
-      {contextHolder}
       {/* thg nay de hien thong bao ra  */}
+      {contextHolder}
       <div
         onClick={() => setOpenResponsive(true)}
         className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
@@ -194,25 +248,14 @@ function CardProductRent({
 
           <div className="mt-2 flex items-center gap-2">
             <div className="flex items-center">
-              {[...Array(5)].map((_, index) => (
-                <svg
-                  key={index}
-                  className="h-4 w-4 text-yellow-400"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M13.8 4.2a2 2 0 0 0-3.6 0L8.4 8.4l-4.6.3a2 2 0 0 0-1.1 3.5l3.5 3-1 4.4c-.5 1.7 1.4 3 2.9 2.1l3.9-2.3 3.9 2.3c1.5 1 3.4-.4 3-2.1l-1-4.4 3.4-3a2 2 0 0 0-1.1-3.5l-4.6-.3-1.8-4.2Z" />
-                </svg>
-              ))}
+              <Rate allowHalf disabled defaultValue={5} />
             </div>
 
             <p className="text-sm font-medium text-gray-900 dark:text-white">
               5.0
             </p>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              (455)
+              (5)
             </p>
           </div>
           <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
@@ -255,6 +298,7 @@ function CardProductRent({
             </button> */}
         </div>
       </div>
+
       <Modal
         title={`Đặt trước ${title}`}
         centered
@@ -294,30 +338,42 @@ function CardProductRent({
         />
         <p className="mt-4">Chọn thời gian thuê: </p>
         {selectedOption === "days" && (
-          <DatePicker
-            format="YYYY-MM-DD HH:mm"
-            disabledDate={disabledDate}
-            disabledTime={disabledDateTime}
-            showTime={{ format: "HH:mm" }}
-            minuteStep={10}
-            onChange={(date) => setSelectedDate(date ? [date, date] : null)}
-          />
+          <div>
+            <DatePicker
+              format="YYYY-MM-DD HH:mm"
+              disabledDate={disabledDate}
+              disabledTime={disabledDateTime}
+              showTime={{ format: "HH:mm" }}
+              minuteStep={10}
+              onChange={(date) => setSelectedDate(date ? [date, date] : null)}
+            />
+            <p className="text-lg text-green-800 mt-4">
+              Phí thuê: {rent_price}
+            </p>
+          </div>
         )}
 
         {selectedOption === "hours" && (
-          <RangePicker
-            disabledDate={disabledDate}
-            disabledTime={disabledRangeTime}
-            showTime={{
-              format: "HH:mm",
-              defaultValue: [dayjs("08:00", "HH:mm"), dayjs("22:00", "HH:mm")],
-            }}
-            minuteStep={10}
-            format="YYYY-MM-DD HH:mm"
-            onChange={(date) => setSelectedDate(date)}
-          />
+          <div>
+            <RangePicker
+              disabledDate={disabledDate}
+              disabledTime={disabledRangeTime}
+              showTime={{
+                format: "HH:mm",
+                defaultValue: [
+                  dayjs("08:00", "HH:mm"),
+                  dayjs("22:00", "HH:mm"),
+                ],
+              }}
+              minuteStep={10}
+              format="YYYY-MM-DD HH:mm"
+              onChange={(date) => setSelectedDate(date)}
+            />
+            <p className="text-lg text-green-800 mt-4">
+              Phí thuê: {rent_price_per_hour}
+            </p>
+          </div>
         )}
-        <p className="text-lg text-green-800 mt-4">Phí thuê: 30.000đ</p>
       </Modal>
     </div>
   );
