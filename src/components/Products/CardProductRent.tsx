@@ -194,18 +194,18 @@ function CardProductRent({
       message.error("Đặt trước thất bại, vui lòng thử lại.");
     }
 
-    const rentalData = {
-      title,
-      method: selectedOption,
-      startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
-      endDate:
-        selectedOption === "hours" && selectedDate[1]
-          ? selectedDate[1].format("YYYY-MM-DD HH:mm")
-          : undefined,
-      price: 30000, // Giá mẫu
-    };
+    // const rentalData = {
+    //   title,
+    //   method: selectedOption,
+    //   startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
+    //   endDate:
+    //     selectedOption === "hours" && selectedDate[1]
+    //       ? selectedDate[1].format("YYYY-MM-DD HH:mm")
+    //       : undefined,
+    //   price: 30000, // Giá mẫu
+    // };
 
-    addRental(rentalData);
+    // addRental(rentalData);
     // console.log("Đặt trước thành công");
     openNotificationWithIcon("success");
     setOpenResponsive(false);
