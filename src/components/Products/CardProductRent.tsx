@@ -170,7 +170,7 @@ function CardProductRent({
       return;
     }
 
-    
+
     if (!user) {
       message.error("Bạn cần đăng nhập để đặt trước.");
       return;
@@ -229,9 +229,9 @@ function CardProductRent({
       >
         <div className="relative h-full w-full">
           <img
-            className={`w-full h-full object-cover transition-opacity rounded-t-md ${
-              isRented ? "opacity-50" : ""
-            }`}
+            className={`min-h-50 w-full h-full object-cover transition-opacity rounded-t-md 
+              ${isRented ? " opacity-50" : ""}
+                `}
             src={image}
             alt=""
           />

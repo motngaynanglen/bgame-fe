@@ -100,8 +100,8 @@ const AddButtons: CollapseProps['items'] = [
     },
 ]
 const apiBody = {
-    from: "2025-03-11T21:17:21.925Z",
-    to: "2025-03-11T21:17:21.925Z"
+    from: new Date(),
+    to: new Date()
 }
 export default function StaffManageTimeTable() {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
@@ -152,7 +152,7 @@ export default function StaffManageTimeTable() {
             <br />
             <Table<DataType> loading={false} columns={columns} dataSource={useData} pagination={false} />
             <br />
-            <AntdCustomPagination totalPages={20} />
+            <AntdCustomPagination totalPages={2}/>
             {/* {useData === undefined ? (
                 <TableSkeleton />
             ) : (

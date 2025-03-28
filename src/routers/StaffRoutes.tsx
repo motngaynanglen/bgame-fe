@@ -5,6 +5,8 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
 import { AiOutlineBook, AiOutlineUnorderedList } from 'react-icons/ai';
+import { MdAddChart } from "react-icons/md";
+
 /**
  *  All Dashboard Routes
  *
@@ -89,13 +91,13 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
 		children: [
 			{
 				key: '34', label: (<Link href={"/staff/timetable"}
-					className={clsx("font-medium text-base")}>Quản lý người dùng</Link>),
+					className={clsx("font-medium text-base")}>Danh sách lịch trình</Link>),
 				icon: (<AiOutlineUnorderedList />),
 			},
 			{
-				key: '35', label: (<Link href={"/staff/users"}
-					className={clsx("font-medium text-base")}>Quản lý người dùng</Link>),
-				icon: (<UserOutlined />),
+				key: '35', label: (<Link href={"/staff/timetable/add"}
+					className={clsx("font-medium text-base")}>Tạo mới đơn thuê</Link>),
+				icon: (<MdAddChart />),
 			},
 
 		]
