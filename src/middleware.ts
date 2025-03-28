@@ -1,28 +1,35 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
+import envConfig from "./config";
+import { headers } from "next/headers";
 
-// const privatePaths = ["/profile", "/user", "/admin", "/manager", "/partner",'/staff']; //, 
+const privatePaths = ["/profile", "/user", "/admin", "/manager", '/staff']; //, 
 // const managePaths = ["/admin", "/manager", "/partner", '/staff',];
-// const authPaths = ["/login", "/register"];
+const authPaths = ["/login", "/register"];
 // const adminPaths = ['/admin/:part*'];
 // const managerPaths = ['/manager/:part*'];
 
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
-  // const { pathname } = request.nextUrl;
-  // const sessionToken = request.cookies.get("sessionToken")?.value;
+  const { pathname } = request.nextUrl;
+  const sessionToken = request.cookies.get("sessionToken")?.value;
   const sessionRole = request.cookies.get("sessionRole")?.value;
-  console.log("run middleware:" + sessionRole)
+  // const response = NextResponse.next({
+  //   request: {
+  //     headers: new Headers(request.headers)
+  //   }
+  // });
+
   //  console.log(pathname + ' : ' + sessionRole);
 
   // Bảng điều hướng - Verson 2
 
-  // if (!sessionToken || sessionToken === "") {
-  //   // Chưa đăng nhập thì không cho vào private paths
-  //   if (privatePaths.some((path) => pathname.startsWith(path))) {
-  //     return NextResponse.redirect(new URL("/login", request.url));
-  //   }
-  // }
+  if (!sessionToken || sessionToken === "") {
+    // Chưa đăng nhập thì không cho vào private paths
+    if (privatePaths.some((path) => pathname.startsWith(path))) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
 
   // if (sessionToken) {
   //   // Điều hướng và xác thực cho các yêu cầu vào trang admin
@@ -133,6 +140,6 @@ export function middleware(request: NextRequest) {
 // cái matcher này là dùng để khai báo những role nào sẽ được chạy middleware này
 // chuỗi kí tự khai báo dưới đây sẽ cho phép middleware này chạy ở tất cả page ngoại trừ cái đã được liệt kê bên trong
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|logout|assets).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|logout|assets).*)", "/api/:path*"],
   // matcher: ['/profile', '/login', '/register','/admin/:part*','/manager/:part*','/partner/:part*' ] //version 1
 };

@@ -56,6 +56,7 @@ export default function LoginPage() {
         id: result.data.name,
         name: result.data.name,
         role: result.data.role,
+        token: result.data.jwt
       });
       // KẾT THÚC SAU KHI SET COOKIE
       // const response = await axios.post(

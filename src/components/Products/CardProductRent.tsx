@@ -177,7 +177,7 @@ function CardProductRent({
     }
 
     const postData = {
-      customerId: user.id, // Lấy từ context
+      customerId: null, // Lấy từ context
       productTemplateIds: [idGroup], // ID sản phẩm
       storeId: storeId, // Store ID (Cập nhật nếu cần)
       from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
@@ -186,7 +186,7 @@ function CardProductRent({
     };
 
     try {
-      const response = await bookListApiRequest.createBookList(postData);
+      const response = await bookListApiRequest.createBookList(postData,user.token);
       message.success("Đặt trước thành công!");
       setOpenResponsive(false); // Đóng modal sau khi thành công
     } catch (error) {
