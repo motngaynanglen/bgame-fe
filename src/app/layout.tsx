@@ -5,6 +5,15 @@ import "./globals.css";
 import { ConfigProvider } from "antd";
 import AppProvider from "./app-provider";
 
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { TanStackProviders } from "./tanstack-provider";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -22,13 +31,14 @@ export const metadata: Metadata = {
   // icons: '/logo.png',
 };
 
+const queryClient = new QueryClient();
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const queryClient = useQueryClient()
-
+  const hehe = useQuery;
   return (
     <html lang="en">
       <head>
@@ -46,7 +56,9 @@ export default function RootLayout({
         {/* <AntdRegistry> */}
         <ConfigProvider>
           {/* <QueryClientProvider client={queryClient}> */}
-          <AppProvider>{children}</AppProvider>
+          <AppProvider>
+            <TanStackProviders>{children}</TanStackProviders>
+          </AppProvider>
           {/* </QueryClientProvider> */}
         </ConfigProvider>
         {/* </AntdRegistry> */}
