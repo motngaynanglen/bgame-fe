@@ -49,7 +49,7 @@ export default function LoginPage() {
 
       await authApiRequest.auth({
         sessionToken: result.data.jwt,
-        sessionRole: "customer",
+        sessionRole: result.data.role,
         expiresAt: expires,
       });
       setUser({

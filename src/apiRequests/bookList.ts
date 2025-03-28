@@ -7,8 +7,16 @@ const bookListApiRequest = {
             Authorization: `Bearer ${sessionToken}`
         }
     }),
-    endBookList: (body: any) => http.post<CommonResType>('/api/BookList/end-booklist', body),
-    getBookListByDate: (body: any) => http.post<CommonResType>('/api/BookList/get-booklist-by-date', body),
+    endBookList: (body: any, sessionToken?: string) => http.post<CommonResType>('/api/BookList/end-booklist', body, {
+        headers: {
+            Authorization: `Bearer ${sessionToken}`
+        }
+    }),
+    getBookListByDate: (body: any, sessionToken?: string) => http.post<CommonResType>('/api/BookList/get-booklist-by-date', body, {
+        headers: {
+            Authorization: `Bearer ${sessionToken}`
+        }
+    }),
 
 }
 export default bookListApiRequest;

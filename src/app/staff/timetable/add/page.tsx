@@ -13,6 +13,7 @@ import {
   Checkbox,
   Drawer,
   MenuProps,
+  message,
   Pagination,
   Select,
   Space
@@ -122,6 +123,10 @@ const items: MenuItem[] = [
 const storeSearchBody = {
   search: "",
   filter: [""],
+  paging: {
+    pageNum: 1,
+    pageSize: 10
+  }
 };
 
 interface Store {
@@ -138,7 +143,7 @@ export default function BoardGameRental() {
   const [stores, setStores] = useState<SelectStores[]>([]);
   const [open, setOpen] = useState(false);
   const [isLoadingStores, setIsLoadingStores] = useState(true);
-
+  const { user } = useAppContext();
   const selectedStoreId = "c0d8b9f4-23b0-4845-9e23-22989cd96316"
   const showDrawer = () => {
     setOpen(true);
@@ -153,8 +158,12 @@ export default function BoardGameRental() {
   };
 
   const fetchBoardGamesByStoreId = async (storeId: string) => {
+    if (!user) {
+      message.error("Bạn cần đăng nhập để đặt trước.");
+      return;
+    }
     try {
-      const res = await productApiRequest.getListByStoreId({ storeId, isRent: true });
+      const res = await productApiRequest.getListByRole(storeSearchBody, user.token);
       console.log("data: ", res);
       setBoardgames(res.data);
     } catch (error) {

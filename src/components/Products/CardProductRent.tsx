@@ -191,7 +191,7 @@ function CardProductRent({
     };
 
     try {
-      const response = await bookListApiRequest.createBookList(postData, );
+      const response = await bookListApiRequest.createBookList(postData, user.token);
       openNotificationWithIcon(
         "success",
         "Đặt trước thành công",
