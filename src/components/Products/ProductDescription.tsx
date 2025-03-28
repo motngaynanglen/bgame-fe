@@ -155,20 +155,22 @@ function SingleProductDescription({
     []
   );
 
-   const fetchBoardGame = async () => {
-      try {
-        const res = await fetch(
-          `https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`
-        );
-        const data = await res.json();
-        console.log(data);
-        setBoardgame(data);
-      } catch (error) {
-        console.error("lỗi nè: " + error);
-      }
-    };
+
   
     React.useEffect(() => {
+      const fetchBoardGame = async () => {
+        try {
+          const res = await fetch(
+            `https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`
+          );
+          const data = await res.json();
+          console.log(data);
+          setBoardgame(data);
+        } catch (error) {
+          console.error("lỗi nè: " + error);
+        }
+      };
+      
       fetchBoardGame();
     }, []);
 

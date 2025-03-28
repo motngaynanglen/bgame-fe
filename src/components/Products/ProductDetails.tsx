@@ -4,6 +4,7 @@ import { Image, InputNumber, notification, Rate } from "antd";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useCartStore } from "../../store/cartStore";
+import { useStoreStore } from "@/src/store/shopStore";
 
 interface BoardGameInfo {
   id: string;
@@ -23,6 +24,8 @@ function ProductDetails({
   const [quantity, setQuantity] = useState(1);
   const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
   const [api, contextHolder] = notification.useNotification();
+  const { stores, fetchStores, selectedStoreId, setSelectedStore } =
+    useStoreStore(); // Lấy danh sách cửa hàng từ store đã call api
 
   type NotificationType = "success" | "info" | "warning" | "error";
   const openNotificationWithIcon = (type: NotificationType) => {
@@ -72,7 +75,7 @@ function ProductDetails({
   };
 
   const handleAddWishlist = () => {
-     if(boardgame){
+    if (boardgame) {
       const product = {
         id: boardgame.id,
         name: boardgame.title,
@@ -81,8 +84,8 @@ function ProductDetails({
       };
       addToWishlist(product);
       openNotificationAddWishList("success");
-  }
-};
+    }
+  };
 
   const fetchBoardGame = async () => {
     try {
@@ -102,7 +105,7 @@ function ProductDetails({
   }, []);
 
   return (
-    <div className="grid lg:grid-cols-12 p-4 gap-6 lg:gap-10 mb-12 text-gray-800">
+    <div className="grid lg:grid-cols-12 pt-2 gap-6 lg:gap-10 mb-12 text-gray-800">
       {contextHolder}
       {/* Image Section */}
       <div className="lg:col-start-1 lg:col-end-7 col-span-12">
@@ -184,14 +187,14 @@ function ProductDetails({
 
         <div className="flex items-center space-x-4">
           {/* <ProductPriceCount price={30} /> */}
-
+          {/* btn them sp vao gio hang */}
           <button
             onClick={handleAddProduct}
             className="bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600"
           >
             Thêm sản phẩm
           </button>
-
+          {/* btn mua ngay */}
           <Link
             href="/cart"
             className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
@@ -200,9 +203,13 @@ function ProductDetails({
           </Link>
         </div>
 
+        {/* btn them wishlist */}
         <ul className="flex space-x-6">
           <li>
-            <button onClick={handleAddWishlist} className="bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600">
+            <button
+              onClick={handleAddWishlist}
+              className="bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+            >
               Thêm vào danh sách yêu thích
             </button>
           </li>
@@ -219,6 +226,28 @@ function ProductDetails({
               />
             ))}
           </div>
+        </div>
+        <div>
+          <h2 className="p-1 font-semibold">
+            Có {stores.length} cửa hàng còn sản phẩm
+          </h2>
+          {stores.length > 0 ? (
+            <ul
+              className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white 
+                   max-h-[100px] sm:max-h-[150px] overflow-y-auto"
+            >
+              {stores.map((store) => (
+                <li
+                  key={store.id}
+                  className="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600"
+                >
+                  {store.store_name} - <Link className="hover: underline-offset-1" href={"https://maps.app.goo.gl/zMYvU3sV4LiMevgr5"}>{store.address}</Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Đang tải danh sách cửa hàng...</p>
+          )}
         </div>
       </div>
     </div>

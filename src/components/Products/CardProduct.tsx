@@ -55,12 +55,12 @@ function CardProduct({
           )}
         </div>
         <div className="pt-4">
-          <Link
-            className="uppercase text-base sm:text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
-            href="/product-detail"
+          <a
+            className="uppercase text-base sm:text-lg font-semibold leading-tight text-gray-900 hover:text-gray-500 dark:text-white 
+               line-clamp-2 overflow-hidden break-all h-[48px]" // Giới hạn chiều cao & số dòng
           >
             {title}
-          </Link>
+          </a>
 
           <div className="mt-2 flex items-center gap-2">
             <div className="flex items-center">

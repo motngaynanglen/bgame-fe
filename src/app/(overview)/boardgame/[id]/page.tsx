@@ -9,7 +9,7 @@ export default function BoardGameDetailPage() {
     const { id } = useParams();
     console.log(id)
   return (
-    <div className="container p-3 bg-sky-50">
+    <div className="container p-2 bg-sky-50">
       <ProductDetails productId={id} />
       <SingleProductDescription productId={id}/>
     </div>

@@ -23,6 +23,7 @@ import { useAppContext } from "@/src/app/app-provider";
 import http from "@/src/lib/httpAxios";
 import bookListApiRequest from "@/src/apiRequests/bookList";
 
+
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
 dayjs.extend(customParseFormat);
@@ -138,14 +139,19 @@ function CardProductRent({
   // cai nay la de hien thong bao ra
   const [api, contextHolder] = notification.useNotification();
   const { user } = useAppContext();
-  console.log("storeID: ", storeId);
+  
+  
 
   type NotificationType = "success" | "info" | "warning" | "error";
 
-  const openNotificationWithIcon = (type: NotificationType) => {
+  const openNotificationWithIcon = (
+    type: NotificationType,
+    message: string,
+    description: string
+  ) => {
     api[type]({
-      message: "Thành công!",
-      description: `Bạn đã đặt lịch thành công.`,
+      message: message,
+      description: description,
       placement: "bottomRight",
       duration: 2,
     });
@@ -170,7 +176,6 @@ function CardProductRent({
       return;
     }
 
-
     if (!user) {
       message.error("Bạn cần đăng nhập để đặt trước.");
       return;
@@ -178,36 +183,44 @@ function CardProductRent({
 
     const postData = {
       customerId: null, // Lấy từ context
-      productTemplateIds: [idGroup], // ID sản phẩm
+      productGroupRefIds: [idGroup], // ID sản phẩm
       storeId: storeId, // Store ID (Cập nhật nếu cần)
       from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
       to: selectedDate ? selectedDate[1]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
-      bookType: selectedOption === "days" ? 0 : 1, // 0 = theo ngày, 1 = theo giờ
+      bookType: selectedOption === "days" ? 1 : 0, // 1 = theo ngày, 0 = theo giờ
     };
 
     try {
-      const response = await bookListApiRequest.createBookList(postData,user.token);
-      message.success("Đặt trước thành công!");
+      const response = await bookListApiRequest.createBookList(postData, );
+      openNotificationWithIcon(
+        "success",
+        "Đặt trước thành công",
+        "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
+      );
       setOpenResponsive(false); // Đóng modal sau khi thành công
     } catch (error) {
       console.error("Lỗi khi đặt trước:", error);
-      message.error("Đặt trước thất bại, vui lòng thử lại.");
+      openNotificationWithIcon(
+        "error",
+        "Đặt trước thất bại",
+        "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+      );
     }
 
-    const rentalData = {
-      title,
-      method: selectedOption,
-      startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
-      endDate:
-        selectedOption === "hours" && selectedDate[1]
-          ? selectedDate[1].format("YYYY-MM-DD HH:mm")
-          : undefined,
-      price: 30000, // Giá mẫu
-    };
+    // const rentalData = {
+    //   title,
+    //   method: selectedOption,
+    //   startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
+    //   endDate:
+    //     selectedOption === "hours" && selectedDate[1]
+    //       ? selectedDate[1].format("YYYY-MM-DD HH:mm")
+    //       : undefined,
+    //   price: 30000, // Giá mẫu
+    // };
 
-    addRental(rentalData);
+    // addRental(rentalData);
     // console.log("Đặt trước thành công");
-    openNotificationWithIcon("success");
+    // openNotificationWithIcon("success");
     setOpenResponsive(false);
 
     console.log("postData: ", postData);
@@ -215,6 +228,8 @@ function CardProductRent({
     // và set lại isRented = true
     //  nếu đã có người đặt trùng giờ thì thông báo lỗi
   };
+
+  const defaultImage = "/assets/images/bg1.jpg";
 
   const { RangePicker } = DatePicker;
   //body post len api
@@ -234,6 +249,9 @@ function CardProductRent({
                 `}
             src={image}
             alt=""
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = defaultImage;
+            }}
           />
           {isRented && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white font-semibold">
@@ -241,8 +259,11 @@ function CardProductRent({
             </div>
           )}
         </div>
-        <div className="pt-4">
-          <div className="uppercase text-lg font-semibold leading-tight text-gray-900  dark:text-white">
+        <div className="pt-2">
+          <div
+            className="uppercase text-base sm:text-xl font-medium leading-tight text-gray-900 hover:text-gray-500 dark:text-white 
+    line-clamp-2 overflow-hidden break-words h-[36px] sm:h-[52px]"
+          >
             {title}
           </div>
 
