@@ -28,8 +28,8 @@ interface BoardGame {
   time: string;
   age: number;
   complexity: number;
+  quantity_sold: number;
 }
-
 
 export default function ProductsPage({
   searchParams,
@@ -50,15 +50,15 @@ export default function ProductsPage({
     setOpen(false);
   };
 
-   const {data, isLoading, isError, error} = useQuery({
-      queryKey: ['boardGames'],
-      queryFn: () => fetchBoardGames(),
-      // enabled: !!selectedStoreId,
-    });
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["boardGames"],
+    queryFn: () => fetchBoardGames(),
+    // enabled: !!selectedStoreId,
+  });
 
   const fetchBoardGames = async () => {
     try {
-      const res = await productApiRequest.getList({ 
+      const res = await productApiRequest.getList({
         search: "",
         filter: [],
       });
@@ -68,14 +68,34 @@ export default function ProductsPage({
     }
   };
 
-  
   return (
     <div className="flex ">
       <main className="pt-4">
-        <div className=" mb-4">
-          <Button type="primary" icon={<FilterOutlined />} onClick={showDrawer}>
-            Bộ Lọc
-          </Button>
+        <div className=" mb-4 flex justify-start items-center divide-x-2 divide-gray-900">
+          <div className="pr-2">
+            <Button
+              type="primary"
+              icon={<FilterOutlined />}
+              onClick={showDrawer}
+            >
+              Bộ Lọc
+            </Button>
+          </div>
+
+          <div className="flex items-center">
+            <AppstoreOutlined className="mx-2" />
+            <p className="mr-2 font-bold">Sắp xếp theo</p>
+            <select
+              className="border-none bg-transparent outline-none text-gray-900 dark:text-white cursor-pointer"
+              defaultValue="default"
+            >
+              <option value="default">Bán chạy nhất</option>
+              <option value="price-asc">Giá tăng dần</option>
+              <option value="price-desc">Giá giảm dần</option>
+              <option value="popularity">Phổ biến</option>
+              <option value="newest">Mới nhất</option>
+            </select>
+          </div>
         </div>
         <div className="flex flex-col lg:flex-row">
           {/* Filter */}
@@ -97,7 +117,7 @@ export default function ProductsPage({
             <CategoryFilter />
           </Drawer>
           {/* Product Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {data?.data.map((boardgame: BoardGame) => (
               <CardProduct
                 key={boardgame.id}
@@ -110,6 +130,7 @@ export default function ProductsPage({
                 age={boardgame.age}
                 complexity={boardgame.complexity}
                 soldOut={boardgame.status}
+                quantity={boardgame.quantity}
               />
             ))}
           </div>

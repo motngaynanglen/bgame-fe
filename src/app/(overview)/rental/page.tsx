@@ -183,7 +183,7 @@ export default function BoardGameRental() {
   }
 
   if (isError) {
-    return <div>Error loading board games: {error?.message}</div>;
+    return <div>Mất kết nối từ server: {error?.message}</div>;
   }
   return (
     <div>

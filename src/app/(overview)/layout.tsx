@@ -12,7 +12,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="bg-sky-50">
-        <main className="container mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8  ">
+        <main className="container min-h-screen mx-auto max-w-screen-xl px-2 sm:px-2  ">
           <Suspense fallback={<Loading />}>{children}</Suspense>
         </main>
       </div>
