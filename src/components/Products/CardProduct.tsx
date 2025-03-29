@@ -17,6 +17,7 @@ function CardProduct({
   age,
   time,
   player,
+  quantity,
 }: {
   id: string;
   image: string;
@@ -27,6 +28,7 @@ function CardProduct({
   age: number;
   time: string;
   player: string;
+  quantity: number;
 }) {
   const formatPrice = (price: number) => {
     return price.toLocaleString("vi-VN");
@@ -34,12 +36,15 @@ function CardProduct({
 
   const router = useRouter();
 
+  const defaultImage = "/assets/images/bg1.jpg";
+
   return (
     <div className="relative">
       <div
         onClick={() => router.push(`/boardgame/${id}`)}
         className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300"
       >
+        {/* ảnh sản phẩm */}
         <div className="relative h-full w-full">
           <img
             className={`w-full h-full object-cover transition-opacity rounded-t-md ${
@@ -47,6 +52,10 @@ function CardProduct({
             }`}
             src={image}
             alt=""
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = defaultImage;
+            }}
+            // onError={handleImageError}
           />
           {soldOut && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white font-semibold rounded-t-md">
@@ -54,13 +63,15 @@ function CardProduct({
             </div>
           )}
         </div>
-        <div className="pt-4">
-          <a
-            className="uppercase text-base sm:text-lg font-semibold leading-tight text-gray-900 hover:text-gray-500 dark:text-white 
-               line-clamp-2 overflow-hidden break-all h-[48px]" // Giới hạn chiều cao & số dòng
+        
+        {/* Thông tin sản phẩm */}
+        <div className="pt-2 ">
+          <h3
+            className="uppercase text-base sm:text-xl font-medium leading-tight text-gray-900 hover:text-gray-500 dark:text-white 
+    line-clamp-2 overflow-hidden break-words h-[36px] sm:h-[52px]"
           >
             {title}
-          </a>
+          </h3>
 
           <div className="mt-2 flex items-center gap-2">
             <div className="flex items-center">
@@ -86,7 +97,7 @@ function CardProduct({
             </p>
           </div>
 
-          <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
+          {/* <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
               <AiOutlineClockCircle className="fill-black" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -114,8 +125,21 @@ function CardProduct({
                 {complexity}/5
               </p>
             </li>
-          </ul>
+          </ul> */}
+          <div className="mt-2 flex items-center gap-2">
+            {quantity > 0 ? (
+              <p className="text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">
+                Còn hàng
+              </p>
+            ) : (
+              <p className="text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
+                Hết hàng
+              </p>
+            )}
+          </div>
+
           <Divider />
+          {/* giá sản pham */}
           <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <p className="text-lg sm:text-2xl font-medium leading-tight text-gray-900 dark:text-white">
               {formatPrice(price)}đ

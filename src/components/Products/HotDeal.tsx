@@ -58,6 +58,7 @@ export default function HotDeal({ category }: { category: string }) {
             age={boardgame.age}
             complexity={boardgame.complexity}
             soldOut={false}
+            quantity={1}
           />
         ))}
       </div>

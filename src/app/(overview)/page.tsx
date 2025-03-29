@@ -1,9 +1,7 @@
+import AboutComponent from "@/src/components/About/AboutComponent";
+import AboutRental from "@/src/components/About/AboutRental";
 import Banner from "@/src/components/Banner/Banner";
 import HotDeal from "@/src/components/Products/HotDeal";
-import AboutUs from "../admin/content/aboutus/page";
-import AboutComponent from "@/src/components/About/AboutComponent";
-import { Divide } from "react-feather";
-import AboutRental from "@/src/components/About/AboutRental";
 import { Space } from "antd";
 
 export default function Home() {
@@ -11,15 +9,18 @@ export default function Home() {
     <div className="bg-sky-50">
       <main className="">
         <Banner />
-        <div className="">
-          <Space/>
+        <div>
+          <Space />
           <AboutComponent />
           <Space />
-          <div className="pb-2">
+          <div className="pb-2 ">
             <HotDeal category="Sản phẩm nổi bật" />
           </div>
-          <Space />
-          <AboutRental />
+          <div>
+            {" "}
+            <AboutRental />
+          </div>
+
           {/* <div className="pb-8">
             <HotDeal category="Sản phẩm mới về" />
           </div> */}
