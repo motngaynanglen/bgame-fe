@@ -49,13 +49,14 @@ export default function LoginPage() {
 
       await authApiRequest.auth({
         sessionToken: result.data.jwt,
-        sessionRole: "customer",
+        sessionRole: result.data.role,
         expiresAt: expires,
       });
       setUser({
         id: result.data.name,
         name: result.data.name,
         role: result.data.role,
+        token: result.data.jwt
       });
       // KẾT THÚC SAU KHI SET COOKIE
       // const response = await axios.post(

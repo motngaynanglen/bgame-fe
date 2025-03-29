@@ -22,18 +22,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useAppContext } from "@/src/app/app-provider";
 import http from "@/src/lib/httpAxios";
 import bookListApiRequest from "@/src/apiRequests/bookList";
-import {
-  getCookie,
-  getCookies,
-  setCookie,
-  deleteCookie,
-  hasCookie,
-  useGetCookies,
-  useSetCookie,
-  useHasCookie,
-  useDeleteCookie,
-  useGetCookie,
-} from 'cookies-next/client';
+
 
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
@@ -150,9 +139,7 @@ function CardProductRent({
   // cai nay la de hien thong bao ra
   const [api, contextHolder] = notification.useNotification();
   const { user } = useAppContext();
-  console.log("storeID: ", storeId);
-  const value = getCookie('sessionRole');
-  console.log("sessionToken: ", value);
+  
   
 
   type NotificationType = "success" | "info" | "warning" | "error";
@@ -204,7 +191,7 @@ function CardProductRent({
     };
 
     try {
-      const response = await bookListApiRequest.createBookList(postData, );
+      const response = await bookListApiRequest.createBookList(postData, user.token);
       openNotificationWithIcon(
         "success",
         "Đặt trước thành công",
@@ -257,9 +244,9 @@ function CardProductRent({
       >
         <div className="relative h-full w-full">
           <img
-            className={`w-full h-full object-cover transition-opacity rounded-t-md ${
-              isRented ? "opacity-50" : ""
-            }`}
+            className={`min-h-50 w-full h-full object-cover transition-opacity rounded-t-md 
+              ${isRented ? " opacity-50" : ""}
+                `}
             src={image}
             alt=""
             onError={(e) => {
