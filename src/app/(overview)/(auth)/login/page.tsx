@@ -4,12 +4,13 @@ import authApiRequest from "@/src/apiRequests/auth";
 import Link from "next/link";
 import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { useAppContext } from "../../app-provider";
+import { useAppContext } from "../../../app-provider";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { setUser } = useAppContext();
-
+  const router = useRouter();
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -58,6 +59,8 @@ export default function LoginPage() {
         role: result.data.role,
         token: result.data.jwt
       });
+      router.push("/");
+      router.refresh();
       // KẾT THÚC SAU KHI SET COOKIE
       // const response = await axios.post(
       //   "/api/Login/login",
