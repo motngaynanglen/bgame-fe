@@ -8,6 +8,7 @@ export const AccountRes = z
       role: z.string(),
       token: z.string(),
       avatar: z.string().optional(),
+      sessionToken: z.string().optional(),
     }),
     message: z.string()
   })

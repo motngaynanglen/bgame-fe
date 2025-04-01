@@ -1,34 +1,40 @@
-import http from '@/src/lib/httpAxios'
+import http from "@/src/lib/httpAxios";
 import {
   LoginBodyType,
   LoginResType,
   RegisterBodyType,
   RegisterResType,
-} from '@/src/schemaValidations/auth.schema'
-import { MessageResType } from '@/src/schemaValidations/common.schema'
+} from "@/src/schemaValidations/auth.schema";
+import { MessageResType } from "@/src/schemaValidations/common.schema";
 
 const authApiRequest = {
-  login: (body: LoginBodyType) => http.post<LoginResType>('/api/Login/login', body),
+  login: (body: LoginBodyType) =>
+    http.post<LoginResType>("/api/Login/login", body),
   register: (body: RegisterBodyType) =>
-    http.post<RegisterResType>('/api/Auth/register', body),
-  auth: (body: { sessionToken: string; sessionRole: string; expiresAt: string }) =>
-    http.post('/api/auth', body, {
-      baseUrl: ''
+    http.post<RegisterResType>("/api/Auth/register", body),
+  auth: (body: {
+    sessionToken: string;
+    sessionRole: string;
+    expiresAt: string;
+  }) =>
+    http.post("/api/auth", body, {
+      baseUrl: "",
     }),
   logoutFromNextClientToNextServer: (
     force?: boolean | undefined,
     signal?: AbortSignal | undefined
   ) =>
     http.post<MessageResType>(
-      '/api/auth/logout',
+      "/api/auth/logout",
       {
-        force
+        force,
       },
       {
-        baseUrl: '',
-        signal
+        baseUrl: "",
+        signal,
       }
     ),
+  upload: (body: any) => http.post("/api/upload/image", body),
   // logoutFromNextServerToServer: (sessionToken: string) => //Không dùng vì be ko có đăng xuất
   //   http.post<MessageResType>(
   //     '/auth/logout',
@@ -55,6 +61,6 @@ const authApiRequest = {
   //     {},
   //     { baseUrl: '' }
   //   )
-}
+};
 
 export default authApiRequest;
