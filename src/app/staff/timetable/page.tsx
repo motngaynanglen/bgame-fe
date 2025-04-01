@@ -16,6 +16,7 @@ import { CheckboxGroupProps } from "antd/es/checkbox";
 const { RangePicker } = DatePicker;
 
 interface DataType {
+    key: string;
     id: string;
     customer_id: string;
     customer_name: string;
@@ -63,7 +64,7 @@ const breadcrumb: BreadcrumbItemType[] =
 const AddButtons: CollapseProps['items'] = [
     {
         key: '1',
-        label: <p className="p-0 m-0">Bổ xung sản phẩm mới</p>,
+        label: <p key="add-button" className="p-0 m-0">Bổ xung sản phẩm mới</p>,
         children: (
             <>
 
@@ -73,8 +74,8 @@ const AddButtons: CollapseProps['items'] = [
     },
 ]
 const options: CheckboxGroupProps<string>["options"] = [
-    { label: "Thuê theo ngày", value: "days" },
-    { label: "Thuê theo giờ", value: "hours" },
+    { label: <span key="days">Thuê theo ngày</span>, value: "days" },
+    { label: <span key="hours">Thuê theo giờ</span>, value: "hours" },
 ];
 const defaultToDay = {
     from: dayjs().hour(1).minute(0).second(0).toISOString(),
@@ -119,6 +120,7 @@ export default function StaffManageTimeTable({ searchParams }: { searchParams?: 
                 onOk={() => handleOk}
                 footer={[
                     <Button
+                        key={"modal-button-1"}
                         // onClick={handleSubmit}
                         disabled={!selectedDate}
                     >
@@ -179,10 +181,15 @@ export default function StaffManageTimeTable({ searchParams }: { searchParams?: 
         setTableLoading(true);
         if (!user) {
             message.error("Bạn cần đăng nhập để đặt trước.");
+            setTableLoading(false);
             return;
         }
         const response = await bookListApiRequest.getBookListByDate(apiBody, user.token);
-        const data: DataType[] = response.data;
+        const data: DataType[] = response.data.map((item: DataType) => ({
+            ...item,
+            key: item.id, // Gán id vào key
+        }));
+        console.log(data);
         setPaging(response.paging);
         setTableLoading(false);
         return data;
@@ -364,7 +371,7 @@ export default function StaffManageTimeTable({ searchParams }: { searchParams?: 
             </Row>
 
             <br />
-            <Table<DataType> loading={tableLoading} columns={columns} dataSource={useData} pagination={false} />
+            <Table<DataType> loading={tableLoading} columns={columns} dataSource={useData ?? []} pagination={false} />
             <br />
             <AntdCustomPagination totalPages={paging?.pageCount ?? 1} />
             {/* {useData === undefined ? (
