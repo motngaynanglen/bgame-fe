@@ -21,6 +21,7 @@ export default function LayoutCustomer({
             <aside className="w-1/4  bg-slate-600 text-white sticky top-[64px] h-[calc(100vh-64px)]">
               <SideBar />
             </aside>
+            <div className="h-[300px] pt-6 min-h-[1em] w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"></div>{" "}
             <main className="w-3/4 p-4">
               <Suspense fallback={<Loading />}>{children}</Suspense>
             </main>

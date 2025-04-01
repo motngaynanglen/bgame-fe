@@ -12,6 +12,8 @@ const productApiRequest = {
     createTemplate: (body: any) => http.post<CommonResType>('/api/Product/create-template', body),
     addProduct: (body: any) => http.post<CommonResType>('/api/Product/create-product', body),
     addNonExistProduct: (body: any) => http.post<CommonResType>('/api/Product/create-product-unknown', body),
-
+    getby: (body: any) => http.post<CommonResType>('/api/Product/get-by', body),
+    getById: (body: any) => http.post<CommonResType>('/api/Product/get-by-id', body),
+   
 }
 export default productApiRequest;

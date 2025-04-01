@@ -250,7 +250,7 @@ function CardProductRent({
       >
         <div className="relative h-full w-full">
           <img
-            className={`min-h-50 w-full h-full object-cover transition-opacity rounded-t-md 
+            className={`h-50 w-full  object-cover transition-opacity rounded-t-md 
               ${isRented ? " opacity-50" : ""}
                 `}
             src={image}
