@@ -24,6 +24,9 @@ import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
 import { useAppContext } from "../../app-provider";
 import { useStoreStore } from "@/src/store/shopStore";
 import { useQuery } from "@tanstack/react-query";
+import { useStores } from "@/src/hooks/useStores";
+import { useSelectedStore } from "@/src/hooks/useSelectStoreId";
+import Loading from "../loading";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -136,13 +139,14 @@ interface SelectStores {
   label: string;
 }
 export default function BoardGameRental() {
-  // const [boardgames, setBoardgames] = useState<BoardGame[]>([]); // sau khi fetch xong sẽ set vào đây
-  // const [stores, setStores] = useState<SelectStores[]>([]);
   const [open, setOpen] = useState(false);
-  const [isLoadingStores, setIsLoadingStores] = useState(true);
-  // const [selectedStoreId, setSelectedStoreId] = useState<string | undefined>(undefined);
-  const { stores, fetchStores, selectedStoreId, setSelectedStore } =
-    useStoreStore();
+  const {
+    stores,
+    isLoading: storesLoading,
+    isError: storesError,
+    error: storesErrorData,
+  } = useStores();
+  const { selectedStoreId, setSelectedStoreId } = useSelectedStore();
 
   const showDrawer = () => {
     setOpen(true);
@@ -152,38 +156,44 @@ export default function BoardGameRental() {
     setOpen(false);
   };
 
-  const onClick: MenuProps["onClick"] = (e) => {
-    console.log("click ", e);
-  };
-
   const fetchBoardGamesByStoreId = async (storeId: string) => {
     try {
       const res = await productApiRequest.getListByStoreId({
         storeId,
         isRent: true,
       });
-      return res
+      return res;
     } catch (error) {
       console.error("lỗi store: " + error);
     }
   };
 
-  const {data, isLoading, isError, error} = useQuery({
-    queryKey: ['rentalBoardGames', selectedStoreId],
+  const {
+    data,
+    isLoading: rentalLoading,
+    isError: rentalError,
+    error: rentalErrorData,
+  } = useQuery({
+    queryKey: ["rentalBoardGames", selectedStoreId],
     queryFn: () => fetchBoardGamesByStoreId(selectedStoreId!),
     enabled: !!selectedStoreId,
   });
-  
-  useEffect(() => {
-    fetchStores(); // Gọi API chỉ nếu chưa có dữ liệu
-  }, [fetchStores]);
 
-  if (isLoading) {
-    return <div>Loading board games...</div>;
+  if (storesLoading || rentalLoading) {
+    return (
+      <Loading/>
+    );
   }
 
-  if (isError) {
-    return <div>Mất kết nối từ server: {error?.message}</div>;
+  if (storesError || rentalError) {
+    return (
+      <div>
+        Mất kết nối từ server:{" "}
+        {storesErrorData?.message ||
+          rentalErrorData?.message ||
+          "Unknown error"}
+      </div>
+    );
   }
   return (
     <div>
@@ -221,7 +231,7 @@ export default function BoardGameRental() {
                   <select
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     value={selectedStoreId || ""}
-                    onChange={(e) => setSelectedStore(e.target.value)}
+                    onChange={(e) => setSelectedStoreId(e.target.value)}
                   >
                     {stores.map((store) => (
                       <option className="p-2" key={store.id} value={store.id}>
@@ -278,7 +288,7 @@ export default function BoardGameRental() {
                   time={boardgame.time}
                   player={boardgame.player}
                 />
-                ))}
+              ))}
             </div>
           </div>
           {/* Pagination */}

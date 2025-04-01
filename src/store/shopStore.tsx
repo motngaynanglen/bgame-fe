@@ -7,6 +7,11 @@ type Store = {
   id: string;
   store_name: string;
   address: string;
+  hotline: string;
+  email: string;
+  code: string;
+  lattitude: string;
+  longitude: string;
 };
 
 type StoreState = {
@@ -49,30 +54,3 @@ export const useStoreStore = create<StoreState>()(
   )
 );
 
-// import { create } from 'zustand';
-// import storeApiRequest from '../apiRequests/stores';
-
-// interface Store {
-//   stores: any[];
-//   isLoading: boolean;
-//   error: string | null;
-//   fetchStores: (searchBody: any) => Promise<void>;
-// }
-
-// const useStoreStore = create<Store>((set) => ({
-//   stores: JSON.parse(localStorage.getItem('stores') || '[]'), // Lấy dữ liệu từ localStorage
-//   isLoading: false,
-//   error: null,
-//   fetchStores: async (searchBody) => {
-//     set({ isLoading: true, error: null });
-//     try {
-//       const res = await storeApiRequest.getList(searchBody);
-//       set({ stores: res.data, isLoading: false });
-//       localStorage.setItem('stores', JSON.stringify(res.data)); // Lưu dữ liệu vào localStorage
-//     } catch (error: any) {
-//       set({ error: error.message, isLoading: false });
-//     }
-//   },
-// }));
-
-// export default useStoreStore;
