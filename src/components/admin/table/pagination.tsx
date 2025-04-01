@@ -30,7 +30,7 @@ export default function AntdCustomPagination({ totalPages, pageSize = 10 }: { to
   return (
     <>
       <Pagination
-        hideOnSinglePage
+        
         align='center'
         showQuickJumper={true}
         showSizeChanger={false}

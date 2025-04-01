@@ -1,36 +1,35 @@
 import productApiRequest from "@/src/apiRequests/product";
+import uploadApiRequest from "@/src/apiRequests/upload";
 import TipTapEditor from "@/src/components/TipTapEditor/TipTapEditor";
+import { useObjectUrls } from "@/src/hooks/useObjectURL";
 import { HttpError } from "@/src/lib/httpAxios";
 import { InboxOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Col, Form, Input, message, Row, Space, Upload, UploadProps } from "antd";
+import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
 
 const defaultValues = {
-    groupName: "UITEST 2",
-    prefix: "UIT2",
-    groupRefName: "UITEST 2",
-    productName: "UITEST 2",
-    image: "string",
+    id: undefined,
+    product_group_ref_id: undefined,
+    groupName: "UITEST 10 group",
+    prefix: "UIT10",
+    groupRefName: "UITEST 10 Ref",
+    productName: "UITEST 10",
+    image: "empty",
     price: 10,
     description: "<p>Chua biết mô tả thế nào nhưng:<br><strong>Rất chi tiết - bắt mắt - đẹp đẽ</strong></p>",
     rentPrice: 1220,
     rentPricePerHour: 1220
 };
-const productTemplate = {
-    productGroupRefId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    productName: "string",
-    image: "string",
-    price: 0,
-    rentPrice: 0
-}
-const product = {
-    productGroupRefId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    storeId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+const numberDefault = {
+    productGroupRefId: "",
     number: 0
 }
-interface productAdd {
+interface productModel {
+    id: string | undefined,
+    product_group_ref_id: string | undefined,
     groupName: string,
     prefix: string,
     groupRefName: string,
@@ -63,19 +62,89 @@ const beforeUpload = (file: File) => {
 
     return true;
 };
-export default function AddProductTemplate() {
+export default function AddProductTemplate({ product, isReadonly, onNext }: { product?: productModel; isReadonly?: boolean, onNext?: (product: productModel) => void }) {
+    const [fileList, setFileList] = useState<File[]>([]); // Lưu danh sách file
+    const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+    const [uploading, setUploading] = useState(false);
+
     const boardGame = useForm({
-        defaultValues: defaultValues,
+        defaultValues: product ?? defaultValues,
         // resolver: zodResolver(BoardGameBody)
     });
-    const onSubmit = async (data:productAdd) => {
-        // if (!sessionToken) {
-        //   toast.warning("Bạn cần đăng nhập để sử dụng chức năng này.")
-        // }
-        // else {
-        console.log(data)
+    const numberAdd = useForm({
+        defaultValues: numberDefault,
+        // resolver: zodResolver(BoardGameBody)
+    });
+    const uploadFiles = async () => {
+        setUploading(true);
+        const formData = new FormData();
+
+        // Thêm tất cả các file vào FormData
+        fileList.forEach((file) => {
+            formData.append("files", file);
+        });
+
+        for (const file of fileList) {
+            try {
+                const response = await uploadApiRequest.uploadImage(formData);
+
+                // Lấy danh sách URL từ phản hồi API
+                const urls = response.urls; // Assuming response.data is an array of URLs
+                setUploadedUrls(urls);
+                message.success("Tất cả Hình ảnh đã được upload thành công");
+            } catch (error) {
+                setUploading(false);
+                console.error("Lỗi khi gửi hình ảnh", file.name, error);
+                message.error(`Lỗi gửi hình ảnh ${file.name}`);
+                
+            }
+        }
+        setUploading(false);
+    };
+    const waitForUploading = async () => {
+        if (!uploading) return; // Nếu không đang upload, không cần đợi
+    
+        await new Promise((resolve) => {
+            const interval = setInterval(() => {
+                if (!uploading) {
+                    clearInterval(interval);
+                    resolve(true);
+                }
+            }, 100); // Kiểm tra trạng thái `uploading` mỗi 100ms
+        });
+    };
+    const onSubmit = async (values: productModel) => {
+        
+        console.log(values)
         try {
-            await productApiRequest.addNonExistProduct(data)
+            if (fileList.length > 0) {
+                await uploadFiles();
+            }
+            await waitForUploading();
+            const imageString = uploadedUrls.join("||");
+
+            const data = {
+                ...values,
+                image: imageString, // Attach the uploaded image URLs to the form data
+            };
+            const response = await productApiRequest.addNonExistProduct(data);
+
+            // Lấy productGroupRefId từ phản hồi API
+            const { productGroupRefId } = response.data;
+
+            // Gắn productGroupRefId vào data
+            const updatedData = {
+                ...data,
+                product_group_ref_id: productGroupRefId,
+            };
+
+            // Hiển thị thông báo thành công
+            message.success("Thêm mới sản phẩm thành công!");
+
+            // Gửi dữ liệu đã cập nhật qua callback onNext
+            if (onNext) {
+                onNext(updatedData);
+            }
         } catch (error: any) {
             if (error instanceof HttpError) {
                 console.log(error);
@@ -85,7 +154,7 @@ export default function AddProductTemplate() {
     }
     function ProductTemplateForm() {
         return (
-            <Form onFinish={boardGame.handleSubmit(onSubmit)}>
+            <Form onFinish={boardGame.handleSubmit(onSubmit)} disabled={isReadonly ?? false}>
                 <Row gutter={[12, 12]}>
                     <Col span={12}>
                         <Row gutter={[12, 12]}>
@@ -108,7 +177,7 @@ export default function AddProductTemplate() {
                             </Col>
                         </Row>
                         <FormItem control={boardGame.control} name="price" label="Giá cơ bản" layout="vertical" className="pb-3">
-                            <Input />
+                            <Input/>
                         </FormItem>
                         <Col span={24} >
 
@@ -134,6 +203,10 @@ export default function AddProductTemplate() {
                                 maxCount={10}
                                 multiple
                                 listType="picture"
+                                onChange={(info) => {
+                                    const files = info.fileList.map((file) => file.originFileObj as File);
+                                    setFileList(files); // Lưu danh sách file vào state
+                                }}
                             >
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
@@ -141,7 +214,7 @@ export default function AddProductTemplate() {
                                 <p className="ant-upload-text">Click hoặc kéo ảnh vào đây để tải lên</p>
                                 <p className="ant-upload-hint">Tối đa 10 ảnh, mỗi ảnh không quá 20MB.</p>
                             </Dragger>
-                        </Form.Item>;
+                        </Form.Item>
                     </Col>
 
                     <Col span={12}>
@@ -150,13 +223,36 @@ export default function AddProductTemplate() {
                         </FormItem>
                     </Col>
                 </Row>
-                <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+                <Form.Item style={{ textAlign: 'right' }}>
                     <Space>
+                        <Button htmlType="reset">Reset</Button>
                         <Button type="primary" htmlType="submit">
                             Submit
                         </Button>
-                        <Button htmlType="reset">reset</Button>
                     </Space>
+                </Form.Item>
+            </Form>
+        )
+    }
+    function ProductNumberAddForm() {
+        return (
+            // <Form onFinish={numberAdd.handleSubmit(onSubmit)}>
+            <Form>
+                <FormItem control={numberAdd.control} name="productGroupRefId" label="" layout="vertical" className="pb-3">
+                    <Input hidden />
+                </FormItem>
+                <FormItem control={numberAdd.control} name="number" label="Số lượng sản phẩm" layout="vertical" className="pb-3">
+                    <Input />
+                </FormItem>
+                <Form.Item style={{ textAlign: 'right' }}>
+
+                    <Space>
+                        <Button htmlType="reset">Reset</Button>
+                        <Button type="primary" htmlType="submit" loading={uploading}>
+                            Submit
+                        </Button>
+                    </Space>
+
                 </Form.Item>
             </Form>
         );

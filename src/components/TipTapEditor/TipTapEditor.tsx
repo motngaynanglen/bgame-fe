@@ -44,6 +44,13 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
         onUpdate: ({ editor }) => {
             onChange?.(editor.getHTML());
         },
+        editorProps: {
+            attributes: {
+              spellcheck: 'false',
+            },
+          },
+          injectCSS: false, 
+          immediatelyRender: false, 
     });
 
     useEffect(() => {
