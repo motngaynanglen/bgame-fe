@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import envConfig from "./config";
-import { headers } from "next/headers";
+
 
 const privatePaths = ["/profile", "/user", "/admin", "/manager", '/staff']; //, 
-// const managePaths = ["/admin", "/manager", "/partner", '/staff',];
+const managePaths = ["/admin", "/manager", '/staff',];
 const authPaths = ["/login", "/register"];
 // const adminPaths = ['/admin/:part*'];
 // const managerPaths = ['/manager/:part*'];
@@ -13,14 +12,14 @@ const authPaths = ["/login", "/register"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionToken = request.cookies.get("sessionToken")?.value;
-  const sessionRole = request.cookies.get("sessionRole")?.value;
+  const role = request.cookies.get("sessionRole")?.value;
   // const response = NextResponse.next({
   //   request: {
   //     headers: new Headers(request.headers)
   //   }
   // });
 
-  //  console.log(pathname + ' : ' + sessionRole);
+  //  console.log(pathname + ' : ' + role);
 
   // Bảng điều hướng - Verson 2
 
@@ -31,97 +30,96 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // if (sessionToken) {
-  //   // Điều hướng và xác thực cho các yêu cầu vào trang admin
-  //   // Điều kiện này là không cần thiết vì đã khai báo ở dưới config, middleware sẽ không chạy nếu được truyền vào trang logout
-  //   // Để cho đẹp tí :v
-
-  //   if (pathname.startsWith("/logout")) {
-  //     return NextResponse.next();
-  //   } else {
-  //     switch (sessionRole) {
-  //       case "ADMIN": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/admin", request.url));
-  //         }
-  //         if (!pathname.startsWith("/admin") && pathname == "/") {
-  //           return NextResponse.redirect(new URL("/admin", request.url));
-  //         }
-  //         if (!pathname.startsWith("/admin") && pathname != "/") {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       case "MANAGER": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/manager", request.url));
-  //         }
-  //         if (!pathname.startsWith("/manager") && pathname == "/") {
-  //           return NextResponse.redirect(new URL("/manager", request.url));
-  //         }
-  //         if (!pathname.startsWith("/manager") && pathname != "/") {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       case "PARTNER": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/partner", request.url));
-  //         }
-  //         if (!pathname.startsWith("/partner") && pathname == "/") {
-  //           return NextResponse.redirect(new URL("/partner", request.url));
-  //         }
-  //         if (!pathname.startsWith("/partner") && pathname != "/") {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       case "STAFF": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/staff", request.url));
-  //         }
-  //         if (!pathname.startsWith("/staff") && pathname == "/") {
-  //           return NextResponse.redirect(new URL("/staff", request.url));
-  //         }
-  //         if (!pathname.startsWith("/staff") && pathname != "/") {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       case "CUSTOMER": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/user/profile", request.url));
-  //         }
-  //         if (managePaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       default: {
-  //         break;
-  //       }
-  //     }
-  //   }
-  // }
+  if (sessionToken) {
+    // Điều hướng và xác thực cho các yêu cầu vào trang admin
+    // Điều kiện này là không cần thiết vì đã khai báo ở dưới config, middleware sẽ không chạy nếu được truyền vào trang logout
+    // Để cho đẹp tí :v
+    if (pathname.includes("/logout")) {
+      return NextResponse.next();
+    } else {
+      switch (role) {
+        case "ADMIN": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/admin", request.url));
+          }
+          if (!pathname.startsWith("/admin") && pathname == "/") {
+            return NextResponse.redirect(new URL("/admin", request.url));
+          }
+          if (!pathname.startsWith("/admin") && pathname != "/") {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        case "MANAGER": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/manager", request.url));
+          }
+          if (!pathname.startsWith("/manager") && pathname == "/") {
+            return NextResponse.redirect(new URL("/manager", request.url));
+          }
+          if (!pathname.startsWith("/manager") && pathname != "/") {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        case "PARTNER": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/partner", request.url));
+          }
+          if (!pathname.startsWith("/partner") && pathname == "/") {
+            return NextResponse.redirect(new URL("/partner", request.url));
+          }
+          if (!pathname.startsWith("/partner") && pathname != "/") {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        case "STAFF": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/staff", request.url));
+          }
+          if (!pathname.startsWith("/staff") && pathname == "/") {
+            return NextResponse.redirect(new URL("/staff", request.url));
+          }
+          if (!pathname.startsWith("/staff") && pathname != "/") {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        case "CUSTOMER": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/user/profile", request.url));
+          }
+          if (managePaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  }
 
   // Bảng điều hướng - Verson 1
-  // // Điều hướng và xác thực cho các yêu cầu vào trang admin
-  // if (pathname.startsWith('/admin') && sessionToken && sessionRole != 'ADMIN') {
+  // Điều hướng và xác thực cho các yêu cầu vào trang admin
+  // if (pathname.startsWith('/admin') && sessionToken && role != 'ADMIN') {
   //   return NextResponse.redirect(new URL('/error', request.url));
   // }
-  // if ((!pathname.startsWith('/admin')) && sessionToken && sessionRole == 'ADMIN'){
+  // if ((!pathname.startsWith('/admin')) && sessionToken && role == 'ADMIN'){
   //   return NextResponse.redirect(new URL('/admin', request.url));
   // }
   // // Điều hướng và xác thực cho các yêu cầu vào trang manager
-  // if (pathname.startsWith('/manager') && sessionToken && sessionRole != 'MANAGER') {
+  // if (pathname.startsWith('/manager') && sessionToken && role != 'MANAGER') {
   //   return NextResponse.redirect(new URL('/error', request.url));
-  // } else if (!(pathname.startsWith('/manager')) && sessionToken && sessionRole == 'MANAGER'){
+  // } else if (!(pathname.startsWith('/manager')) && sessionToken && role == 'MANAGER'){
   //   return NextResponse.redirect(new URL('/manager', request.url));
   // }
   // // Điều hướng và xác thực cho các yêu cầu vào trang manager
-  // if (pathname.startsWith('/partner') && sessionToken && sessionRole != 'PARTNER') {
+  // if (pathname.startsWith('/partner') && sessionToken && role != 'PARTNER') {
   //   return NextResponse.redirect(new URL('/error', request.url));
-  // } else if (!(pathname.startsWith('/partner')) && sessionToken && sessionRole == 'PARTNER'){
+  // } else if (!(pathname.startsWith('/partner')) && sessionToken && role == 'PARTNER'){
   //   return NextResponse.redirect(new URL('/partner', request.url));
   // }
 

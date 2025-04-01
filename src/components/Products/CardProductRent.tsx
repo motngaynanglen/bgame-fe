@@ -139,8 +139,8 @@ function CardProductRent({
   // cai nay la de hien thong bao ra
   const [api, contextHolder] = notification.useNotification();
   const { user } = useAppContext();
-  
-  
+
+
 
   type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -163,9 +163,7 @@ function CardProductRent({
     "days"
   );
   const [openResponsive, setOpenResponsive] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<
-    [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
-  >(null);
+  const [selectedDate, setSelectedDate] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
   //----------------------------------------------
 
   //dong nay la ham xu ly khi nhan nut dat truoc
@@ -192,11 +190,19 @@ function CardProductRent({
 
     try {
       const response = await bookListApiRequest.createBookList(postData, user.token);
-      openNotificationWithIcon(
-        "success",
-        "Đặt trước thành công",
-        "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
-      );
+      if (response.statusCode == "200") {
+        openNotificationWithIcon(
+          "success",
+          "Đặt trước thành công",
+          "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
+        );
+      } else
+        openNotificationWithIcon(
+          "error",
+          "Đặt trước Thất bại",
+          response.message
+        );
+
       setOpenResponsive(false); // Đóng modal sau khi thành công
     } catch (error) {
       console.error("Lỗi khi đặt trước:", error);

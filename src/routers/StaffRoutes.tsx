@@ -73,13 +73,8 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	},
 	{
 		key: "group-1-1",
-		label: (<Link href={"/staff/content/aboutus"} className={clsx("font-medium text-base")}>Quản lý Trang Chủ</Link>),
+		label: (<Link href={"/staff/productSale"} className={clsx("font-medium text-base")}>Cửa hàng sản phẩm</Link>),
 		icon: (<ReconciliationOutlined />),
-	},
-	{
-		key: "group-1-2",
-		label: (<Link href={"/staff/users"} className={clsx("font-medium text-base")}>Quản lý người dùng</Link>),
-		icon: (<UserOutlined />),
 	},
 	{
 		key: 'group-2',

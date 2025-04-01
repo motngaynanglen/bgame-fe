@@ -13,6 +13,11 @@ const bookListApiRequest = {
             Authorization: `Bearer ${sessionToken}`
         }
     }),
+    startBookList: (body: any, sessionToken?: string) => http.post<CommonResType>('/api/BookList/start-booklist', body, {
+        headers: {
+            Authorization: `Bearer ${sessionToken}`
+        }
+    }),
     getBookListByDate: (body: any, sessionToken?: string) => http.post<CommonResType>('/api/BookList/get-booklist-by-date', body, {
         headers: {
             Authorization: `Bearer ${sessionToken}`

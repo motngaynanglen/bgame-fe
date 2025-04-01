@@ -63,3 +63,33 @@ export const normalizePath = (path: string) => {
   return path.startsWith("/") ? path.slice(1) : path
 
 }
+export function formatDateTime(dateString: string, Type: "DATETIME" | "DATE" | "TIME"): string {
+  const date = new Date(dateString);
+
+  const currentOffset = date.getTimezoneOffset(); // Lấy độ lệch múi giờ hiện tại (phút)
+  console.log(date)
+  // Nếu múi giờ là UTC (offset = 0), cộng thêm 7 giờ
+  const hoursUTC7 = ():number => {
+    if (currentOffset < 0) {
+      return (date.getUTCHours() + 7)
+    }
+    return (date.getUTCHours())
+  }
+
+  console.log("after: " + date)
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+  const year = date.getUTCFullYear();
+  const hours = String(hoursUTC7()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  switch (Type) {
+    case "DATE":
+      return `${day}-${month}-${year}`;
+    case "TIME":
+      return `${hours}:${minutes}`;
+    default:
+      return `${day}-${month}-${year} ${hours}:${minutes}`;
+
+  }
+}
+
