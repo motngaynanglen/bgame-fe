@@ -110,6 +110,8 @@ export default function Header() {
         mode="horizontal"
         defaultSelectedKeys={["2"]}
         items={items}
+        selectable={false}
+        // forceSubMenuRender={true}
         // style={{ display: "flex", minWidth: 0, justifyContent: "center" }}
       />
     </div>
