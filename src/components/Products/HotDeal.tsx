@@ -27,7 +27,7 @@ export default function HotDeal({ category }: { category: string }) {
       const res = await fetch("https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame");
       const data = await res.json();
       console.log(data);
-      setBoardgames(data.slice(0, 4)); 
+      setBoardgames(data.slice(0, 5)); 
     } catch (error) {
       console.error("lỗi nè: "+error);
     }
@@ -45,7 +45,7 @@ export default function HotDeal({ category }: { category: string }) {
       </Divider>
 
      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
         {boardgames.map((boardgame, index) => (
           <CardProduct
             key={index}
