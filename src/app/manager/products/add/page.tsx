@@ -3,7 +3,6 @@ import { HomeOutlined, UserOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Dropdown, MenuProps, Select } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useState } from "react";
-import { CiSettings } from "react-icons/ci";
 import AddProductTemplate from "./ProductTemplateForm";
 import ProductAddNumberForm from "./ProductAddNumberForm";
 
@@ -49,7 +48,7 @@ const items = [
 ]
 interface productModel {
     id: string | undefined,
-    product_group_ref_id: string | undefined,
+    productGroupRefId: string | undefined,
     groupName: string,
     prefix: string,
     groupRefName: string,
@@ -100,6 +99,7 @@ export default function ManagerCreateBGame() {
         setCreatedProduct(product);
         setStep(2);
         console.log("đã bước qua steff 2 này alo?", step);
+        console.log("product: ", product    );
 
     };
     // const handleCancel = () => {

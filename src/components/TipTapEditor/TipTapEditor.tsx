@@ -18,9 +18,10 @@ import { BoldOutlined, ItalicOutlined, UnderlineOutlined, OrderedListOutlined, U
 interface TipTapEditorProps {
     value?: string;
     onChange?: (content: string) => void;
+    isReadonly?: boolean;
 }
 
-const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = "", onChange }, ref) => {
+const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = "", onChange, isReadonly }, ref) => {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -46,11 +47,11 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
         },
         editorProps: {
             attributes: {
-              spellcheck: 'false',
+                spellcheck: 'false',
             },
-          },
-          injectCSS: false, 
-          immediatelyRender: false, 
+        },
+        injectCSS: false,
+        immediatelyRender: false,
     });
 
     useEffect(() => {
@@ -113,7 +114,7 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
             </Space>
 
             {/* Editor Content */}
-            <EditorContent editor={editor} className="border p-2 min-h-[150px] rounded-md" />
+            <EditorContent editor={editor} className="border p-2 min-h-[150px] rounded-md" disabled={isReadonly} />
 
         </div>
     );

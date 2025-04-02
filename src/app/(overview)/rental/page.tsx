@@ -134,6 +134,7 @@ interface Store {
   store_name: string;
   address: string;
 }
+
 interface SelectStores {
   value: string;
   label: string;
@@ -161,6 +162,11 @@ export default function BoardGameRental() {
       const res = await productApiRequest.getListByStoreId({
         storeId,
         isRent: true,
+        paging: {
+          pageNum: 1,
+          pageSize: 10,
+          
+        }
       });
       return res;
     } catch (error) {
