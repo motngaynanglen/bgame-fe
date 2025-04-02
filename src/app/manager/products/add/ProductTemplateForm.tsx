@@ -1,36 +1,32 @@
 import productApiRequest from "@/src/apiRequests/product";
+import uploadApiRequest from "@/src/apiRequests/upload";
 import TipTapEditor from "@/src/components/TipTapEditor/TipTapEditor";
+import { useObjectUrls } from "@/src/hooks/useObjectURL";
 import { HttpError } from "@/src/lib/httpAxios";
 import { InboxOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Col, Form, Input, message, Row, Space, Upload, UploadProps } from "antd";
+import { Button, Col, Form, Input, message, Row, Space, Upload, UploadFile, UploadProps } from "antd";
+import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
 
 const defaultValues = {
-    groupName: "UITEST 2",
-    prefix: "UIT2",
-    groupRefName: "UITEST 2",
-    productName: "UITEST 2",
-    image: "string",
+    id: undefined,
+    product_group_ref_id: undefined,
+    groupName: "UITEST 10 group",
+    prefix: "UIT10",
+    groupRefName: "UITEST 10 Ref",
+    productName: "UITEST 10",
+    image: "empty",
     price: 10,
     description: "<p>Chua biết mô tả thế nào nhưng:<br><strong>Rất chi tiết - bắt mắt - đẹp đẽ</strong></p>",
     rentPrice: 1220,
     rentPricePerHour: 1220
 };
-const productTemplate = {
-    productGroupRefId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    productName: "string",
-    image: "string",
-    price: 0,
-    rentPrice: 0
-}
-const product = {
-    productGroupRefId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    storeId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    number: 0
-}
-interface productAdd {
+
+interface productModel {
+    id: string | undefined,
+    product_group_ref_id: string | undefined,
     groupName: string,
     prefix: string,
     groupRefName: string,
@@ -44,9 +40,12 @@ interface productAdd {
 
 const { Dragger } = Upload;
 
-interface FormValues {
-    images: UploadProps["fileList"];
-}
+interface FileUploadList {
+    dragger: UploadFile[];
+};
+const normFile = (e: any): UploadFile[] => {
+    return Array.isArray(e) ? e : e?.fileList;
+};
 
 const beforeUpload = (file: File) => {
     const isImage = file.type.startsWith("image/");
@@ -63,19 +62,98 @@ const beforeUpload = (file: File) => {
 
     return true;
 };
-export default function AddProductTemplate() {
+export default function AddProductTemplate({ product, isReadonly, onNext }: { product?: productModel; isReadonly?: boolean, onNext?: (product: productModel) => void }) {
+    const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+    const [uploading, setUploading] = useState(false);
+
     const boardGame = useForm({
-        defaultValues: defaultValues,
+        defaultValues: product ?? defaultValues,
         // resolver: zodResolver(BoardGameBody)
     });
-    const onSubmit = async (data:productAdd) => {
-        // if (!sessionToken) {
-        //   toast.warning("Bạn cần đăng nhập để sử dụng chức năng này.")
-        // }
-        // else {
-        console.log(data)
+    const images = useForm<FileUploadList>({
+        defaultValues: {
+            dragger: [],
+        },
+    });
+    const handleFileChange = (info: any) => {
+        const newFileList = normFile(info);
+        images.setValue("dragger", newFileList);
+    };
+    const uploadProps: UploadProps = {
+        accept: "image/*",
+        beforeUpload: beforeUpload,
+        maxCount: 10,
+        multiple: true,
+        listType: "picture",
+        onChange: handleFileChange,
+    };
+    const uploadFiles = async () => {
+        setUploading(true);
+        const formData = new FormData();
+
+        const uploadedFiles = images.watch("dragger")
+            ?.map((file) => file.originFileObj)
+            .filter((file) => file instanceof File) as File[];
+
+        // Thêm tất cả các file vào FormData
+        uploadedFiles.forEach((file) => {
+            formData.append("files", file);
+        });
+
         try {
-            await productApiRequest.addNonExistProduct(data)
+            const response = await uploadApiRequest.uploadImage(formData);
+            const urls = response.urls;
+            const images = urls.join("||");
+            message.success("Tất cả Hình ảnh đã được upload thành công");
+            return images;
+        } catch (error) {
+            message.error("Lỗi khi gửi hình ảnh");
+            return "";
+        } finally {
+            setUploading(false);
+        }
+    };
+    const waitForUploading = async () => {
+        if (!uploading) return; // Nếu không đang upload, không cần đợi
+
+        await new Promise((resolve) => {
+            const interval = setInterval(() => {
+                if (!uploading) {
+                    clearInterval(interval);
+                    resolve(true);
+                }
+            }, 100); // Kiểm tra trạng thái `uploading` mỗi 100ms
+        });
+    };
+    const onSubmit = async (values: productModel) => {
+        const imagesString = await uploadFiles();
+        try {
+            
+            await waitForUploading();
+
+            const data = {
+                ...values,
+                image: imagesString,
+            };
+            console.log("data: ", data);
+            const response = await productApiRequest.addNonExistProduct(data);
+
+            
+            const  productGroupRefId:string  = response.data;
+            console.log("productGroupRefId: ", productGroupRefId);
+            const updatedData = {
+                ...data,
+                productGroupRefId: productGroupRefId,
+            };
+            
+            // Hiển thị thông báo thành công
+            message.success("Thêm mới sản phẩm thành công!");
+
+            // Gửi dữ liệu đã cập nhật qua callback onNext
+            if (onNext) {
+                
+                onNext(updatedData);
+            }
         } catch (error: any) {
             if (error instanceof HttpError) {
                 console.log(error);
@@ -85,7 +163,7 @@ export default function AddProductTemplate() {
     }
     function ProductTemplateForm() {
         return (
-            <Form onFinish={boardGame.handleSubmit(onSubmit)}>
+            <Form onFinish={boardGame.handleSubmit(onSubmit)} disabled={isReadonly ?? false}>
                 <Row gutter={[12, 12]}>
                     <Col span={12}>
                         <Row gutter={[12, 12]}>
@@ -126,22 +204,16 @@ export default function AddProductTemplate() {
                             label="Hình ảnh"
                             className="pb-3"
                             valuePropName="fileList"
-                            getValueFromEvent={(e) => e?.fileList}
+                            getValueFromEvent={normFile}
                         >
-                            <Dragger
-                                accept="image/*"
-                                beforeUpload={beforeUpload}
-                                maxCount={10}
-                                multiple
-                                listType="picture"
-                            >
+                            <Dragger {...uploadProps}>
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
                                 </p>
                                 <p className="ant-upload-text">Click hoặc kéo ảnh vào đây để tải lên</p>
                                 <p className="ant-upload-hint">Tối đa 10 ảnh, mỗi ảnh không quá 20MB.</p>
                             </Dragger>
-                        </Form.Item>;
+                        </Form.Item>
                     </Col>
 
                     <Col span={12}>
@@ -150,17 +222,18 @@ export default function AddProductTemplate() {
                         </FormItem>
                     </Col>
                 </Row>
-                <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+                <Form.Item style={{ textAlign: 'right' }}>
                     <Space>
+                        <Button htmlType="reset">Reset</Button>
                         <Button type="primary" htmlType="submit">
                             Submit
                         </Button>
-                        <Button htmlType="reset">reset</Button>
                     </Space>
                 </Form.Item>
             </Form>
-        );
+        )
     }
+
     return (
         <>
             <ProductTemplateForm />

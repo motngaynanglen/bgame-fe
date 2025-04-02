@@ -190,8 +190,8 @@ export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	
 	{
 		key: 'group-2',
-		label: (<Link href={"/manager/bookings"}
-			className={clsx("font-medium ")}>Quản lý kho hàng</Link>),
+		label: (<span
+			className={clsx("font-medium ")}>Quản lý kho hàng</span>),
 		icon: (
 			<AiOutlineBook />
 		),

@@ -185,7 +185,7 @@ export default function StaffManageTimeTable({ searchParams }: { searchParams?: 
             return;
         }
         const response = await bookListApiRequest.getBookListByDate(apiBody, user.token);
-        const data: DataType[] = response.data.map((item: DataType) => ({
+        const data: DataType[] | undefined = response.data?.map((item: DataType) => ({
             ...item,
             key: item.id, // Gán id vào key
         }));

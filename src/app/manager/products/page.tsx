@@ -4,113 +4,85 @@ import { InvoicesTableSkeleton, TableSkeleton } from "@/src/components/admin/lay
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import SearchBar from "@/src/components/admin/table/search";
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, Collapse, Pagination, Row, Space, Table, Tag } from "antd";
+import { Breadcrumb, Button, Card, Col, Collapse, message, Pagination, Row, Space, Table, Tag } from "antd";
 import type { CollapseProps, TableProps } from "antd"
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { Suspense, useEffect, useState } from "react";
+import { useAppContext } from "../../app-provider";
+import productApiRequest from "@/src/apiRequests/product";
 
 interface DataType {
     key: string;
-    name: string;
-    age: number;
-    address: string;
+    id: string;
+    product_group_ref_id: string;
+    product_name: string;
+    image: string;
+    price: number;
+    rent_price: number;
+    rent_price_per_hour: number;
+    sales_quantity: number;
+    rent_quantity: number;
     tags: string[];
 }
-
+interface PagingType {
+    pageNum: number,
+    pageSize: number,
+    pageCount: number,
+}
 const columns: TableProps<DataType>['columns'] = [
     {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
+        title: 'Tên sản phẩm',
+        dataIndex: 'product_name',
+        key: 'product_name',
         render: (text) => <a>{text}</a>,
     },
     {
-        title: 'Age',
-        dataIndex: 'age',
-        key: 'age',
+        title: 'Giá cơ bản',
+        dataIndex: 'price',
+        key: 'price',
     },
     {
-        title: 'Address',
-        dataIndex: 'address',
-        key: 'address',
+        title: 'Số lượng bán',
+        dataIndex: 'sales_quantity',
+        key: 'sales_quantity',
     },
     {
-        title: 'Tags',
-        key: 'tags',
-        dataIndex: 'tags',
-        render: (_, { tags }) => (
-            <>
-                {tags.map((tag) => {
-                    let color = tag.length > 5 ? 'geekblue' : 'green';
-                    if (tag === 'loser') {
-                        color = 'volcano';
-                    }
-                    return (
-                        <Tag color={color} key={tag}>
-                            {tag.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
-        ),
+        title: 'Số lượng thuê',
+        dataIndex: 'rent_quantity',
+        key: 'rent_quantity',
     },
+    // {
+    //     title: 'Tags',
+    //     key: 'tags',
+    //     dataIndex: 'tags',
+    //     render: (_, { tags }) => (
+    //         <>
+    //             {tags.map((tag) => {
+    //                 let color = tag.length > 5 ? 'geekblue' : 'green';
+    //                 if (tag === 'loser') {
+    //                     color = 'volcano';
+    //                 }
+    //                 return (
+    //                     <Tag color={color} key={tag}>
+    //                         {tag.toUpperCase()}
+    //                     </Tag>
+    //                 );
+    //             })}
+    //         </>
+    //     ),
+    // },
     {
-        title: 'Action',
+        title: '',
         key: 'action',
         render: (_, record) => (
             <Space size="middle">
-                <a>llll</a>
+                <a>Action</a>
                 <a>Delete</a>
             </Space>
         ),
     },
 ];
 
-const data: DataType[] = [
-    {
-        key: '1',
-        name: 'John Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '2',
-        name: 'Jim Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-    {
-        key: '4',
-        name: 'John Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '5',
-        name: 'Jim Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '6',
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-
-];
 
 const role: string = "manager";
 const baseUrl: string = "/" + role + "/" + "boardgames";
@@ -162,22 +134,65 @@ const AddButtons: CollapseProps['items'] = [
 
     },
 ]
-export default function ManagerTableBoardgame() {
+export default function ManagerTableBoardgame({ searchParams }: { searchParams?: { query?: string; page?: string; }; }) {
+
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
+    const [paging, setPaging] = useState<PagingType | undefined>(undefined);
+    const [tableLoading, setTableLoading] = useState<boolean>(true);
+    const { user } = useAppContext();
 
+    const apiBody = {
+        search: searchParams?.query ?? "",
+        filter: [
+            "string"
+        ],
+        paging: {
+            pageNum: searchParams?.page ?? 1,
+            pageSize: 10
+        }
+    };
+
+    const fetchTableData = async () => {
+        setTableLoading(true);
+        if (!user) {
+            message.error("Bạn cần đăng nhập để đặt trước.");
+            setTableLoading(false);
+            return;
+        }
+        try {
+            const response = await productApiRequest.getListByRole(apiBody, user.token);
+            const data: DataType[] = response.data.map((item: DataType) => ({
+                ...item,
+                key: item.id, // Gán id vào key
+            }));
+            console.log(data);
+            setPaging(response.paging);
+            setTableLoading(false);
+            return data;
+        } catch (error) {
+            setTableLoading(false);
+        }
+    };
     useEffect(() => {
-        const fetchData = () => {
-            return new Promise<DataType[]>((resolve) => {
-                setTimeout(() => {
-                    resolve(data);
-                }, 5000); // 3-second delay
-            });
-        };
 
-        fetchData().then((result) => {
+        fetchTableData().then((result) => {
             setData(result);
         });
-    }, []);
+
+    }, [searchParams]);
+    // useEffect(() => {
+    //     const fetchData = () => {
+    //         return new Promise<DataType[]>((resolve) => {
+    //             setTimeout(() => {
+    //                 resolve(data);
+    //             }, 5000); // 3-second delay
+    //         });
+    //     };
+
+    //     fetchData().then((result) => {
+    //         setData(result);
+    //     });
+    // }, []);
     return (
         <>
             <Breadcrumb items={breadcrumb} className="pb-4" />
@@ -197,9 +212,9 @@ export default function ManagerTableBoardgame() {
             </Row>
 
             <br />
-            <Table<DataType> loading={true} columns={columns} dataSource={useData} pagination={false} />
+            <Table<DataType> loading={tableLoading} columns={columns} dataSource={useData} pagination={false} />
             <br />
-            <AntdCustomPagination totalPages={20} />
+            <AntdCustomPagination totalPages={paging?.pageCount ?? 1} />
             {/* {useData === undefined ? (
                 <TableSkeleton />
             ) : (
