@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import productApiRequest from "../apiRequests/product";
 
 interface BoardGame {
@@ -29,21 +29,21 @@ interface responseModel {
   };
 }
 
-export const useProducts = (pageNum: number = 1, pageSize: number = 15) => {
-  const { data, isLoading, isError, error, refetch } = useQuery<responseModel>({
-    queryKey: ["boardGames", pageNum, pageSize],
+export const useProducts = (currentPage: number = 1, pageSize: number = 15) => {
+  const { data, isLoading, isError, error } = useQuery<responseModel>({
+    queryKey: ["boardGames", currentPage, pageSize],
     queryFn: async () => {
       const res = await productApiRequest.getList({
         search: "",
         filter: [],
         paging: {
-            pageNum,
-            pageSize,
+          pageNum: currentPage,
+          pageSize,
         },
       });
       return res;
     },
-    // keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
 
@@ -54,7 +54,6 @@ export const useProducts = (pageNum: number = 1, pageSize: number = 15) => {
     error,
     pageCount: data?.paging?.pageCount || 1,
     pageNum: data?.paging?.pageNum || 1,
-    pageSize: data?.paging?.pageSize || 10,
-    refetch,
+    pageSize: data?.paging?.pageSize || 15,
   };
 };

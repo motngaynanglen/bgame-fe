@@ -1,8 +1,9 @@
-'use client';
+"use client";
 import { Divider } from "antd";
 import Link from "next/link";
 import CardProduct from "./CardProduct";
 import { useEffect, useState } from "react";
+import { useProducts } from "@/src/hooks/useProduct";
 
 export default function HotDeal({ category }: { category: string }) {
   const items = [1, 2, 3, 4]; // Đây là dữ liệu giả, thay bằng dữ liệu thực từ API.
@@ -20,21 +21,9 @@ export default function HotDeal({ category }: { category: string }) {
     complexity: number;
   }
 
-  const [boardgames, setBoardgames] = useState<BoardGame[]>([]);
+  const { products, isLoading, isError, error, pageCount, pageSize } =
+    useProducts();
 
-  const fetchBoardGames = async () => {
-    try {
-      const res = await fetch("https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame");
-      const data = await res.json();
-      console.log(data);
-      setBoardgames(data.slice(0, 5)); 
-    } catch (error) {
-      console.error("lỗi nè: "+error);
-    }
-  }
-  useEffect(() => {
-    fetchBoardGames();
-  }, []);
 
   return (
     <div className="container md:p-3">
@@ -44,23 +33,28 @@ export default function HotDeal({ category }: { category: string }) {
         </h1>
       </Divider>
 
-     
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-        {boardgames.map((boardgame, index) => (
-          <CardProduct
-            key={index}
-            id={boardgame.id}
-            image={boardgame.image}
-            price={boardgame.price}
-            title={boardgame.title}
-            time={boardgame.time}
-            player={boardgame.player}
-            age={boardgame.age}
-            complexity={boardgame.complexity}
-            soldOut={false}
-            quantity={1}
-          />
-        ))}
+        {products
+          .filter((boardgame) => boardgame.sales_quantity > 0) // Lọc các sản phẩm có số lượng bán ra lớn hơn 0
+          .slice(0, 5) // Lấy 5 sản phẩm đầu tiên
+          .map((boardgame, index) => {
+            const imageUrls = boardgame.image?.split("||") || [];
+            return (
+              <CardProduct
+                key={index}
+                id={boardgame.id}
+                image={imageUrls[0]}
+                price={boardgame.sell_price}
+                title={boardgame.product_name}
+                time={boardgame.time}
+                player={boardgame.player}
+                age={boardgame.age}
+                complexity={boardgame.complexity}
+                soldOut={false}
+                quantity={boardgame.sales_quantity}
+              />
+            );
+          })}
       </div>
 
       <div className="flex justify-center pt-3">
