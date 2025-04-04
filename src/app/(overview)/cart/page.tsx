@@ -1,10 +1,12 @@
 "use client";
 import { useCartStore } from "@/src/store/cartStore";
-import { Button, Empty, Input, InputNumber, Space } from "antd";
+import { Button, Divider, Empty, Input, InputNumber, Space } from "antd";
 import { useRouter } from "next/navigation";
+import { IoIosClose } from "react-icons/io";
 
 export default function ShoppingCart() {
-  const { cart, removeFromCart, clearCart, calculateTotal } = useCartStore();
+  const { cart, removeFromCart, clearCart, calculateTotal, updateQuantity } =
+    useCartStore();
   const router = useRouter();
   return (
     <div className="min-h-screen bg-sky-50 text-white pt-2 sm:p-4">
@@ -12,17 +14,20 @@ export default function ShoppingCart() {
         {/* Shopping Cart Header */}
         <h2 className="text-2xl font-bold ">Giỏ Hàng </h2>
         {/* tiêu đề */}
-        <div className="hidden sm:grid grid-cols-5 bg-gray-800 p-4 rounded-lg ">
+        <div className="hidden sm:grid grid-cols-[3fr_1fr_1fr_1fr_0.5fr] bg-gray-800 p-4 rounded-lg ">
           <div className="flex items-center justify-start ">
-            <h1 className="">Sản phẩm</h1>
+            <h1 className="">Sản phẩm</h1>
           </div>
           <div className="flex items-center justify-center space-x-4">
-            Số lượng
+            Số lượng
           </div>
-          <div className="flex items-center justify-center space-x-4">Giá</div>
+          <div className="flex items-center justify-center space-x-4">Giá</div>
 
           <div className="flex items-center justify-center space-x-4">
-            Tạm tính
+            Tạm tính
+          </div>
+          <div className="flex items-center justify-center">
+            {/* Để trống, cột delete */}
           </div>
         </div>
         {/* Cart Items */}
@@ -44,93 +49,68 @@ export default function ShoppingCart() {
             </div>
           ) : (
             <div>
-              {cart.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-800 p-4 rounded-lg mb-4 flex flex-col sm:grid sm:grid-cols-5 items-center"
-                >
-                  {/* image and name */}
-                  <div className="flex flex-row sm:items-start sm:justify-around md:items-center md:justify-start">
-                    {/* <Space>
+              {cart.map((item, index) => {
+                const imageUrls = item.image?.split("||") || [];
+                return (
+                  <div
+                    key={index}
+                    className="bg-gray-800 p-4 rounded-lg mb-4 flex flex-col sm:grid sm:grid-cols-[3fr_1fr_1fr_1fr_0.5fr] items-center"
+                  >
+                    {/* image and name */}
+                    <div className="flex flex-row sm:items-start sm:justify-around md:items-center md:justify-start">
                       <img
-                        src={item.image}
+                        src={imageUrls[0]}
                         alt={item.name}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
                       />
-                      <h1>{item.name}</h1>
-                    </Space> */}
-
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
-                    />
-
-                    <div className="ml-4 sm:ml-0 mr-4">
-                      <h1 className="text-sm font-semibold">{item.name}</h1>
-                      <div className="text-blue-400 font-bold sm:hidden">
-                        {item.price.toLocaleString("vi-VN")}₫
+                      <Divider type="vertical" className="" />
+                      <div className="ml-4 sm:ml-0 mr-4">
+                        <h1 className="text-lg font-semibold">{item.name}</h1>
+                        <div className="text-blue-400 font-bold sm:hidden">
+                          {item.price.toLocaleString("vi-VN")}₫
+                        </div>
+                        <div className="flex items-center justify-center space-x-4 sm:hidden">
+                          <InputNumber min={1} defaultValue={item.quantity} />
+                        </div>
                       </div>
-                      <div className="flex items-center justify-center space-x-4 sm:hidden">
-                        <InputNumber min={1} defaultValue={item.quantity} />
-                      </div>
+
+                      <button
+                        className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600 sm:hidden"
+                        onClick={() => removeFromCart(item.id)}
+                      >
+                        {/* Delete icon */}
+                      </button>
                     </div>
-                    <button
-                      className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600 sm:hidden"
-                      onClick={() => removeFromCart(item.id)}
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        ></path>
-                      </svg>
-                    </button>
-                  </div>
 
-                  {/* quantity */}
-                  <div className=" hidden sm:flex items-center justify-center space-x-4">
-                    <InputNumber min={1} defaultValue={item.quantity} />
-                  </div>
-                  <div className="hidden sm:flex items-center justify-center space-x-4">
-                    {item.price.toLocaleString("vi-VN")}
-                  </div>
-                  {/* tạm tính */}
-                  <div className="hidden sm:flex items-center justify-center space-x-4 ">
-                    {(item.price * item.quantity).toLocaleString("vi-VN")}
-                  </div>
-                  {/* Delete Icon */}
-                  <div className="hidden sm:flex items-center justify-center">
-                    <button
-                      className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600"
-                      onClick={() => removeFromCart(item.id)}
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                    {/* quantity */}
+                    <div className="hidden sm:flex items-center justify-center space-x-4">
+                      <InputNumber
+                        min={1}
+                        defaultValue={item.quantity}
+                        onChange={(value) =>
+                          updateQuantity(item.id, value || 1)
+                        }
+                      />
+                    </div>
+                    <div className="hidden sm:flex items-center justify-center space-x-4">
+                      {item.price.toLocaleString("vi-VN")}
+                    </div>
+                    {/* tạm tính */}
+                    <div className="hidden sm:flex items-center justify-center space-x-4 ">
+                      {(item.price * item.quantity).toLocaleString("vi-VN")}
+                    </div>
+                    {/* Delete Icon */}
+                    <div className="hidden sm:flex items-center justify-center">
+                      <button
+                        className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600"
+                        onClick={() => removeFromCart(item.id)}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        ></path>
-                      </svg>
-                    </button>
+                        <IoIosClose />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

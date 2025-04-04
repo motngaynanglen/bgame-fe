@@ -67,7 +67,7 @@ export default function ProfilePage() {
   console.log(user);
   return (
     <div className=" flex flex-col items-center bg-sky-50">
-      <div className="w-full max-w-4xl bg-white mt-2 p-6 rounded-lg shadow-md ">
+      <div className="w-full max-w-4xl bg-white pt-2 p-6 rounded-lg shadow-md ">
         <h1 className="text-2xl font-semibold mb-4 text-black-2">
           Thông tin cá nhân
         </h1>
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                   </p>
                 )}
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-gray-700">Địa chỉ</label>
                 <textarea
                   className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2 row-2"
@@ -169,9 +169,8 @@ export default function ProfilePage() {
                     {errors.address.message}
                   </p>
                 )}
-              </div>
-            </div>
-            <div className="flex justify-end mt-6">
+              </div> */}
+              <div className="flex justify-end mt-6">
               <button
                 type="submit"
                 className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -179,6 +178,15 @@ export default function ProfilePage() {
                 Lưu thay đổi
               </button>
             </div>
+            </div>
+            {/* <div className="flex justify-end mt-6">
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Lưu thay đổi
+              </button>
+            </div> */}
           </form>
         </div>
       </div>
