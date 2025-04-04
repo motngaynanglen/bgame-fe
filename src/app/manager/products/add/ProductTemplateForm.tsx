@@ -1,8 +1,10 @@
 import productApiRequest from "@/src/apiRequests/product";
 import uploadApiRequest from "@/src/apiRequests/upload";
+import { useAppContext } from "@/src/app/app-provider";
 import TipTapEditor from "@/src/components/TipTapEditor/TipTapEditor";
 import { useObjectUrls } from "@/src/hooks/useObjectURL";
 import { HttpError } from "@/src/lib/httpAxios";
+import { productModel } from "@/src/schemaValidations/product.schema";
 import { InboxOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Col, Form, Input, message, Row, Space, Upload, UploadFile, UploadProps } from "antd";
@@ -12,7 +14,7 @@ import { FormItem } from "react-hook-form-antd";
 
 const defaultValues = {
     id: undefined,
-    product_group_ref_id: undefined,
+    productGroupRefId: undefined,
     groupName: "UITEST 10 group",
     prefix: "UIT10",
     groupRefName: "UITEST 10 Ref",
@@ -24,19 +26,6 @@ const defaultValues = {
     rentPricePerHour: 1220
 };
 
-interface productModel {
-    id: string | undefined,
-    product_group_ref_id: string | undefined,
-    groupName: string,
-    prefix: string,
-    groupRefName: string,
-    productName: string,
-    image: string,
-    price: number,
-    description: string,
-    rentPrice: number,
-    rentPricePerHour: number
-}
 
 const { Dragger } = Upload;
 
@@ -65,7 +54,7 @@ const beforeUpload = (file: File) => {
 export default function AddProductTemplate({ product, isReadonly, onNext }: { product?: productModel; isReadonly?: boolean, onNext?: (product: productModel) => void }) {
     const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
     const [uploading, setUploading] = useState(false);
-
+    const { user } = useAppContext();
     const boardGame = useForm({
         defaultValues: product ?? defaultValues,
         // resolver: zodResolver(BoardGameBody)
@@ -126,9 +115,13 @@ export default function AddProductTemplate({ product, isReadonly, onNext }: { pr
         });
     };
     const onSubmit = async (values: productModel) => {
+        if (!user) {
+            message.error("Bạn cần đăng nhập để đặt trước.");
+            return;
+        }
         const imagesString = await uploadFiles();
         try {
-            
+
             await waitForUploading();
 
             const data = {
@@ -136,22 +129,22 @@ export default function AddProductTemplate({ product, isReadonly, onNext }: { pr
                 image: imagesString,
             };
             console.log("data: ", data);
-            const response = await productApiRequest.addNonExistProduct(data);
+            const response = await productApiRequest.addNonExistProduct(data, user.token);
 
-            
-            const  productGroupRefId:string  = response.data;
+
+            const productGroupRefId: string = response.data;
             console.log("productGroupRefId: ", productGroupRefId);
             const updatedData = {
                 ...data,
                 productGroupRefId: productGroupRefId,
             };
-            
+
             // Hiển thị thông báo thành công
             message.success("Thêm mới sản phẩm thành công!");
 
             // Gửi dữ liệu đã cập nhật qua callback onNext
             if (onNext) {
-                
+
                 onNext(updatedData);
             }
         } catch (error: any) {
