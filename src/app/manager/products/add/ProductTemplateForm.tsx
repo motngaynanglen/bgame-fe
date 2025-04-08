@@ -156,7 +156,7 @@ export default function AddProductTemplate({ product, isReadonly, onNext }: { pr
     }
     function ProductTemplateForm() {
         return (
-            <Form onFinish={boardGame.handleSubmit(onSubmit)} disabled={isReadonly ?? false}>
+            <Form onFinish={boardGame.handleSubmit(onSubmit)} disabled={(isReadonly ?? false) || boardGame.formState.isSubmitting } >
                 <Row gutter={[12, 12]}>
                     <Col span={12}>
                         <Row gutter={[12, 12]}>
@@ -217,9 +217,9 @@ export default function AddProductTemplate({ product, isReadonly, onNext }: { pr
                 </Row>
                 <Form.Item style={{ textAlign: 'right' }}>
                     <Space>
-                        <Button htmlType="reset">Reset</Button>
-                        <Button type="primary" htmlType="submit">
-                            Submit
+                        <Button type="default" onClick={() => boardGame.reset()} disabled={boardGame.formState.isSubmitting}> Làm mới</Button>
+                        <Button type="primary" htmlType="submit" disabled={boardGame.formState.isSubmitting} loading={boardGame.formState.isSubmitting}>
+                            {boardGame.formState.isSubmitting ? "Đang tạo sản phẩm..." : "Tạo sản phẩm"}
                         </Button>
                     </Space>
                 </Form.Item>

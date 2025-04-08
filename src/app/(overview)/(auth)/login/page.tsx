@@ -6,8 +6,16 @@ import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useAppContext } from "../../../app-provider";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoginBody, LoginBodyType } from "@/src/schemaValidations/auth.schema";
+import { useForm } from "react-hook-form";
+import { FormItem } from "react-hook-form-antd";
+import { Button, Form, Input } from "antd";
 
 export default function LoginPage() {
+  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginBodyType>({
+    resolver: zodResolver(LoginBody),
+  });
   const [showPassword, setShowPassword] = useState(false);
   const { setUser } = useAppContext();
   const router = useRouter();
@@ -15,36 +23,16 @@ export default function LoginPage() {
     setShowPassword(!showPassword);
   };
 
-  interface LoginFormElements extends HTMLFormControlsCollection {
-    username: HTMLInputElement;
-    password: HTMLInputElement;
-  }
 
-  interface LoginFormElement extends HTMLFormElement {
-    readonly elements: LoginFormElements;
-  }
-
-  const [credentials, setCredentials] = useState({
-    username: "",
-    password: "",
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<LoginFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (value: LoginBodyType) => {
+    // e.preventDefault();
     // console.log(e.currentTarget.elements.username.value);
     // console.log(e.currentTarget.elements.password.value);
     try {
-      console.log(credentials);
-      
+      console.log(value);
+
       // LOGIN BẮT ĐẦU TỪ ĐÂY
-      const result = await authApiRequest.login(credentials);
+      const result = await authApiRequest.login(value);
       console.log(result);
       const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
 
@@ -67,7 +55,7 @@ export default function LoginPage() {
       //   credentials
       // );
       // const { jwt, refreshToken } = response.data;
-      
+
       // console.log("data nè: ", response.data);
       // console.log(JSON.stringify(response.data.data));
       // console.log("token nè: ", jwt);
@@ -97,20 +85,17 @@ export default function LoginPage() {
           </span>
         </div>
         {/* <h1 className="text-2xl font-semibold mb-4 text-green-900">Login</h1> */}
-        <form action="#" method="POST" onSubmit={handleSubmit}>
+        <Form onFinish={handleSubmit(onSubmit)}>
           <div className="mb-4 bg-sky-100">
             <label htmlFor="username" className="block text-gray-600">
               Tài Khoản
             </label>
             {/* nhap username */}
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 text-black-2"
-              onChange={handleChange}
-            />
+            <FormItem control={control} name="username" label=""
+              className="w-full border rounded-md focus:outline-none focus:border-blue-500 text-black-2"
+            >
+              <Input required type="text" />
+            </FormItem>
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block text-gray-800">
@@ -118,28 +103,27 @@ export default function LoginPage() {
             </label>
             {/* nhap password */}
             <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                required
-                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 text-black-2"
-                onChange={handleChange}
-              />
-              {showPassword ? (
-                <AiFillEye
-                  className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  onClick={togglePasswordVisibility}
-                />
-              ) : (
-                <AiFillEyeInvisible
-                  className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  onClick={togglePasswordVisibility}
-                />
-              )}
+              <FormItem control={control} name="password" label=""
+                className="w-full border rounded-md focus:outline-none focus:border-blue-500 text-black-2"
+              >
+                <Input required type={showPassword ? "text" : "password"} />
+                {showPassword ? (
+                  <AiFillEye
+                    className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    onClick={togglePasswordVisibility}
+                  />
+                ) : (
+                  <AiFillEyeInvisible
+                    className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    onClick={togglePasswordVisibility}
+                  />
+                )}
+              </FormItem>
+
             </div>
           </div>
           <div className="mb-4 flex items-center">
+
             <input
               type="checkbox"
               id="remember"
@@ -156,13 +140,13 @@ export default function LoginPage() {
               Quên mật khẩu?
             </Link>
           </div>
-          <button
-            type="submit"
-            className="bg-red-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full"
-          >
-            Đăng Nhập
-          </button>
-        </form>
+          <Form.Item >
+            <Button className="bg-red-500 hover:bg-blue-600 text-white font-semibold rounded-md py-5 px-4 w-full" htmlType="submit">
+              Đăng Nhập
+            </Button>
+          </Form.Item>
+          
+        </Form>
         <div className="mt-6 text-green-500 text-center">
           <Link href="/register" className="hover:underline">
             Đăng kí tài khoản
