@@ -145,6 +145,7 @@ export default function ProductsPage({
                   <CardProduct
                     key={product.id}
                     id={product.id}
+                    product_group_ref_id={product.product_group_ref_id}
                     image={imageUrls[0]}
                     price={product.sell_price}
                     title={product.product_name}
