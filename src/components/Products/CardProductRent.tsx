@@ -197,10 +197,14 @@ function CardProductRent({
       message.error("Bạn cần đăng nhập để đặt trước.");
       return;
     }
-
     const postData = {
       customerId: null, // Lấy từ context
-      productGroupRefIds: [idGroup], // ID sản phẩm
+      bookListItems: [
+        {
+          productTemplateID: idGroup,
+          quantity: 1
+        }
+      ],
       storeId: storeId, // Store ID (Cập nhật nếu cần)
       from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
       to: selectedDate ? selectedDate[1]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
