@@ -201,7 +201,7 @@ function CardProductRent({
       customerId: null, // Lấy từ context
       bookListItems: [
         {
-          productTemplateID: idGroup,
+          productTemplateID: id,
           quantity: 1
         }
       ],
