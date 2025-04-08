@@ -20,9 +20,12 @@ import { GoPeople } from "react-icons/go";
 import { LuBrain } from "react-icons/lu";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useAppContext } from "@/src/app/app-provider";
-import http from "@/src/lib/httpAxios";
+import http, { HttpError } from "@/src/lib/httpAxios";
 import bookListApiRequest from "@/src/apiRequests/bookList";
-
+import { notifyError, notifySuccess } from "../Notification/Notification";
+import CustomDatePicker from "../DateRantalPicker/DateRental";
+import CustomRangePicker from "../DateRantalPicker/HourRental";
+import { useRouter } from "next/navigation";
 
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
@@ -54,9 +57,40 @@ const disabledDate: RangePickerProps["disabledDate"] = (
 };
 
 // ham nay de gioi han gio la 8h toi 21h
-const disabledDateTime = () => ({
-  disabledHours: () => range(0, 24).filter((hour) => hour < 8 || hour >= 21),
-});
+const disabledDateTime = (selectedDate?: dayjs.Dayjs) => {
+  const now = dayjs();
+  const currentHour = now.hour();
+
+  return {
+    disabledHours: () => {
+      let hours = range(0, 24).filter((hour) => hour < 8 || hour >= 21);
+
+      if (selectedDate && selectedDate.isSame(now, "day")) {
+        // Nếu ngày được chọn là ngày hôm nay, loại bỏ giờ đã qua
+        hours = hours.concat(range(8, currentHour));
+      }
+
+      return hours;
+    },
+    disabledMinutes: () => {
+      if (selectedDate && selectedDate.isSame(now, "day") && now.hour() === 8) {
+        return range(0, now.minute());
+      }
+      return [];
+    },
+    disabledSeconds: () => {
+      if (
+        selectedDate &&
+        selectedDate.isSame(now, "day") &&
+        now.hour() === 8 &&
+        now.minute() === 0
+      ) {
+        return range(0, now.second());
+      }
+      return [];
+    },
+  };
+};
 
 // ham nay gioi ham o tren
 const disabledRangeTime: RangePickerProps["disabledTime"] = (date, type) => {
@@ -139,31 +173,16 @@ function CardProductRent({
   // cai nay la de hien thong bao ra
   const [api, contextHolder] = notification.useNotification();
   const { user } = useAppContext();
-
-
-
-  type NotificationType = "success" | "info" | "warning" | "error";
-
-  const openNotificationWithIcon = (
-    type: NotificationType,
-    message: string,
-    description: string
-  ) => {
-    api[type]({
-      message: message,
-      description: description,
-      placement: "bottomRight",
-      duration: 2,
-    });
-  };
-  //----------------------------------------------
+  const router = useRouter();
 
   //dong nay la state de hien thi modal va chon ngay
   const [selectedOption, setSelectedOption] = useState<"days" | "hours">(
     "days"
   );
   const [openResponsive, setOpenResponsive] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
+  const [selectedDate, setSelectedDate] = useState<
+    [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
+  >(null);
   //----------------------------------------------
 
   //dong nay la ham xu ly khi nhan nut dat truoc
@@ -189,28 +208,35 @@ function CardProductRent({
     };
 
     try {
-      const response = await bookListApiRequest.createBookList(postData, user.token);
+      const response = await bookListApiRequest.createBookList(
+        postData,
+        user.token
+      );
       if (response.statusCode == "200") {
-        openNotificationWithIcon(
-          "success",
-          "Đặt trước thành công",
+        notifySuccess(
+          "Đặt trước thành công!",
           "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
         );
       } else
-        openNotificationWithIcon(
-          "error",
-          "Đặt trước Thất bại",
-          response.message
+        notifyError(
+          "Đặt trước thất bại!",
+          response.message || "Vui lòng thử lại sau."
         );
 
       setOpenResponsive(false); // Đóng modal sau khi thành công
-    } catch (error) {
-      console.error("Lỗi khi đặt trước:", error);
-      openNotificationWithIcon(
-        "error",
-        "Đặt trước thất bại",
-        "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
-      );
+    } catch (error: any) {
+      console.error("Lỗi API:", error);
+      if (error instanceof HttpError && error.status === 401) {
+        notifyError("Đặt trước thất bại!", "bạn cần đăng nhập để tiếp tục");
+        router.push("/login");
+      } else {
+        // Xử lý lỗi khác nếu có
+        console.error("Lỗi khác:", error);
+        notifyError(
+          "Đặt trước thất bại",
+          "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+        );
+      }
     }
 
     // const rentalData = {
@@ -285,7 +311,7 @@ function CardProductRent({
               (5)
             </p>
           </div>
-          <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
+          {/* <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">
               <AiOutlineClockCircle className="fill-black" />
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -313,7 +339,7 @@ function CardProductRent({
                 {complexity}/5
               </p>
             </li>
-          </ul>
+          </ul> */}
           {/* <button  onClick={(e) => e.stopPropagation()}>
               <Link
                 href="/product-detail"
@@ -366,12 +392,7 @@ function CardProductRent({
         <p className="mt-4">Chọn thời gian thuê: </p>
         {selectedOption === "days" && (
           <div>
-            <DatePicker
-              format="YYYY-MM-DD HH:mm"
-              disabledDate={disabledDate}
-              disabledTime={disabledDateTime}
-              showTime={{ format: "HH:mm" }}
-              minuteStep={10}
+            <CustomDatePicker
               onChange={(date) => setSelectedDate(date ? [date, date] : null)}
             />
             <p className="text-lg text-green-800 mt-4">
@@ -382,20 +403,7 @@ function CardProductRent({
 
         {selectedOption === "hours" && (
           <div>
-            <RangePicker
-              disabledDate={disabledDate}
-              disabledTime={disabledRangeTime}
-              showTime={{
-                format: "HH:mm",
-                defaultValue: [
-                  dayjs("08:00", "HH:mm"),
-                  dayjs("22:00", "HH:mm"),
-                ],
-              }}
-              minuteStep={10}
-              format="YYYY-MM-DD HH:mm"
-              onChange={(date) => setSelectedDate(date)}
-            />
+            <CustomRangePicker onChange={(dates) => setSelectedDate(dates)} />
             <p className="text-lg text-green-800 mt-4">
               Phí thuê: {rent_price_per_hour}
             </p>

@@ -24,7 +24,6 @@ export default function HotDeal({ category }: { category: string }) {
   const { products, isLoading, isError, error, pageCount, pageSize } =
     useProducts();
 
-
   return (
     <div className="container md:p-3">
       <Divider variant="dashed" style={{ borderColor: "#7cb305" }}>
@@ -43,6 +42,7 @@ export default function HotDeal({ category }: { category: string }) {
               <CardProduct
                 key={index}
                 id={boardgame.id}
+                product_group_ref_id={boardgame.product_group_ref_id}
                 image={imageUrls[0]}
                 price={boardgame.sell_price}
                 title={boardgame.product_name}

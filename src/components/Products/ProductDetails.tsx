@@ -1,12 +1,13 @@
 "use client";
+import productApiRequest from "@/src/apiRequests/product";
+import { useStores } from "@/src/hooks/useStores";
 import { useWishlistStore } from "@/src/store/wishlistStore";
+import { useQuery } from "@tanstack/react-query";
 import { Image, InputNumber, notification, Rate } from "antd";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCartStore } from "../../store/cartStore";
-import { useStoreStore } from "@/src/store/shopStore";
-import productApiRequest from "@/src/apiRequests/product";
-import { useQuery } from "@tanstack/react-query";
+import { notifySuccess } from "../Notification/Notification";
 
 interface BoardGameInfo {
   id: string;
@@ -42,27 +43,9 @@ function ProductDetails({
   const [quantity, setQuantity] = useState(1);
   // const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
   const [api, contextHolder] = notification.useNotification();
-  const { stores, fetchStores, selectedStoreId, setSelectedStore } =
-    useStoreStore(); // Lấy danh sách cửa hàng từ store đã call api
+  const { stores } = useStores();
 
-  type NotificationType = "success" | "info" | "warning" | "error";
-  const openNotificationWithIcon = (type: NotificationType) => {
-    api[type]({
-      message: "Thành công!",
-      description: `Bạn đã thêm sản phẩm vào giỏ hàng.`,
-      placement: "bottomRight",
-      duration: 2,
-    });
-  };
 
-  const openNotificationAddWishList = (type: NotificationType) => {
-    api[type]({
-      message: "Thành công!",
-      description: `Bạn đã thêm sản phẩm vào danh sách yêu thích.`,
-      placement: "bottomRight",
-      duration: 2,
-    });
-  };
 
   const { addToCart } = useCartStore();
   const { addToWishlist } = useWishlistStore();
@@ -87,8 +70,7 @@ function ProductDetails({
         image: data.data.image,
       };
       addToCart(product, quantity); // Thêm sản phẩm với số lượng được chọn
-      // alert("Đã thêm vào giỏ hàng!");
-      openNotificationWithIcon("success");
+      notifySuccess("Thành công!", `${data.data.product_name} đã được thêm vào giỏ.`);
       console.log(product);
     }
   };
@@ -102,7 +84,10 @@ function ProductDetails({
   //       price: boardgame.price,
   //     };
   //     addToWishlist(product);
-  //     openNotificationAddWishList("success");
+  // notifySuccess(
+  //   "Thành công!",
+  //   "Sản phẩm đã được thêm vào danh sách yêu thích."
+  // );
   //   }
   // };
 

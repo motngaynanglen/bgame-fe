@@ -1,22 +1,89 @@
 "use client";
+import { orderApiRequest } from "@/src/apiRequests/orders";
 import CheckOutSuccess from "@/src/components/CheckOut/CheckOutSuccess";
+import { useOrder } from "@/src/hooks/useOrder";
 import { useCartStore } from "@/src/store/cartStore";
-import { Divider, Modal } from "antd";
+import { Modal } from "antd";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAppContext } from "../../app-provider";
+import {
+  notifyError,
+  notifySuccess,
+} from "@/src/components/Notification/Notification";
+import { HttpError } from "@/src/lib/httpAxios";
+
+interface FormData {
+  email: string;
+  fullName: string;
+  phoneNumber: string;
+  address: string;
+}
 
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
-  const { cart, calculateTotal } = useCartStore();
+  const { cart, calculateTotal, clearCart } = useCartStore();
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const { user } = useAppContext();
+
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<FormData>();
+
+  const handleCreateOrder = async (formData: FormData) => {
+    const customerID = null;
+    const body = {
+      customerID,
+      orderItems: cart.map((item) => ({
+        productTemplateID: item.id,
+        quantity: item.quantity,
+      })),
+      email: formData.email,
+      fullName: formData.fullName,
+      phoneNumber: formData.phoneNumber,
+      address: formData.address,
+    };
+
+    try {
+      const res = await orderApiRequest.createOrder(body, user?.token);
+      console.log("Đơn hàng đã được tạo:", body);
+      if (res.statusCode == "200") {
+        setOpenResponsive(true);
+        clearCart(); // Xóa giỏ hàng sau khi đặt hàng thành công
+        // notifySuccess(
+        //   "Tạo  thành công!",
+        //   "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
+        // );
+      } else
+        notifyError(
+          "Đặt trước thất bại!",
+          res.message || "Vui lòng thử lại sau."
+        );
+    } catch (error: any) {
+      if (error instanceof HttpError && error.status === 401) {
+        notifyError("Đặt trước thất bại!", "bạn cần đăng nhập để tiếp tục");
+        // router.push("/login");
+      } else {
+        // Xử lý lỗi khác nếu có
+        console.error("Lỗi khác:", error);
+        notifyError(
+          "Đặt trước thất bại",
+          "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+        );
+      }
+    }
+  };
 
   return (
     <div className="p-6">
       <div className="flex flex-col lg:flex-row bg-white shadow-md rounded-lg p-6 ">
         {/* form nhập thông tin giao hàng */}
         <div className="w-full lg:w-2/3 pr-0 lg:pr-4 border-r-2 border-gray-200">
+          {/* logo  */}
           <div className="flex justify-center items-center mb-6">
-            {/* logo  */}
             <img
               src="https://placehold.co/50x50"
               alt="BGImpact logo"
@@ -24,6 +91,7 @@ export default function CheckOut() {
             />
             <h1 className="text-4xl font-bold">BOARD GAME IMPACT</h1>
           </div>
+          {/* form nhập thông tin giao hàng */}
           <div>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold mb-4 text-black-2">
@@ -35,30 +103,49 @@ export default function CheckOut() {
               </Link>
             </div>
 
-            <form className="space-y-4">
+            <form
+              className="space-y-4"
+              onSubmit={handleSubmit(handleCreateOrder)}
+            >
               <input
                 type="email"
                 placeholder="Email"
                 className="w-full p-2 border border-gray-300 rounded"
+                {...register("email", { required: "Email là bắt buộc" })}
               />
+              {errors.email && (
+                <p className="text-red-500">{errors.email.message}</p>
+              )}
               <input
                 type="text"
                 placeholder="Họ và tên"
                 className="w-full p-2 border border-gray-300 rounded"
+                {...register("fullName", { required: "Họ và tên là bắt buộc" })}
               />
-              <div className="flex items-center">
-                <input
-                  type="tel"
-                  placeholder="Số điện thoại"
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
+              {errors.fullName && (
+                <p className="text-red-500">{errors.fullName.message}</p>
+              )}
+              <input
+                type="tel"
+                placeholder="Số điện thoại"
+                className="w-full p-2 border border-gray-300 rounded"
+                {...register("phoneNumber", {
+                  required: "Số điện thoại là bắt buộc",
+                })}
+              />
+              {errors.phoneNumber && (
+                <p className="text-red-500">{errors.phoneNumber.message}</p>
+              )}
               <input
                 type="text"
                 placeholder="Địa chỉ"
                 className="w-full p-2 border border-gray-300 rounded"
+                {...register("address", { required: "Địa chỉ là bắt buộc" })}
               />
-              <div className="flex justify-between space-x-4">
+              {errors.address && (
+                <p className="text-red-500">{errors.address.message}</p>
+              )}
+              {/* <div className="flex justify-between space-x-4">
                 <select className="w-full p-2 border border-gray-300 rounded">
                   <option>Tỉnh thành</option>
                 </select>
@@ -68,12 +155,23 @@ export default function CheckOut() {
                 <select className="w-full p-2 border border-gray-300 rounded">
                   <option>Phường xã (tùy chọn)</option>
                 </select>
-              </div>
+              </div> */}
 
-              <textarea
+              {/* <textarea
                 placeholder="Khách nhập địa chỉ bằng tiếng anh tại đây (tùy chọn)"
                 className="w-full p-2 border border-gray-300 rounded"
-              ></textarea>
+              ></textarea> */}
+              <div className="flex justify-between items-center">
+                <a href="/cart" className="text-blue-500">
+                  Quay về giỏ hàng
+                </a>
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white p-2 rounded"
+                >
+                  ĐẶT HÀNG
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -86,7 +184,7 @@ export default function CheckOut() {
           {cart.map((item, index) => {
             const imageUrls = item.image?.split("||") || [];
             return (
-              <div className="flex items-center mb-4">
+              <div key={item.id || index} className="flex items-center mb-4">
                 <img
                   src={imageUrls[0]}
                   alt={item.name}
@@ -144,22 +242,17 @@ export default function CheckOut() {
               </div>
             </div>
           </div>
-          <div className="flex justify-between items-center">
-            <a href="#" className="text-blue-500">
-              Quay về giỏ hàng
-            </a>
-            <button
-              className="bg-green-500 text-white p-2 rounded"
-              onClick={() => setOpenResponsive(true)}
-            >
-              ĐẶT HÀNG
-            </button>
-          </div>
         </div>
       </div>
 
       {/* cai nay la hien thong bao thanh toan thanh */}
-      <Modal title="Thông báo" centered open={openResponsive} footer={null}>
+      <Modal
+        title="Thông báo"
+        centered
+        open={openResponsive}
+        footer={null}
+        closable={false}
+      >
         <CheckOutSuccess />
       </Modal>
     </div>

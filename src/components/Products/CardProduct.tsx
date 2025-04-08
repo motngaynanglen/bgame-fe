@@ -1,12 +1,8 @@
 "use client";
-import { Button, Divider, Rate } from "antd";
-import Link from "next/link";
+import { useCartStore } from "@/src/store/cartStore";
+import { Button, notification, Rate } from "antd";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { AiOutlineClockCircle } from "react-icons/ai";
-import { BsPeople } from "react-icons/bs";
-import { GoPeople } from "react-icons/go";
-import { LuBrain } from "react-icons/lu";
+import { notifySuccess } from "../Notification/Notification";
 
 function CardProduct({
   id,
@@ -19,6 +15,7 @@ function CardProduct({
   time,
   player,
   quantity,
+  product_group_ref_id,
 }: {
   id: string;
   image: string;
@@ -30,18 +27,33 @@ function CardProduct({
   time: string;
   player: string;
   quantity: number;
+  product_group_ref_id: string;
 }) {
   const router = useRouter();
 
   const defaultImage = "/assets/images/bg1.jpg";
+  const [api, contextHolder] = notification.useNotification();
+  const { addToCart } = useCartStore();
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Ngăn chặn sự kiện click trên toàn bộ card
+    e.stopPropagation();
+    const product = {
+      id: id,
+      product_group_ref_id: product_group_ref_id,
+      name: title,
+      price: price,
+      quantity: quantity,
+      image: image,
+    };
+    addToCart(product, (quantity = 1));
+    notifySuccess("Thành công!", `${title} đã được thêm vào giỏ.`);
     console.log("Thêm vào giỏ hàng:", id);
   };
 
   return (
+    
     <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105">
+      <>{contextHolder}</>
       <div
         onClick={() => router.push(`/boardgame/${id}`)}
         className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300"
@@ -50,21 +62,12 @@ function CardProduct({
         <div className="relative h-[200px] w-full overflow-hidden rounded-t-md">
           <img
             className={`w-full h-full object-cover transition-opacity rounded-t-md `}
-            //   ${
-            //   soldOut ? "opacity-50" : ""
-            // }`}
             src={image}
             alt=""
             onError={(e) => {
               (e.target as HTMLImageElement).src = defaultImage;
             }}
-            // onError={handleImageError}
           />
-          {/* {soldOut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white font-semibold rounded-t-md">
-              Đã hết hàng
-            </div>
-          )} */}
         </div>
 
         {/* Thông tin sản phẩm */}

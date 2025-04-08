@@ -1,6 +1,7 @@
 import envConfig from '@/src/config'
 import axios, { AxiosError, AxiosInstance } from 'axios'
 import { redirect } from 'next/navigation'
+import { setStoredUser } from '../app/app-provider'
 
 type CustomOptions = Omit<RequestInit, 'method'> & {
     baseUrl?: string | undefined
@@ -10,8 +11,8 @@ const STATUS_CODES = {
     OK: 200,
     ENTITY_ERROR: 422,
     AUTHENTICATION_ERROR: 401,
-    NOT_FOUND: 400,
-    AUTHENTICATION_FAIL: 404,
+    NOT_FOUND: 404,
+    // AUTHENTICATION_FAIL: 404,
     SERVER_ERROR: 500,
 } as const;
 
@@ -125,10 +126,15 @@ const request = async <Response>(
                     message: 'Server error',
                     data: data,
                 });
-            } else if (status === STATUS_CODES.AUTHENTICATION_FAIL) {
+            } else if (status === STATUS_CODES.AUTHENTICATION_ERROR) {
+                setStoredUser(null); // Xóa thông tin người dùng khỏi localStorage
+
+                // if (typeof window !== 'undefined') {
+                //     window.location.href = '/login'; // Chuyển hướng đến trang đăng nhập
+                //   }
                 throw new HttpError({
-                    status: STATUS_CODES.AUTHENTICATION_FAIL,
-                    message: 'Invalid credentials',
+                    status: STATUS_CODES.AUTHENTICATION_ERROR,
+                    message: 'Authentication error',
                     data: data,
                 });
             } else if (status === STATUS_CODES.NOT_FOUND) {
