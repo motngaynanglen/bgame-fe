@@ -63,7 +63,9 @@ export default function AccountMenu({ hidden }: { hidden: boolean }) {
     },
   ];
 
+
   // const profile = useAppContext().user
+
   return (
     <div hidden={hidden}>
       <Dropdown menu={{ items }} trigger={["hover"]}>

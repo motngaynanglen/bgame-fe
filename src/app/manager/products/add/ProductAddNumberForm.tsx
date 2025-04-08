@@ -5,20 +5,8 @@ import AddProductTemplate from "./ProductTemplateForm";
 import productApiRequest from "@/src/apiRequests/product";
 import { HttpError } from "@/src/lib/httpAxios";
 import { useAppContext } from "@/src/app/app-provider";
+import { productModel } from "@/src/schemaValidations/product.schema";
 
-interface productModel {
-    id: string | undefined,
-    productGroupRefId: string | undefined,
-    groupName: string,
-    prefix: string,
-    groupRefName: string,
-    productName: string,
-    image: string,
-    price: number,
-    description: string,
-    rentPrice: number,
-    rentPricePerHour: number
-}
 interface numberAddModel {
     productGroupRefId: string,
     number: number
@@ -27,7 +15,7 @@ const numberDefault = {
     productGroupRefId: "",
     number: 0
 }
-export default function ProductAddNumberForm({ productModel }: { productModel: productModel }) {
+export default function ProductAddNumberForm({ productModel }: { productModel?: productModel }) {
     const { user } = useAppContext();
     const numberAdd = useForm({
         defaultValues: numberDefault,
@@ -44,32 +32,35 @@ export default function ProductAddNumberForm({ productModel }: { productModel: p
             message.error("Bạn cần đăng nhập để đặt trước.");
             return;
         }
-        console.log("productModel: ", productModel);
-        if (productModel.productGroupRefId === undefined) {
-            message.error("Không tìm thấy mã sản phẩm!");
+        if (productModel) {
+            console.log("productModel: ", productModel);
+            if (productModel.productGroupRefId === undefined) {
+                message.error("Không tìm thấy mã sản phẩm!");
+                return;
+            }
+            const data: numberAddModel = {
+                productGroupRefId: productModel.productGroupRefId,
+                number: values.number,
+            };
+            try {
+
+
+                console.log("data: ", data);
+                const response = await productApiRequest.addProduct(data, user.token);
+
+                // Hiển thị thông báo thành công
+                message.success("Thêm mới sản phẩm thành công!");
+
+
+            } catch (error: any) {
+                message.success("Thêm mới sản phẩm thất bại!");
+                if (error instanceof HttpError) {
+                    console.log(error);
+                }
+            }
+        }else {
             return;
         }
-        const data: numberAddModel = {
-            productGroupRefId: productModel.productGroupRefId,
-            number: values.number,
-        };
-        try {
-
-            
-            console.log("data: ", data);
-            const response = await productApiRequest.addProduct(data, user.token);
-
-            // Hiển thị thông báo thành công
-            message.success("Thêm mới sản phẩm thành công!");
-
-
-        } catch (error: any) {
-            message.success("Thêm mới sản phẩm thất bại!");
-            if (error instanceof HttpError) {
-                console.log(error);
-            }
-        }
-        // }
     }
     function ProductNumberAddForm() {
         return (

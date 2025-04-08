@@ -5,6 +5,7 @@ import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useState } from "react";
 import AddProductTemplate from "./ProductTemplateForm";
 import ProductAddNumberForm from "./ProductAddNumberForm";
+import { productModel } from "@/src/schemaValidations/product.schema";
 
 
 const url = {
@@ -46,19 +47,7 @@ const items = [
         label: (<span >  Thêm số lượng vào sản phẩm đã có </span>),
     },
 ]
-interface productModel {
-    id: string | undefined,
-    productGroupRefId: string | undefined,
-    groupName: string,
-    prefix: string,
-    groupRefName: string,
-    productName: string,
-    image: string,
-    price: number,
-    description: string,
-    rentPrice: number,
-    rentPricePerHour: number
-}
+
 const ProgressBar: React.FC<{ step: number; totalSteps: number }> = ({
     step,
     totalSteps,
