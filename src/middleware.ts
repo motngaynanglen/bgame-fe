@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
 
-const privatePaths = ["/profile", "/user", "/admin", "/manager", '/staff']; //, 
+const privatePaths = ["/profile", "/user",  "/manager", '/staff']; //"/admin", 
 const managePaths = ["/admin", "/manager", '/staff',];
 const authPaths = ["/login", "/register"];
 // const adminPaths = ['/admin/:part*'];
@@ -38,18 +38,18 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     } else {
       switch (role) {
-        case "ADMIN": {
-          if (authPaths.some((path) => pathname.startsWith(path))) {
-            return NextResponse.redirect(new URL("/admin", request.url));
-          }
-          if (!pathname.startsWith("/admin") && pathname == "/") {
-            return NextResponse.redirect(new URL("/admin", request.url));
-          }
-          if (!pathname.startsWith("/admin") && pathname != "/") {
-            return NextResponse.redirect(new URL("/logout", request.url));
-          }
-          break;
-        }
+        // case "ADMIN": {
+        //   if (authPaths.some((path) => pathname.startsWith(path))) {
+        //     return NextResponse.redirect(new URL("/admin", request.url));
+        //   }
+        //   if (!pathname.startsWith("/admin") && pathname == "/") {
+        //     return NextResponse.redirect(new URL("/admin", request.url));
+        //   }
+        //   if (!pathname.startsWith("/admin") && pathname != "/") {
+        //     return NextResponse.redirect(new URL("/logout", request.url));
+        //   }
+        //   break;
+        // }
         case "MANAGER": {
           if (authPaths.some((path) => pathname.startsWith(path))) {
             return NextResponse.redirect(new URL("/manager", request.url));

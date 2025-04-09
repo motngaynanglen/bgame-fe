@@ -4,114 +4,98 @@ import { CreateButton } from "@/src/components/admin/Button";
 import { InvoicesTableSkeleton, TableSkeleton } from "@/src/components/admin/layout/skeletons";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import SearchBar from "@/src/components/admin/table/search";
+import dayjs from "@/src/lib/dayjs ";
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
-import { Breadcrumb, Col, Pagination, Row, Space, Table, Tag } from "antd";
+import { Breadcrumb, Button, Col, message, Pagination, Row, Space, Table, Tag } from "antd";
 import type { TableProps } from "antd"
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { Suspense, useEffect, useState } from "react";
+import { useAppContext } from "../../app-provider";
+import { PagingBodyType, PagingResType } from "@/src/schemaValidations/common.schema";
+import userApiRequest from "@/src/apiRequests/user";
+import { formatDateTime } from "@/src/lib/utils";
 
 interface DataType {
-    key: string;
-    name: string;
-    age: number;
-    address: string;
-    tags: string[];
+    id: string,
+    code: string,
+    full_name: string,
+    date_of_birth: dayjs.Dayjs,
+    image: string,
+    gender: string,
+    status: string,
+    username: string,
+    role: string,
+    email: string,
+    phone_number: string
 }
 
 const columns: TableProps<DataType>['columns'] = [
     {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
+        title: 'Tên',
+        dataIndex: 'full_name',
+        key: 'full_name',
         render: (text) => <a>{text}</a>,
     },
     {
-        title: 'Age',
-        dataIndex: 'age',
-        key: 'age',
+        title: 'Mã',
+        dataIndex: 'code',
+        key: 'code',
     },
     {
-        title: 'Address',
-        dataIndex: 'address',
-        key: 'address',
+        title: 'Năm sinh',
+        dataIndex: 'date_of_birth',
+        key: 'date_of_birth',
+        render: (text) => <span>{formatDateTime(text, "DATE")}</span>,
     },
     {
-        title: 'Tags',
-        key: 'tags',
-        dataIndex: 'tags',
-        render: (_, { tags }) => (
-            <>
-                {tags.map((tag) => {
-                    let color = tag.length > 5 ? 'geekblue' : 'green';
-                    if (tag === 'loser') {
-                        color = 'volcano';
-                    }
-                    return (
-                        <Tag color={color} key={tag}>
-                            {tag.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
-        ),
+        title: 'Vai trò',
+        key: 'role',
+        dataIndex: 'role',
+        render: (text) => {
+            let color = text.length > 5 ? 'geekblue' : 'green';
+            if (text === 'MANAGER') {
+                color = 'volcano';
+            }
+            return (
+                <Tag color={color} key={text}>
+                    {text.toUpperCase()}
+                </Tag>
+            );
+        },
     },
     {
         title: 'Action',
         key: 'action',
         render: (_, record) => (
-            <Space size="middle">
-                <a>Invite {record.name}</a>
-                <a>Delete</a>
-            </Space>
+            <>
+                <Row gutter={[12, 12]}>
+                    <Col span={12}>
+                        <Button color="primary" variant="dashed" >View {record.username}</Button>
+
+                    </Col>
+                    <Col span={12} className="flex justify-center">
+                        {(() => {
+                            switch (record.status) {
+                                case "ACTIVE":
+                                    return <Button color="red" variant="filled">DEACTIVE</Button>;
+                                case "DEACTIVE":
+                                    return (
+                                        <Space className="flex justify-between">
+                                            <Button color="yellow" variant="filled" >ACTIVE</Button>
+                                        </Space>
+                                    );
+                                default:
+                                    return null;
+                            }
+                        })()}
+                    </Col>
+
+                </Row>
+            </>
         ),
     },
 ];
 
-const data: DataType[] = [
-    {
-        key: '1',
-        name: 'John Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '2',
-        name: 'Jim Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-    {
-        key: '4',
-        name: 'John Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '5',
-        name: 'Jim Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '6',
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-
-];
 
 const role: string = "admin";
 const baseUrl: string = "/" + role + "/" + "users";
@@ -146,20 +130,65 @@ export default function AdminTableUser({
     };
 }) {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
+    const [paging, setPaging] = useState<PagingResType | undefined>(undefined);
+    const [tableLoading, setTableLoading] = useState<boolean>(true);
+    const { user } = useAppContext();
 
+    const apiBody: PagingBodyType = {
+        // search: searchParams?.query ?? "",
+        // filter: [
+        //     "string"
+        // ],
+        paging: {
+            pageNum: searchParams?.page ? parseInt(searchParams.page) : 1,
+            pageSize: 5
+        }
+    };
+
+    const fetchTableData = async () => {
+        setTableLoading(true);
+        // if (!user) {
+        //     message.error("Bạn cần đăng nhập để đặt trước.");
+        //     setTableLoading(false);
+        //     return;
+        // }
+        try {
+            // const response = await userApiRequest.getListByAdmin(apiBody, user.token);
+            const response = await userApiRequest.getListByAdmin(apiBody);
+            const data: DataType[] = response.data.map((item: DataType) => ({
+                ...item,
+                key: item.id, // Gán id vào key
+            }));
+            console.log(data);
+            setPaging(response.paging);
+
+            return data;
+        } catch (error) {
+            message.error(error as string);
+        } finally {
+            setTableLoading(false);
+        }
+    };
     useEffect(() => {
-        const fetchData = () => {
-            return new Promise<DataType[]>((resolve) => {
-                setTimeout(() => {
-                    resolve(data);
-                }, 5000); // 3-second delay
-            });
-        };
 
-        fetchData().then((result) => {
+        fetchTableData().then((result) => {
             setData(result);
         });
-    }, []);
+
+    }, [searchParams]);
+    // useEffect(() => {
+    //     const fetchData = () => {
+    //         return new Promise<DataType[]>((resolve) => {
+    //             setTimeout(() => {
+    //                 resolve(data);
+    //             }, 5000); // 3-second delay
+    //         });
+    //     };
+
+    //     fetchData().then((result) => {
+    //         setData(result);
+    //     });
+    // }, []);
     return (
         <>
             <Breadcrumb items={breadcrumb} className="pb-4" />
@@ -178,9 +207,9 @@ export default function AdminTableUser({
                 <TableSkeleton />
             ) : (
                 <>
-                    <Table<DataType> columns={columns} dataSource={useData} pagination={false} />
+                    <Table<DataType> columns={columns} dataSource={useData ?? []} pagination={false} loading={tableLoading}/>
                     <br />
-                    <AntdCustomPagination totalPages={20} />
+                    <AntdCustomPagination totalPages={paging?.paging.pageCount ?? 1} />
                 </>
             )}
         </>

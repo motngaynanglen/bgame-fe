@@ -144,7 +144,7 @@ export default function BoardGameRental() {
   const [open, setOpen] = useState(false);
   const [isLoadingStores, setIsLoadingStores] = useState(true);
   const { user } = useAppContext();
-  const selectedStoreId = "c0d8b9f4-23b0-4845-9e23-22989cd96316"
+  const selectedStoreId = null
   const showDrawer = () => {
     setOpen(true);
   };
