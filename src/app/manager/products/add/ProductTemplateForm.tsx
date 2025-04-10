@@ -15,15 +15,15 @@ import { FormItem } from "react-hook-form-antd";
 const defaultValues = {
     id: undefined,
     productGroupRefId: undefined,
-    groupName: "UITEST 10 group",
-    prefix: "UIT10",
-    groupRefName: "UITEST 10 Ref",
-    productName: "UITEST 10",
+    groupName: "Nana",
+    prefix: "Nana",
+    groupRefName: "Nana",
+    productName: "Nana",
     image: "empty",
-    price: 10,
+    price: 350000,
     description: "<p>Chua biết mô tả thế nào nhưng:<br><strong>Rất chi tiết - bắt mắt - đẹp đẽ</strong></p>",
-    rentPrice: 1220,
-    rentPricePerHour: 1220
+    rentPrice: 50000,
+    rentPricePerHour: 30000,
 };
 
 

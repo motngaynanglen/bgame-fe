@@ -45,8 +45,6 @@ function ProductDetails({
   const [api, contextHolder] = notification.useNotification();
   const { stores } = useStores();
 
-
-
   const { addToCart } = useCartStore();
   const { addToWishlist } = useWishlistStore();
   const handleChange = (value: number | null) => {
@@ -70,7 +68,10 @@ function ProductDetails({
         image: data.data.image,
       };
       addToCart(product, quantity); // Thêm sản phẩm với số lượng được chọn
-      notifySuccess("Thành công!", `${data.data.product_name} đã được thêm vào giỏ.`);
+      notifySuccess(
+        "Thành công!",
+        `${data.data.product_name} đã được thêm vào giỏ.`
+      );
       console.log(product);
     }
   };
@@ -131,8 +132,12 @@ function ProductDetails({
         {/* Image Section */}
         <div className="lg:col-start-1 lg:col-end-7 col-span-12">
           <div className="space-y-4 col-start-2">
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden flex items-center border-dashed border-2 border-gray-300">
-              <Image src={imageUrls[0]} alt="Thumbnail" />
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden flex justify-center items-center  border-gray-300">
+              <Image
+                src={imageUrls[0]}
+                alt="Thumbnail"
+                style={{ width: 612, height: 612, objectFit: "cover" }}
+              />
               {/* <img src={boardgame?.image} alt="Thumbnail" className="w-full h-full object-contain" /> */}
             </div>
 

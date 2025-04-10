@@ -217,6 +217,7 @@ export default function BoardGameRental() {
                   id={boardgame.id}
                   idGroup={boardgame.product_group_ref_id}
                   storeId={selectedStoreId ?? null}
+                  quantity={boardgame.quantity}
                   image={boardgame.image}
                   price={boardgame.price}
                   title={boardgame.product_name}
