@@ -8,11 +8,11 @@ import { useAppContext } from "@/src/app/app-provider";
 import { productModel } from "@/src/schemaValidations/product.schema";
 
 interface numberAddModel {
-    productGroupRefId: string,
+    productTemplateId: string,
     number: number
 }
 const numberDefault = {
-    productGroupRefId: "",
+    productTemplateId: "",
     number: 0
 }
 export default function ProductAddNumberForm({ productModel }: { productModel?: productModel }) {
@@ -34,12 +34,12 @@ export default function ProductAddNumberForm({ productModel }: { productModel?: 
         }
         if (productModel) {
             console.log("productModel: ", productModel);
-            if (productModel.productGroupRefId === undefined) {
+            if (productModel.id === undefined) {
                 message.error("Không tìm thấy mã sản phẩm!");
                 return;
             }
             const data: numberAddModel = {
-                productGroupRefId: productModel.productGroupRefId,
+                productTemplateId: productModel.id,
                 number: values.number,
             };
             try {
@@ -66,7 +66,7 @@ export default function ProductAddNumberForm({ productModel }: { productModel?: 
         return (
             <>
                 <Form onFinish={numberAdd.handleSubmit(onSubmit)}>
-                    <FormItem control={numberAdd.control} name="productGroupRefId" label="" layout="vertical" className="pb-3">
+                    <FormItem control={numberAdd.control} name="productTemplateId" label="" layout="vertical" className="pb-3">
                         <Input hidden />
                     </FormItem>
                     <FormItem control={numberAdd.control} name="number" label="Số lượng sản phẩm" layout="vertical" className="pb-3">

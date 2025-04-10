@@ -132,11 +132,11 @@ export default function AddProductTemplate({ product, isReadonly, onNext }: { pr
             const response = await productApiRequest.addNonExistProduct(data, user.token);
 
 
-            const productGroupRefId: string = response.data;
-            console.log("productGroupRefId: ", productGroupRefId);
+            const id: string = response.data;
+            console.log("id: ", id);
             const updatedData = {
                 ...data,
-                productGroupRefId: productGroupRefId,
+                id: id,
             };
 
             // Hiển thị thông báo thành công

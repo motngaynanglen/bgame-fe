@@ -3,7 +3,7 @@ import { Descriptions, Rate, Tabs, TabsProps } from "antd";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import type { DescriptionsProps } from "antd";
-
+import { useQueryClient } from "@tanstack/react-query";
 
 interface BoardGameInfo {
   id: string;
@@ -20,8 +20,18 @@ function SingleProductDescription({
 }: {
   productId: string | string[] | undefined;
 }) {
-    const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
-  
+  const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
+  const queryClient = useQueryClient();
+  const cachedData = queryClient.getQueryData(["boardgameByID", productId]);
+
+  // if (cachedData) {
+  //   // Sử dụng cachedData
+  //   return <div>{JSON.stringify(cachedData)}</div>;
+  // } else {
+  //   // Dữ liệu không có trong cache
+  //   return <div>Dữ liệu không có trong cache.</div>;
+  // }
+
   const items: DescriptionsProps["items"] = useMemo(
     () => [
       {
@@ -156,23 +166,6 @@ function SingleProductDescription({
   );
 
 
-  
-    React.useEffect(() => {
-      const fetchBoardGame = async () => {
-        try {
-          const res = await fetch(
-            `https://677fbe1f0476123f76a7e213.mockapi.io/BoardGame/${productId}`
-          );
-          const data = await res.json();
-          console.log(data);
-          setBoardgame(data);
-        } catch (error) {
-          console.error("lỗi nè: " + error);
-        }
-      };
-      
-      fetchBoardGame();
-    }, []);
 
   return (
     <div className="space-y-8 mb-32 ">

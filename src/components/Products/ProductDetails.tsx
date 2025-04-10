@@ -232,7 +232,7 @@ function ProductDetails({
               Thêm sản phẩm vào giỏ hàng
             </button>
             {/* btn mua ngay */}
-            <button
+            {/* <button
               disabled={data.data.sales_quantity <= 0}
               className={`bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 ${
                 data.data.sales_quantity > 0
@@ -241,7 +241,7 @@ function ProductDetails({
               }`}
             >
               Mua ngay
-            </button>
+            </button> */}
           </div>
 
           {/* btn them wishlist */}
