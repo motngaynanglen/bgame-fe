@@ -15,9 +15,9 @@ const RegisterBodyDefaults = {
     dateOfBirth: new Date(),
     confirmPassword: ""
 };
-export default function UserForm({ user }: { user?: RegisterBodyType }) {
+export default function UserForm({ staff }: { staff?: RegisterBodyType }) {
     const { control, handleSubmit } = useForm({
-        defaultValues: user || RegisterBodyDefaults,
+        defaultValues: staff || RegisterBodyDefaults,
         resolver: zodResolver(RegisterBody)
     });
 

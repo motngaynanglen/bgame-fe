@@ -4,7 +4,7 @@ import { DashboardRouter } from './route.schema';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
-import { AiOutlineBook, AiOutlineUnorderedList } from 'react-icons/ai';
+import { AiFillFileAdd, AiFillFolderAdd, AiOutlineBook, AiOutlineUnorderedList } from 'react-icons/ai';
 import { GrTableAdd } from "react-icons/gr";
 
 // 	{
@@ -187,7 +187,7 @@ export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 		label: (<Link href={"/manager/staffs"} className={clsx("font-medium")}>Quản lý nhân sự</Link>),
 		icon: (<UserOutlined />),
 	},
-	
+
 	{
 		key: 'group-2',
 		label: (<span
@@ -197,15 +197,26 @@ export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 		),
 		children: [
 			{
-				key: '34', label: (<Link href={"/manager/products"}
+				key: '31', label: (<Link href={"/manager/products"}
 					className={clsx("font-medium")}>Danh sách</Link>),
 				icon: (<AiOutlineUnorderedList />),
 			},
 			{
-				key: '35', label: (<Link href={"/manager/products/add"}
+				key: '32', label: (<Link href={"/manager/products/addGroup"}
+					className={clsx("font-medium")}>Bổ xung đầu mục</Link>),
+				icon: (<AiFillFolderAdd />),
+			},
+			{
+				key: '33', label: (<Link href={"/manager/products/addRef"}
+					className={clsx("font-medium")}>Bổ xung nhóm</Link>),
+				icon: (<AiFillFileAdd />),
+			},
+			{
+				key: '34', label: (<Link href={"/manager/products/add"}
 					className={clsx("font-medium")}>Bổ xung sản phẩm</Link>),
 				icon: (<GrTableAdd />),
 			},
+			
 
 		]
 	},

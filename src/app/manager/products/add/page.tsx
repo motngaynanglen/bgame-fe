@@ -1,6 +1,6 @@
 "use client"
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Dropdown, MenuProps, Select } from "antd";
+import { Breadcrumb, Button, Card, ConfigProvider, Dropdown, MenuProps, Select } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useState } from "react";
 import AddProductTemplate from "./ProductTemplateForm";
@@ -88,7 +88,7 @@ export default function ManagerCreateBGame() {
         setCreatedProduct(product);
         setStep(2);
         console.log("đã bước qua steff 2 này alo?", step);
-        console.log("product: ", product    );
+        console.log("product: ", product);
 
     };
     // const handleCancel = () => {
@@ -113,20 +113,23 @@ export default function ManagerCreateBGame() {
     return (
         <>
             <Breadcrumb items={breadcrumb} />
-            <Card title={pageTitle()}>
+            <ConfigProvider prefixCls="form-ant">
 
-                {step == 1 && (
-                    <AddProductTemplate onNext={handleNext} />
-                )}
-                {step == 2 && createdProduct && (
 
-                    <ProductAddNumberForm
-                        productModel={createdProduct}
-                    />
-                )}
-                <ProgressBar step={step} totalSteps={2} />
-            </Card>
+                <Card title={pageTitle()}>
 
+                    {step == 1 && (
+                        <AddProductTemplate onNext={handleNext} />
+                    )}
+                    {step == 2 && createdProduct && (
+
+                        <ProductAddNumberForm
+                            productModel={createdProduct}
+                        />
+                    )}
+                    <ProgressBar step={step} totalSteps={2} />
+                </Card>
+            </ConfigProvider>
         </>
     )
 }

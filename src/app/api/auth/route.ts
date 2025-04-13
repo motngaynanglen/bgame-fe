@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     return Response.json(body,   {
       status: 200,
       headers: {
-        'Set-Cookie': `sessionToken=${sessionToken}; Path=/; HttpOnly; Expires=${expiresDate}; SameSite=Lax; Secure, sessionRole=${sessionRole}; Path=/; HttpOnly; Expires=${expiresDate}; SameSite=Lax; Secure`,
+        'Set-Cookie': `sessionToken=${sessionToken}; Path=/; HttpOnly; Expires=${expiresDate}; SameSite=None; Secure, sessionRole=${sessionRole}; Path=/; HttpOnly; Expires=${expiresDate}; SameSite=Lax; Secure`,
       }
     })
   }

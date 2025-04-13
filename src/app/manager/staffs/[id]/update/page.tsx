@@ -40,7 +40,7 @@ export default function ManagerCreateStaff() {
     return (
         <>
             <Breadcrumb items={breadcrumb} className="pb-4" />
-            <UserForm user={RegisterBodyData}/>
+            <UserForm staff={RegisterBodyData}/>
         </>
     )
 }
