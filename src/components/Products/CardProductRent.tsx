@@ -147,7 +147,7 @@ function CardProductRent({
   title,
   price,
   rent_price_per_hour,
-  // quantity,
+  quantity,
   rent_price,
   isRented,
   complexity,
@@ -162,7 +162,7 @@ function CardProductRent({
   title: string;
   price: number;
   rent_price_per_hour: number;
-  // quantity: number;
+  quantity: number;
   rent_price: number;
   isRented: boolean;
   complexity: number;
@@ -314,6 +314,9 @@ function CardProductRent({
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
               (5)
             </p>
+          </div>
+          <div className="mt-2">
+            <span>Gổm {quantity} sản phẩm.</span>
           </div>
           {/* <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">

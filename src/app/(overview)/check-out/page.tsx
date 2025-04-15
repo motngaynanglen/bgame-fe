@@ -3,7 +3,7 @@ import { orderApiRequest } from "@/src/apiRequests/orders";
 import CheckOutSuccess from "@/src/components/CheckOut/CheckOutSuccess";
 import { useOrder } from "@/src/hooks/useOrder";
 import { useCartStore } from "@/src/store/cartStore";
-import { Modal } from "antd";
+import { List, Modal, Radio, RadioChangeEvent } from "antd";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,11 +21,31 @@ interface FormData {
   address: string;
 }
 
+interface AddressData {
+  province: string;
+  districts: {
+    district: string;
+    wards: string[];
+  }[];
+}
+
+const data = [
+  "Giao hàng tiết kiệm",
+  "Giao hàng nhanh",
+  "Giao hàng qua Ahamove",
+  "Giao hàng qua Viettel Post",
+];
+
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
   const { cart, calculateTotal, clearCart } = useCartStore();
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
   const { user } = useAppContext();
+  const [value, setValue] = useState(1);
+
+  const onChange = (e: RadioChangeEvent) => {
+    setValue(e.target.value);
+  };
 
   const {
     register,
@@ -53,10 +73,6 @@ export default function CheckOut() {
       if (res.statusCode == "200") {
         setOpenResponsive(true);
         clearCart(); // Xóa giỏ hàng sau khi đặt hàng thành công
-        // notifySuccess(
-        //   "Tạo  thành công!",
-        //   "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
-        // );
       } else
         notifyError(
           "Đặt trước thất bại!",
@@ -161,6 +177,24 @@ export default function CheckOut() {
                 placeholder="Khách nhập địa chỉ bằng tiếng anh tại đây (tùy chọn)"
                 className="w-full p-2 border border-gray-300 rounded"
               ></textarea> */}
+              <div className=" font-semibold text-xl mb-4">
+                <span>Vận chuyển</span>
+              </div>
+              <List
+                bordered
+                dataSource={data}
+                renderItem={(item, index) => (
+                  <List.Item>
+                    {" "}
+                    <Radio.Group
+                      value={value}
+                      onChange={onChange}
+                      className="flex items-center"
+                      options={[{ value: index, label: item }]}
+                    />
+                  </List.Item>
+                )}
+              />
               <div className="flex justify-between items-center">
                 <a href="/cart" className="text-blue-500">
                   Quay về giỏ hàng
