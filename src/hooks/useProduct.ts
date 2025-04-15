@@ -1,4 +1,8 @@
-import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import productApiRequest from "../apiRequests/product";
 
 interface BoardGame {
@@ -6,16 +10,20 @@ interface BoardGame {
   product_group_ref_id: string;
   product_name: string;
   sell_price: number;
-  status: boolean;
+  code: string;
   image: string;
-  sales_quantity: number;
-  rent_quantity: number;
   publisher: string;
   category: string;
   player: string;
-  time: string;
-  age: number;
   complexity: number;
+  age: number;
+  number_of_players_min: number;
+  number_of_players_max: number;
+  hard_rank: number;
+  time: string;
+  description: string;
+  sales_quantity: number;
+  rent_quantity: number;
 }
 
 interface responseModel {
@@ -25,7 +33,7 @@ interface responseModel {
   paging: {
     pageNum: number; // Thay đổi kiểu dữ liệu
     pageSize: number; // Thay đổi kiểu dữ liệu
-    pageCount: number; 
+    pageCount: number;
   };
 }
 
@@ -46,7 +54,6 @@ export const useProducts = (currentPage: number = 1, pageSize: number = 15) => {
     placeholderData: keepPreviousData,
   });
 
-
   return {
     products: data?.data || [],
     isLoading,
@@ -57,3 +64,42 @@ export const useProducts = (currentPage: number = 1, pageSize: number = 15) => {
     pageSize: data?.paging?.pageSize || 15,
   };
 };
+
+export const useProduct = (id: string) => {
+  const { data, isLoading, isError, error } = useQuery<BoardGame>({
+    queryKey: ["boardGame", id],
+    queryFn: async () => {
+      const res = await productApiRequest.getById({ productId: id });
+      return res;
+    },
+   
+  });
+
+  return {
+    product: data,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+// export const useProduct = (id: string) => {
+//   const queryClient = useQueryClient();
+//   const { data, isLoading, isError, error } = useQuery<BoardGame>({
+//     queryKey: ["boardGame", id],
+//     queryFn: async () => {
+//       const res = await productApiRequest.getById(id);
+//       return res;
+//     },
+//     placeholderData: () => {
+//       return queryClient.getQueryData<BoardGame[]>(["boardGames"])?.find((item) => item.id === id);
+//     },
+//   });
+
+//   return {
+//     product: data,
+//     isLoading,
+//     isError,
+//     error,
+//   };
+// };

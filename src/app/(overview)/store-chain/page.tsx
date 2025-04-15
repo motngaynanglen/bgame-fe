@@ -5,7 +5,6 @@ import { ClockCircleFilled, MailFilled, PhoneFilled } from "@ant-design/icons";
 import { List, Space } from "antd";
 import Link from "next/link";
 import React from "react";
-import { BsTelephoneFill } from "react-icons/bs";
 
 const data = Array.from({ length: 5 }).map((_, i) => ({
   href: "https://ant.design",
@@ -25,7 +24,7 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 
 export default function StoreChain() {
   const { stores, isLoading, isError, error } = useStores();
-  const { selectedStoreId, setSelectedStoreId } = useSelectedStore();
+
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -36,18 +35,10 @@ export default function StoreChain() {
   }
 
   return (
-    <div className="py-6">
+    <div className="container min-h-screen mx-auto max-w-screen-xl">
       <List
         itemLayout="vertical"
         size="large"
-        pagination={{
-          onChange: (page) => {
-            console.log(page);
-          },
-          pageSize: 5,
-          position: "bottom",
-          align: "center",
-        }}
         dataSource={stores}
         renderItem={(store) => (
           <List.Item
@@ -93,7 +84,6 @@ export default function StoreChain() {
                 </>
               }
             />
-            
           </List.Item>
         )}
       />

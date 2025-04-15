@@ -13,8 +13,8 @@ export default function layout({ children }: { children: React.ReactNode }) {
         {/* </section> */}
       </div>
 
-      <div className="bg-sky-50">
-        <main className="container min-h-screen mx-auto max-w-screen-xl">
+      <div className="bg-white">
+        <main className="">
           <Suspense fallback={<Loading />}>{children}</Suspense>
         </main>
       </div>
