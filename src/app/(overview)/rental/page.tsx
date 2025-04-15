@@ -204,7 +204,7 @@ export default function BoardGameRental() {
   return (
     <div>
       <Breadcrumb />
-      <div className="flex ">
+      <div className="flex container min-h-screen mx-auto max-w-screen-2xl">
         <main className="pt-4">
           <div className=" mb-4">
             <div className="flex ">

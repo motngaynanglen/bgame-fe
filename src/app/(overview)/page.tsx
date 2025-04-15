@@ -6,10 +6,10 @@ import { Space } from "antd";
 
 export default function Home() {
   return (
-    <div className="bg-sky-50">
+    <div className="bg-gray-100 ">
       <main className="">
         <Banner />
-        <div>
+        <div className="container min-h-screen mx-auto max-w-screen-2xl">
           <Space />
           <AboutComponent />
           <Space />

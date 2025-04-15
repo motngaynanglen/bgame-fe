@@ -1,11 +1,8 @@
 "use client";
-import productApiRequest from "@/src/apiRequests/product";
-import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import CategoryFilter from "@/src/components/Filter/CategoryFilter";
 import CardProduct from "@/src/components/Products/CardProduct";
 import { useProducts } from "@/src/hooks/useProduct";
 import { AppstoreOutlined, FilterOutlined } from "@ant-design/icons";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Button, Drawer, Pagination } from "antd";
 import { useState } from "react";
 
@@ -88,7 +85,7 @@ export default function ProductsPage({
   console.log("totalItems", totalItems);
 
   return (
-    <div className="flex ">
+    <div className="flex container min-h-screen mx-auto max-w-screen-2xl">
       <main className="pt-4">
         <div className=" mb-4 flex justify-start items-center divide-x-2 divide-gray-900">
           <div className="pr-2">
@@ -136,7 +133,7 @@ export default function ProductsPage({
             <CategoryFilter />
           </Drawer>
           {/* Product Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
             {products
               // .filter((boardgame) => boardgame.sales_quantity > 0)
               .map((product) => {
@@ -153,7 +150,6 @@ export default function ProductsPage({
                     player={product.player}
                     age={product.age}
                     complexity={product.complexity}
-                    soldOut={product.status}
                     quantity={product.sales_quantity}
                   />
                 );

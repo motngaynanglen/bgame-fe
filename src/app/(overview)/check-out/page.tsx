@@ -94,7 +94,7 @@ export default function CheckOut() {
   };
 
   return (
-    <div className="p-6">
+    <div className="container mx-auto p-4 bg-sky-50 min-h-screen ">
       <div className="flex flex-col lg:flex-row bg-white shadow-md rounded-lg p-6 ">
         {/* form nhập thông tin giao hàng */}
         <div className="w-full lg:w-2/3 pr-0 lg:pr-4 border-r-2 border-gray-200">

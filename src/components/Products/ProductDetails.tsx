@@ -37,8 +37,10 @@ interface responseModel {
 
 function ProductDetails({
   productId,
+  onProductData,
 }: {
   productId: string | string[] | undefined;
+  onProductData: (data: BoardGameInfo | undefined) => void;
 }) {
   const [quantity, setQuantity] = useState(1);
   // const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
@@ -92,21 +94,27 @@ function ProductDetails({
   //   }
   // };
 
-  const fetchBoardGamesById = async (productId: string) => {
-    try {
-      const res = await productApiRequest.getById({
-        productId,
-      });
-      return res;
-    } catch (error) {
-      console.error("lỗi store: " + error);
-      throw error; // Ném lỗi để React Query có thể xử lý
-    }
-  };
+  // const fetchBoardGamesById = async (productId: string) => {
+  //   try {
+  //     const res = await productApiRequest.getById({
+  //       productId,
+  //     });
+  //     return res;
+  //   } catch (error) {
+  //     console.error("lỗi store: " + error);
+  //     throw error; // Ném lỗi để React Query có thể xử lý
+  //   }
+  // };
 
   const { data, isLoading, isError, error } = useQuery<responseModel>({
     queryKey: ["boardgameByID", productId],
-    queryFn: () => fetchBoardGamesById(productId as string),
+    queryFn: async () => {
+      // Hàm gọi API
+      const res = await productApiRequest.getById({
+        productId: productId as string,
+      });
+      return res;
+    },
     enabled: !!productId,
   });
 
@@ -117,26 +125,24 @@ function ProductDetails({
   if (isError) {
     return <div>Mất kết nối từ server: {error?.message}</div>;
   }
-  // useEffect(
-  //   if (data) {
-  //     setBoardgame(data);
-  //
-  // }, [data]);
+
+  onProductData(data?.data);
+
   console.log("data nè: ", data);
 
   if (data) {
     const imageUrls = data.data.image?.split("||") || [];
     return (
-      <div className="grid lg:grid-cols-12 pt-2 gap-6 lg:gap-10 mb-12 text-gray-800">
+      <div className="grid lg:grid-cols-12  gap-6 lg:gap-10 mb-8 text-gray-800 border-2 rounded-lg border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
         {contextHolder}
         {/* Image Section */}
-        <div className="lg:col-start-1 lg:col-end-7 col-span-12">
+        <div className="lg:col-start-1 lg:col-end-7 col-span-12 ">
           <div className="space-y-4 col-start-2">
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden flex justify-center items-center  border-gray-300">
+            <div className="relative w-full  border-2 rounded-lg overflow-hidden flex justify-center items-center  border-gray-300">
               <Image
                 src={imageUrls[0]}
                 alt="Thumbnail"
-                style={{ width: 612, height: 612, objectFit: "cover" }}
+                style={{ width: "auto", height: "auto", objectFit: "cover" }}
               />
               {/* <img src={boardgame?.image} alt="Thumbnail" className="w-full h-full object-contain" /> */}
             </div>
@@ -164,9 +170,9 @@ function ProductDetails({
         </div>
 
         {/* Details Section */}
-        <div className="space-y-6 lg:col-end-12 lg:col-span-5 col-span-12">
+        <div className="space-y-6 lg:col-end-12 lg:col-span-5 col-span-12 ">
           {/* name product */}
-          <h3 className="text-xl lg:text-4xl uppercase font-bold">
+          <h3 className="font-body text-xl lg:text-4xl uppercase font-bold">
             {data?.data.product_name}
           </h3>
           <div className="flex items-center space-x-2">
@@ -182,17 +188,17 @@ function ProductDetails({
             {/* <span className="line-through text-gray-400">$80.00</span> */}
           </div>
 
-          {/* <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <span className="text-gray-500">Nhà phát hành:</span>
             <Link href="#" className="text-orange-500 hover:underline">
               {data?.data.publisher}
             </Link>
-          </div> */}
+          </div>
           {/* category */}
           <div className="flex items-center space-x-2">
             <span className="text-gray-500">Mã sản phẩm: </span>
             <Link href="#" className="text-orange-500 hover:underline">
-              {/* {data?.data.category} */}
+              {data?.data.code}
             </Link>
           </div>
           {/* status */}

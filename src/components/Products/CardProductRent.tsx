@@ -1,6 +1,9 @@
 "use client";
+import bookListApiRequest from "@/src/apiRequests/bookList";
+import { useAppContext } from "@/src/app/app-provider";
+import { HttpError } from "@/src/lib/httpAxios";
 import { useRentalStore } from "@/src/store/rentalStore";
-import type { DatePickerProps, GetProps } from "antd";
+import type { GetProps } from "antd";
 import {
   Button,
   DatePicker,
@@ -13,19 +16,12 @@ import {
 } from "antd";
 import type { CheckboxGroupProps } from "antd/es/checkbox";
 import dayjs from "dayjs";
-import { useState } from "react";
-import { AiOutlineClockCircle } from "react-icons/ai";
-import { BsPeople } from "react-icons/bs";
-import { GoPeople } from "react-icons/go";
-import { LuBrain } from "react-icons/lu";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { useAppContext } from "@/src/app/app-provider";
-import http, { HttpError } from "@/src/lib/httpAxios";
-import bookListApiRequest from "@/src/apiRequests/bookList";
-import { notifyError, notifySuccess } from "../Notification/Notification";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import CustomDatePicker from "../DateRantalPicker/DateRental";
 import CustomRangePicker from "../DateRantalPicker/HourRental";
-import { useRouter } from "next/navigation";
+import { notifyError, notifySuccess } from "../Notification/Notification";
 
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
@@ -41,98 +37,6 @@ const range = (start: number, end: number) => {
   return result;
 };
 
-// ham nay de gioi han ngay la ngay hien tai va sau
-const disabledDate: RangePickerProps["disabledDate"] = (
-  current,
-  selectedDates
-) => {
-  const today = dayjs().startOf("day");
-
-  if (!selectedDates || !selectedDates.from) {
-    return current && current.isBefore(today, "day");
-  }
-
-  const selectedDate = selectedDates.from;
-  return current && !current.isSame(selectedDate, "day");
-};
-
-// ham nay de gioi han gio la 8h toi 21h
-const disabledDateTime = (selectedDate?: dayjs.Dayjs) => {
-  const now = dayjs();
-  const currentHour = now.hour();
-
-  return {
-    disabledHours: () => {
-      let hours = range(0, 24).filter((hour) => hour < 8 || hour >= 21);
-
-      if (selectedDate && selectedDate.isSame(now, "day")) {
-        // Nếu ngày được chọn là ngày hôm nay, loại bỏ giờ đã qua
-        hours = hours.concat(range(8, currentHour));
-      }
-
-      return hours;
-    },
-    disabledMinutes: () => {
-      if (selectedDate && selectedDate.isSame(now, "day") && now.hour() === 8) {
-        return range(0, now.minute());
-      }
-      return [];
-    },
-    disabledSeconds: () => {
-      if (
-        selectedDate &&
-        selectedDate.isSame(now, "day") &&
-        now.hour() === 8 &&
-        now.minute() === 0
-      ) {
-        return range(0, now.second());
-      }
-      return [];
-    },
-  };
-};
-
-// ham nay gioi ham o tren
-const disabledRangeTime: RangePickerProps["disabledTime"] = (date, type) => {
-  const today = dayjs().startOf("day");
-  const currentHour = dayjs().hour();
-
-  if (!date) {
-    return {
-      disabledHours: () =>
-        range(0, 24).filter((hour) => hour < 8 || hour >= 21),
-    };
-  }
-
-  if (date.isSame(today, "day")) {
-    return {
-      disabledHours: () =>
-        range(0, 24).filter(
-          (hour) => hour < 8 || hour < currentHour || hour >= 21
-        ),
-      disabledMinutes: (selectedHour) => {
-        if (selectedHour === currentHour) {
-          const minutes = [];
-          for (let i = 0; i < 60; i++) {
-            if (i <= dayjs().minute()) {
-              minutes.push(i);
-            }
-          }
-          return minutes;
-        }
-        return [];
-      },
-      disabledSeconds: () => [],
-    };
-  } else {
-    return {
-      disabledHours: () =>
-        range(0, 24).filter((hour) => hour < 8 || hour >= 21),
-      disabledMinutes: () => [],
-      disabledSeconds: () => [],
-    };
-  }
-};
 
 const options: CheckboxGroupProps<string>["options"] = [
   { label: "Thuê theo ngày", value: "days" },
@@ -243,18 +147,18 @@ function CardProductRent({
       }
     }
 
-    // const rentalData = {
-    //   title,
-    //   method: selectedOption,
-    //   startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
-    //   endDate:
-    //     selectedOption === "hours" && selectedDate[1]
-    //       ? selectedDate[1].format("YYYY-MM-DD HH:mm")
-    //       : undefined,
-    //   price: 30000, // Giá mẫu
-    // };
+    const rentalData = {
+      title,
+      method: selectedOption,
+      startDate: selectedDate[0]?.format("YYYY-MM-DD HH:mm") || "",
+      endDate:
+        selectedOption === "hours" && selectedDate[1]
+          ? selectedDate[1].format("YYYY-MM-DD HH:mm")
+          : undefined,
+      price: 30000, // Giá mẫu
+    };
 
-    // addRental(rentalData);
+    addRental(rentalData);
     // console.log("Đặt trước thành công");
     // openNotificationWithIcon("success");
     setOpenResponsive(false);
