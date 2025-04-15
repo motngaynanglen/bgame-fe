@@ -9,7 +9,6 @@ function CardProduct({
   image,
   title,
   price,
-  soldOut,
   complexity,
   age,
   time,
@@ -21,7 +20,6 @@ function CardProduct({
   image: string;
   title: string;
   price: number;
-  soldOut: boolean;
   complexity: number;
   age: number;
   time: string;
@@ -51,12 +49,11 @@ function CardProduct({
   };
 
   return (
-    
     <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105">
       <>{contextHolder}</>
       <div
         onClick={() => router.push(`/boardgame/${id}`)}
-        className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300"
+        className="rounded-lg   bg-white p-2  dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300 hover:shadow-lg transition-shadow duration-300 border border-gray-100"
       >
         {/* ảnh sản phẩm */}
         <div className="relative h-[200px] w-full overflow-hidden rounded-t-md">
@@ -133,7 +130,7 @@ function CardProduct({
             )}
           </div>
 
-          <div className="border-t my-2" />
+          <div className=" my-2" />
           {/* giá sản pham */}
           <div className="mt-4 relative">
             {/* Giá sản phẩm */}
