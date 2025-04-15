@@ -11,9 +11,15 @@ import { LoginBody, LoginBodyType } from "@/src/schemaValidations/auth.schema";
 import { useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
 import { Button, Form, Input } from "antd";
+import Image from "next/image";
+// import Image from "next/image";
 
 export default function LoginPage() {
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginBodyType>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +28,6 @@ export default function LoginPage() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
 
   const onSubmit = async (value: LoginBodyType) => {
     // e.preventDefault();
@@ -45,7 +50,7 @@ export default function LoginPage() {
         id: result.data.name,
         name: result.data.name,
         role: result.data.role,
-        token: result.data.jwt
+        token: result.data.jwt,
       });
       router.push("/");
       router.refresh();
@@ -71,10 +76,14 @@ export default function LoginPage() {
   return (
     <div className="bg-sky-100 flex justify-center items-center ">
       <div className="w-1/2 h-screen hidden lg:block">
-        <img
+        <Image
+          width={0}
+          height={0}
+          sizes="100vw"
           src="/assets/images/bg-login.jpg"
           alt="Placeholder img"
           className="object-cover w-full h-full"
+          loading="lazy"
         />
       </div>
       <div className="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
@@ -91,7 +100,10 @@ export default function LoginPage() {
               Tài Khoản
             </label>
             {/* nhap username */}
-            <FormItem control={control} name="username" label=""
+            <FormItem
+              control={control}
+              name="username"
+              label=""
               className="w-full border rounded-md focus:outline-none focus:border-blue-500 text-black-2"
             >
               <Input required type="text" />
@@ -103,7 +115,10 @@ export default function LoginPage() {
             </label>
             {/* nhap password */}
             <div className="relative">
-              <FormItem control={control} name="password" label=""
+              <FormItem
+                control={control}
+                name="password"
+                label=""
                 className="w-full border rounded-md focus:outline-none focus:border-blue-500 text-black-2"
               >
                 <Input required type={showPassword ? "text" : "password"} />
@@ -119,11 +134,9 @@ export default function LoginPage() {
                   />
                 )}
               </FormItem>
-
             </div>
           </div>
           <div className="mb-4 flex items-center">
-
             <input
               type="checkbox"
               id="remember"
@@ -140,12 +153,14 @@ export default function LoginPage() {
               Quên mật khẩu?
             </Link>
           </div>
-          <Form.Item >
-            <Button className="bg-red-500 hover:bg-blue-600 text-white font-semibold rounded-md py-5 px-4 w-full" htmlType="submit">
+          <Form.Item>
+            <Button
+              className="bg-red-500 hover:bg-blue-600 text-white font-semibold rounded-md py-5 px-4 w-full"
+              htmlType="submit"
+            >
               Đăng Nhập
             </Button>
           </Form.Item>
-          
         </Form>
         <div className="mt-6 text-green-500 text-center">
           <Link href="/register" className="hover:underline">

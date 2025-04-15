@@ -1,6 +1,6 @@
 "use client";
 import { useCartStore } from "@/src/store/cartStore";
-import { Button, Divider, Empty, Input, InputNumber, Space } from "antd";
+import { Button, Divider, Empty, Image, Input, InputNumber, Space } from "antd";
 import { useRouter } from "next/navigation";
 import { IoIosClose } from "react-icons/io";
 
@@ -58,10 +58,14 @@ export default function ShoppingCart() {
                   >
                     {/* image and name */}
                     <div className="flex flex-row sm:items-start sm:justify-around md:items-center md:justify-start">
-                      <img
+                      <Image
+                        style={{ borderRadius: "0.5rem" }}
+                        width={96}
+                        height={96}
                         src={imageUrls[0]}
                         alt={item.name}
                         className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
+                        loading="lazy"
                       />
                       <Divider type="vertical" className="" />
                       <div className="ml-4 sm:ml-0 mr-4">

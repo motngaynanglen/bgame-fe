@@ -1,6 +1,7 @@
 'use client';
 import React from "react";
 import { useAppContext } from "../../app-provider";
+import Image from "next/image";
 // cai page nay k phai la page chinh cua app
 // cai nay la page cua account fake
 export default function AccountInformation() {
@@ -11,12 +12,13 @@ export default function AccountInformation() {
       <div className="w-full max-w-4xl bg-white mt-6 p-6 rounded-lg shadow-md">
         <h1 className="text-2xl font-semibold mb-4 text-black-2">Thông tin cá nhân</h1>
         <div className="flex items-center mb-6">
-          <img
+          <Image
             alt="User avatar"
             className="w-24 h-24 rounded-full mr-4"
             height="50"
             src="https://storage.googleapis.com/a1aa/image/unsNjiOyD5Ylj2cj_LdnUyUwRWFzVkbzM_z-ZX1ywVs.jpg"
             width="50"
+            loading="lazy"
           />
           <div>
             <button className="bg-blue-500 text-white px-4 py-2 rounded mr-2">
