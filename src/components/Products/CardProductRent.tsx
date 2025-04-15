@@ -269,7 +269,7 @@ function CardProductRent({
 
   const { RangePicker } = DatePicker;
   //body post len api
-
+  const imageList = image.split("||");
   return (
     <div className="relative">
       {/* thg nay de hien thong bao ra  */}
@@ -283,7 +283,7 @@ function CardProductRent({
             className={`h-50 w-full  object-cover transition-opacity rounded-t-md 
               ${isRented ? " opacity-50" : ""}
                 `}
-            src={image}
+            src={imageList[0]}
             alt=""
             onError={(e) => {
               (e.target as HTMLImageElement).src = defaultImage;
@@ -316,7 +316,7 @@ function CardProductRent({
             </p>
           </div>
           <div className="mt-2">
-            <span>Gổm {quantity} sản phẩm.</span>
+            {(quantity && quantity !== 0) ? (<span>Gổm {quantity} sản phẩm.</span>) : <></>}
           </div>
           {/* <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <li className="flex items-center gap-2">

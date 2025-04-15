@@ -63,13 +63,13 @@ export const normalizePath = (path: string) => {
   return path.startsWith("/") ? path.slice(1) : path
 
 }
-export function formatDateTime(dateString: string, Type: "DATETIME" | "DATE" | "TIME"): string {
+export function formatDateTime(dateString: string | Date, Type: "DATETIME" | "DATE" | "TIME"): string {
   const date = new Date(dateString);
 
   const currentOffset = date.getTimezoneOffset(); // Lấy độ lệch múi giờ hiện tại (phút)
   console.log(date)
   // Nếu múi giờ là UTC (offset = 0), cộng thêm 7 giờ
-  const hoursUTC7 = ():number => {
+  const hoursUTC7 = (): number => {
     if (currentOffset < 0) {
       return (date.getUTCHours() + 7)
     }

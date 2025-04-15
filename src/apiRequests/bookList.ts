@@ -23,6 +23,8 @@ const bookListApiRequest = {
             Authorization: `Bearer ${sessionToken}`
         }
     }),
+    getBookAvailableSlot: (body: any, sessionToken?: string) => http.post<CommonResType>('/api/BookList/get-booklist-available-slot', body),
+    getBookAvailableProduct: (body: any, sessionToken?: string) => http.post<CommonResType>('/api/BookList/get-booklist-available-product', body),
 
 
 }
