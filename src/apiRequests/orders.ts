@@ -9,4 +9,10 @@ export const orderApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+  getOrderHistory: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/get-order-history", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
 };

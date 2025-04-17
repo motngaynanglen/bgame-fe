@@ -75,7 +75,7 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
     ),
   },
 
-   {
+  {
     key: "group-1-1",
     label: (
       <Link
@@ -90,14 +90,14 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
   {
     key: "group-2",
     label: (
-      <Link href={"/staff/bookings"} className={clsx("font-medium text-base")}>
+      <p className={clsx("font-medium text-base")}>
         Quản lý lịch đặt
-      </Link>
+      </p>
     ),
     icon: <AiOutlineBook />,
     children: [
       {
-        key: "34",
+        key: "21",
         label: (
           <Link
             href={"/staff/timetable"}
@@ -109,7 +109,7 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
         icon: <AiOutlineUnorderedList />,
       },
       {
-        key: "35",
+        key: "22",
         label: (
           <Link
             href={"/staff/timetable/add"}
@@ -122,7 +122,53 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
       },
     ],
   },
- 
+  {
+    key: "group-3",
+    label: (
+      <p className={clsx("font-medium text-base")}>
+        Quản lý đơn hàng
+      </p>
+    ),
+    icon: <AiOutlineBook />,
+    children: [
+      {
+        key: "31",
+        label: (
+          <Link
+            href={"/staff/orders/pending"}
+            className={clsx("font-medium text-base")}
+          >
+            Nhận đơn chờ
+          </Link>
+        ),
+        icon: <AiOutlineUnorderedList />,
+      },
+      {
+        key: "32",
+        label: (
+          <Link
+            href={"/staff/orders/on-going"}
+            className={clsx("font-medium text-base")}
+          >
+            Đơn đang xử lý
+          </Link>
+        ),
+        icon: <MdAddChart />,
+      },
+      {
+        key: "33",
+        label: (
+          <Link
+            href={"/staff/orders"}
+            className={clsx("font-medium text-base")}
+          >
+            Danh sách đơn hàng
+          </Link>
+        ),
+        icon: <MdAddChart />,
+      },
+    ],
+  },
 ];
 export const staffRouter: DashboardRouter = {
   role: "staff",

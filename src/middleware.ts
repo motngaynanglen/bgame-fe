@@ -23,84 +23,84 @@ export function middleware(request: NextRequest) {
 
   // Bảng điều hướng - Verson 2
 
-  // if (!sessionToken || sessionToken === "") {
-  //   // Chưa đăng nhập thì không cho vào private paths
-  //   if (privatePaths.some((path) => pathname.startsWith(path))) {
-  //     return NextResponse.redirect(new URL("/login", request.url));
-  //   }
-  // }
+  if (!sessionToken || sessionToken === "") {
+    // Chưa đăng nhập thì không cho vào private paths
+    if (privatePaths.some((path) => pathname.startsWith(path))) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
 
-  // if (sessionToken) {
-  //   // Điều hướng và xác thực cho các yêu cầu vào trang admin
-  //   // Điều kiện này là không cần thiết vì đã khai báo ở dưới config, middleware sẽ không chạy nếu được truyền vào trang logout
-  //   // Để cho đẹp tí :v
-  //   if (pathname.includes("/logout")) {
-  //     return NextResponse.next();
-  //   } else {
-  //     switch (role) {
-  //       // case "ADMIN": {
-  //       //   if (authPaths.some((path) => pathname.startsWith(path))) {
-  //       //     return NextResponse.redirect(new URL("/admin", request.url));
-  //       //   }
-  //       //   if (!pathname.startsWith("/admin") && pathname == "/") {
-  //       //     return NextResponse.redirect(new URL("/admin", request.url));
-  //       //   }
-  //       //   if (!pathname.startsWith("/admin") && pathname != "/") {
-  //       //     return NextResponse.redirect(new URL("/logout", request.url));
-  //       //   }
-  //       //   break;
-  //       // }
-  //       case "MANAGER": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/manager", request.url));
-  //         }
-  //         if (!pathname.startsWith("/manager") && pathname == "/") {
-  //           return NextResponse.redirect(new URL("/manager", request.url));
-  //         }
-  //         if (!pathname.startsWith("/manager") && pathname != "/") {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       case "PARTNER": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/partner", request.url));
-  //         }
-  //         if (!pathname.startsWith("/partner") && pathname == "/") {
-  //           return NextResponse.redirect(new URL("/partner", request.url));
-  //         }
-  //         if (!pathname.startsWith("/partner") && pathname != "/") {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       case "STAFF": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/staff", request.url));
-  //         }
-  //         if (!pathname.startsWith("/staff") && pathname == "/") {
-  //           return NextResponse.redirect(new URL("/staff", request.url));
-  //         }
-  //         if (!pathname.startsWith("/staff") && pathname != "/") {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       case "CUSTOMER": {
-  //         if (authPaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/user/profile", request.url));
-  //         }
-  //         if (managePaths.some((path) => pathname.startsWith(path))) {
-  //           return NextResponse.redirect(new URL("/logout", request.url));
-  //         }
-  //         break;
-  //       }
-  //       default: {
-  //         break;
-  //       }
-  //     }
-  //   }
-  // }
+  if (sessionToken) {
+    // Điều hướng và xác thực cho các yêu cầu vào trang admin
+    // Điều kiện này là không cần thiết vì đã khai báo ở dưới config, middleware sẽ không chạy nếu được truyền vào trang logout
+    // Để cho đẹp tí :v
+    if (pathname.includes("/logout")) {
+      return NextResponse.next();
+    } else {
+      switch (role) {
+        // case "ADMIN": {
+        //   if (authPaths.some((path) => pathname.startsWith(path))) {
+        //     return NextResponse.redirect(new URL("/admin", request.url));
+        //   }
+        //   if (!pathname.startsWith("/admin") && pathname == "/") {
+        //     return NextResponse.redirect(new URL("/admin", request.url));
+        //   }
+        //   if (!pathname.startsWith("/admin") && pathname != "/") {
+        //     return NextResponse.redirect(new URL("/logout", request.url));
+        //   }
+        //   break;
+        // }
+        case "MANAGER": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/manager", request.url));
+          }
+          if (!pathname.startsWith("/manager") && pathname == "/") {
+            return NextResponse.redirect(new URL("/manager", request.url));
+          }
+          if (!pathname.startsWith("/manager") && pathname != "/") {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        case "PARTNER": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/partner", request.url));
+          }
+          if (!pathname.startsWith("/partner") && pathname == "/") {
+            return NextResponse.redirect(new URL("/partner", request.url));
+          }
+          if (!pathname.startsWith("/partner") && pathname != "/") {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        case "STAFF": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/staff", request.url));
+          }
+          if (!pathname.startsWith("/staff") && pathname == "/") {
+            return NextResponse.redirect(new URL("/staff", request.url));
+          }
+          if (!pathname.startsWith("/staff") && pathname != "/") {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        case "CUSTOMER": {
+          if (authPaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/user/profile", request.url));
+          }
+          if (managePaths.some((path) => pathname.startsWith(path))) {
+            return NextResponse.redirect(new URL("/logout", request.url));
+          }
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  }
 
   // Bảng điều hướng - Verson 1
   // Điều hướng và xác thực cho các yêu cầu vào trang admin
