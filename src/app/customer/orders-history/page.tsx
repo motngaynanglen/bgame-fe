@@ -1,67 +1,73 @@
 'use client';
+import { PagingResType } from "@/src/schemaValidations/common.schema";
 import { useRentalStore } from "@/src/store/rentalStore";
-import { Button, Empty } from "antd";
+import { Button, Empty, message, Tag } from "antd";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAppContext } from "../../app-provider";
+import { orderApiRequest } from "@/src/apiRequests/orders";
+import { formatDateTime, formatVND } from "@/src/lib/utils";
 
 interface DataType {
   key: string;
-  name: string;
-  age: number;
-  address: string;
-  tags: string[];
+  id: string;
+  transaction_id: string,
+  customer_id: string,
+  staff_id: string,
+  code: string,
+  email: string,
+  full_name: string,
+  phone_number: string,
+  address: string,
+  total_item: number,
+  total_price: string,
+  status: string,
+  created_at: string,
 }
 
-const dataSource = [
-  {
-    key: "1",
-    name: "Mike",
-    age: 32,
-    address: "10 Downing Street",
-  },
-  {
-    key: "2",
-    name: "John",
-    age: 42,
-    address: "10 Downing Street",
-  },
-];
-
-const columns = [
-  {
-    title: "Đơn hàng",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Ngày",
-    dataIndex: "date",
-    key: "date",
-  },
-  {
-    title: "Địa chỉ",
-    dataIndex: "address",
-    key: "address",
-  },
-  {
-    title: "Giá trị đơn hàng",
-    dataIndex: "value",
-    key: "value",
-  },
-  {
-    title: "Phương thức thanh toán",
-    dataIndex: "payment",
-    key: "payment",
-  },
-];
-
-export default function HistoryOrders() {
-  const { rentals } = useRentalStore();
+export default function HistoryOrders({ searchParams, }: { searchParams?: { query?: string; page?: string }; }) {
+  const [useData, setData] = useState<DataType[] | undefined>(undefined);
+  const [paging, setPaging] = useState<PagingResType | undefined>(undefined);
+  const [tableLoading, setTableLoading] = useState<boolean>(true);
+  const { user } = useAppContext();
   const router = useRouter();
+  const apiBody = {
+    paging: {
+      pageNum: searchParams?.page ?? 1,
+      pageSize: 10,
+    },
+  };
+  const fetchTableData = async () => {
+    setTableLoading(true);
+    if (!user) {
+      message.error("Bạn cần đăng nhập để đặt trước.");
+      setTableLoading(false);
+      return;
+    }
+    const response = await orderApiRequest.getOrderHistory(
+      apiBody,
+      user.token
+    );
+    const data: DataType[] | undefined = response.data?.map(
+      (item: DataType) => ({
+        ...item,
+        key: item.id, // Gán id vào key
+      })
+    );
+    setPaging(response.paging);
+    setTableLoading(false);
+    return data;
+  };
+  useEffect(() => {
+    fetchTableData().then((result) => {
+      setData(result);
+    });
+  }, [searchParams]);
   return (
     <div className="min-h-screen">
       <div className=" p-4 w-full max-w-4xl bg-white mt-2 rounded-lg shadow-md">
         <h2 className="text-xl font-bold mb-4">Đơn hàng</h2>
-        {rentals.length === 0 ? (
+        {useData?.length === 0 ? (
           <Empty description={<span>Bạn chưa có đơn hàng </span>}>
             <Button onClick={() => router.push("/products")} type="primary">
               Tìm mua board game
@@ -71,29 +77,25 @@ export default function HistoryOrders() {
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border p-2">Tên Board Game</th>
-                <th className="border p-2">Ngày/Giờ Thuê</th>
+                <th className="border p-2">Mã đơn hàng</th>
+                <th className="border p-2">Ngày tạo đơn</th>
                 <th className="border p-2">Phương Thức</th>
                 <th className="border p-2">Giá Tiền</th>
               </tr>
             </thead>
 
             <tbody>
-              {rentals.map((rental, index) => (
+              {useData?.map((rental, index) => (
                 <tr key={index} className="border text-center">
-                  <td className="border p-2">{rental.title}</td>
+                  <td className="border p-2">{rental.code || "Không có mã"}</td>
                   <td className="border p-2">
-                    {rental.method === "hours"
-                      ? `${rental.startDate} → ${rental.endDate}`
-                      : rental.startDate}
+                    {formatDateTime(rental.created_at,"DATE") }
                   </td>
                   <td className="border p-2">
-                    {rental.method === "hours"
-                      ? "Thuê theo giờ"
-                      : "Thuê theo ngày"}
+                    <Tag>{rental.status}</Tag>
                   </td>
                   <td className="border p-2">
-                    {rental.price.toLocaleString()}đ
+                    {formatVND(rental.total_price)}
                   </td>
                 </tr>
               ))}

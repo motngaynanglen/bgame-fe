@@ -25,6 +25,7 @@ import { formatDateTime, formatTimeStringRemoveSeconds, formatVND } from "@/src/
 import dayjs from "@/src/lib/dayjs ";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import { orderApiRequest } from "@/src/apiRequests/orders";
+import { PagingResType } from "@/src/schemaValidations/common.schema";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -45,11 +46,6 @@ interface DataType {
 }
 
 
-interface PagingType {
-    pageNum: number;
-    pageSize: number;
-    pageCount: number;
-}
 const statusName = ["THEO GIỜ", "THEO LƯỢT"];
 
 const role: string = "manager";
@@ -97,7 +93,7 @@ export default function StaffManagePendingOrders({
     const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
 
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
-    const [paging, setPaging] = useState<PagingType | undefined>(undefined);
+    const [paging, setPaging] = useState<PagingResType | undefined>(undefined);
     const [mode, setMode] = useState<number>(0);
     const [dateRange, setDateRange] = useState<[string, string] | null>(null);
     const [tableLoading, setTableLoading] = useState<boolean>(true);
@@ -296,7 +292,7 @@ export default function StaffManagePendingOrders({
                 pagination={false}
             />
             <br />
-            <AntdCustomPagination totalPages={paging?.pageCount ?? 1} />
+            <AntdCustomPagination totalPages={paging?.paging.pageCount ?? 1} />
             {/* {useData === undefined ? (
                 <TableSkeleton />
             ) : (
