@@ -26,6 +26,21 @@ const productApiRequest = {
     }),
     getby: (body: any) => http.post<CommonResType>('/api/Product/get-by', body),
     getById: (body: any) => http.post<CommonResType>('/api/Product/get-by-id', body),
+    getListByTempId: (body: any, sessionToken?: string) => http.post<CommonResType>('/api/Product/get-by-template-condition', body, {
+        headers: {
+            Authorization: `Bearer ${sessionToken}`
+        }
+    }),
+    updateToRent: (body: { code: string }, sessionToken?: string) => http.post<CommonResType>('/api/Product/change-product-to-rent', body, {
+        headers: {
+            Authorization: `Bearer ${sessionToken}`
+        }
+    }),
+    updateToSale: (body: { code: string }, sessionToken?: string) => http.post<CommonResType>('/api/Product/change-product-to-sales', body, {
+        headers: {
+            Authorization: `Bearer ${sessionToken}`
+        }
+    }),
 
 }
 export default productApiRequest;

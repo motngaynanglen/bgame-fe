@@ -103,7 +103,7 @@ const request = async <Response>(
     };
 
     try {
-        console.log(fullUrl);
+        console.log(axiosConfig);
         const response = await axiosInstance(axiosConfig);
         // const response = await axios(axiosConfig);
         console.log(response)

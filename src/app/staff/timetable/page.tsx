@@ -384,7 +384,7 @@ export default function StaffManageTimeTable({
             </Col>
             <Col span={12}>
               <Button color="red" variant="filled">
-                Delete
+                Cancel
               </Button>
             </Col>
           </Row>

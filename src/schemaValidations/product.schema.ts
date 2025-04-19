@@ -11,6 +11,8 @@ export interface productModel {
     description: string,
     rentPrice: number,
     rentPricePerHour: number
+    sales_quantity?: number,
+    rent_quantity?: number
 }
 import { z } from "zod";
 
@@ -30,3 +32,31 @@ export const productFullFormSchema = z.object({
 
 // Kiểu TypeScript tự động sinh từ schema
 export type ProductFullFormType = z.infer<typeof productFullFormSchema>;
+
+export const productResSchema = z.object({
+    id: z.string(),
+    product_template_id: z.string().optional().nullable(),
+    store_id: z.string().optional().nullable(),
+    product_group_ref_id: z.string().optional().nullable(),
+    supply_item_id: z.string().optional().nullable(),
+    code: z.string(),
+    product_name: z.string().optional().nullable(),
+    image: z.string().optional().nullable(),
+    price: z.number().optional().nullable(),
+    rent_price: z.number().optional().nullable(),
+    rent_price_per_hour: z.number().optional().nullable(),
+    publisher: z.string().optional().nullable(),
+    age: z.string().optional().nullable(),
+    number_of_player_min: z.number().optional().nullable(),
+    number_of_player_max: z.number().optional().nullable(),
+    hard_rank: z.string().optional().nullable(),
+    description: z.string().optional().nullable(),
+    condition: z.enum(["SALES_PRODUCT", "RENTAL_PRODUCT"]),
+    status: z.enum(["ACTIVE", "INACTIVE"]),
+    created_at: z.string(),
+    created_by: z.string(),
+    updated_at: z.string().optional().nullable(),
+    updated_by: z.string().optional().nullable(),
+});
+
+export type ProductResType = z.infer<typeof productResSchema>;

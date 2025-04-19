@@ -11,6 +11,9 @@ import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
 import productApiRequest from "@/src/apiRequests/product";
 
+const role: string = "manager";
+const baseUrl: string = "/" + role + "/" + "products";
+const manageUrl = (id:string): string => `${baseUrl}/${id}/manage`;
 interface DataType {
     key: string;
     id: string;
@@ -76,17 +79,12 @@ const columns: TableProps<DataType>['columns'] = [
         key: 'action',
         render: (_, record) => (
             <Space size="middle">
-                <a>Manage</a>
+                <Button type="link" href={manageUrl(record.id)}>Manage</Button>
                 <a>Delete</a>
             </Space>
         ),
     },
 ];
-
-
-const role: string = "manager";
-const baseUrl: string = "/" + role + "/" + "boardgames";
-const createUrl: string = baseUrl + "/" + "create";
 
 const breadcrumb: BreadcrumbItemType[] =
     [
