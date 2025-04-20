@@ -1,7 +1,6 @@
 import {
   keepPreviousData,
-  useQuery,
-  useQueryClient,
+  useQuery
 } from "@tanstack/react-query";
 import productApiRequest from "../apiRequests/product";
 

@@ -9,7 +9,7 @@ export default function ShoppingCart() {
     useCartStore();
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-sky-50 text-white pt-2 sm:p-4">
+    <div className="min-h-screen text-white pt-2 sm:p-4">
       <div className="max-w-5xl mx-auto space-y-8  border-4 border-gray-800 p-4 rounded-lg bg-gray-900">
         {/* Shopping Cart Header */}
         <h2 className="text-2xl font-bold ">Giỏ Hàng </h2>

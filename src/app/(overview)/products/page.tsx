@@ -87,30 +87,36 @@ export default function ProductsPage({
   return (
     <div className="flex container min-h-screen mx-auto max-w-screen-2xl">
       <main className="pt-4">
-        <div className=" mb-4 flex justify-start items-center divide-x-2 divide-gray-900">
-          <div className="pr-2">
-            <Button
-              type="primary"
-              icon={<FilterOutlined />}
-              onClick={showDrawer}
-            >
-              Bộ Lọc
-            </Button>
-          </div>
-
+        <div className=" mb-4 flex justify-between items-center border-2 border-gray-900 p-2 rounded-lg bg-gray-800 text-white">
           <div className="flex items-center">
-            <AppstoreOutlined className="mx-2" />
-            <p className="mr-2 font-bold">Sắp xếp theo</p>
-            <select
-              className="border-none bg-transparent outline-none text-gray-900 dark:text-white cursor-pointer"
-              defaultValue="default"
-            >
-              <option value="default">Bán chạy nhất</option>
-              <option value="price-asc">Giá tăng dần</option>
-              <option value="price-desc">Giá giảm dần</option>
-              <option value="popularity">Phổ biến</option>
-              <option value="newest">Mới nhất</option>
-            </select>
+            <h1 className="text-2xl font-bold pr-2">Sản phẩm</h1>
+            {/* <p className="text-gray-500 text-sm pr-2">{totalItems} sản phẩm</p> */}
+          </div>
+          <div className="flex divide-x-2 divide-gray-900">
+            <div className="pr-2 ">
+              <Button
+                type="primary"
+                icon={<FilterOutlined />}
+                onClick={showDrawer}
+              >
+                Bộ Lọc
+              </Button>
+            </div>
+
+            <div className="flex items-center">
+              <AppstoreOutlined className="mx-2" />
+              <p className="mr-2 font-bold">Sắp xếp theo</p>
+              <select
+                className="border-none  outline-none bg-gray-800 p-2 text-white cursor-pointer"
+                defaultValue="default"
+              >
+                <option value="default">Bán chạy nhất</option>
+                <option value="price-asc">Giá tăng dần</option>
+                <option value="price-desc">Giá giảm dần</option>
+                <option value="popularity">Phổ biến</option>
+                <option value="newest">Mới nhất</option>
+              </select>
+            </div>
           </div>
         </div>
         <div className="flex flex-col lg:flex-row">
@@ -129,7 +135,7 @@ export default function ProductsPage({
             </div> */}
 
           {/* Drawer cho mobile */}
-          <Drawer title="Bộ Lọc" placement="left" onClose={onClose} open={open}>
+          <Drawer title="Bộ Lọc" placement="right" onClose={onClose} open={open}>
             <CategoryFilter />
           </Drawer>
           {/* Product Cards */}
