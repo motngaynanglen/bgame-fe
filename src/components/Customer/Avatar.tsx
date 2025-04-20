@@ -1,46 +1,28 @@
-import React, { useState } from "react";
-import { Button, message, Upload } from "antd";
-import type { GetProp, UploadFile, UploadProps } from "antd";
-import ImgCrop from "antd-img-crop";
+import uploadApiRequest from "@/src/apiRequests/upload";
+import { useAppContext } from "@/src/app/app-provider";
 import { UploadOutlined } from "@ant-design/icons";
-import authApiRequest from "@/src/apiRequests/auth";
+import type { GetProp, UploadFile, UploadProps } from "antd";
+import { Button, message, Upload } from "antd";
+import ImgCrop from "antd-img-crop";
+import { useState } from "react";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 export default function Avatar() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const { user } = useAppContext(); // Lấy thông tin user từ context
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const handleFileSubmit = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setSelectedFile(file);
-    console.log("File selected:", file);
-
-    // Tạo FormData và đảm bảo key là 'file'
+  const handleAutoUpload = async (file: File) => {
     const formData = new FormData();
-    formData.append("file", file); // API yêu cầu key là 'file'
+    formData.append("files", file);
 
     try {
-      const response = await fetch("", {
-        method: "POST",
-        body: formData,
-        headers: {
-          // Không đặt Content-Type ở đây, để trình duyệt tự thêm boundary
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data);
+      const response = await uploadApiRequest.uploadImage(formData, user?.token);
+      setImageUrl(response.urls[0]);
+      message.success("Tải lên hình ảnh thành công.");
     } catch (error) {
       console.error("Upload failed:", error);
+      message.error("Tải lên hình ảnh thất bại.");
     }
   };
 
@@ -61,23 +43,13 @@ export default function Avatar() {
 
   const props: UploadProps = {
     name: "file",
+    accept: "image/*",
     showUploadList: false,
-    action: "http://14.225.207.72/api/upload/image",
-
-    headers: {
-      authorization: "authorization-text",
+    customRequest: async ({ file, onSuccess }) => {
+      await handleAutoUpload(file as File);
+      onSuccess?.("ok");
     },
-    onChange(info) {
-      if (info.file.status !== "uploading") {
-        console.log(info.file.response.url);
-      }
-      if (info.file.status === "done") {
-        message.success(`${info.file.name} cập nhật thành công.`);
-        setImageUrl(info.file.response.url);
-      } else if (info.file.status === "error") {
-        message.error(`${info.file.name} cập nhật thất bại.`);
-      }
-    },
+    onPreview,
   };
 
   return (
@@ -90,14 +62,11 @@ export default function Avatar() {
         width="50"
       />
       <ImgCrop rotationSlider>
-        {/* <Upload>
-          <input type="file" accept="image/*" onChange={handleFileSubmit} />
-          {selectedFile && <p>Ảnh đã chọn: {selectedFile.name}</p>}
-        </Upload> */}
-        <Upload {...props} onPreview={onPreview}>
+        <Upload {...props} >
           <Button icon={<UploadOutlined />}>Click to Upload</Button>
         </Upload>
       </ImgCrop>
+
     </div>
   );
 }

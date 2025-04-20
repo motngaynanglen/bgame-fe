@@ -4,13 +4,31 @@ import { useAppContext } from "../app-provider";
 import { CldUploadButton, CldUploadWidget } from "next-cloudinary";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Avatar from "../../components/Customer/Avatar";
+import { Divide } from "react-feather";
+import { DatePicker, DatePickerProps, Divider, Modal } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import userApiRequest from "@/src/apiRequests/user";
+
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 interface IFormInput {
-  name: string;
+  personID: string;
+  fullName: string;
   email: string;
-  birthDate: string;
-  address: string;
-  gender: string;
+  dateOfBirth: string;
+  image: string;
+  gender: number;
+  phoneNumber: string;
+}
+
+const dateFormat = "DD/MM/YYYY";
+
+interface IFormInputAddress {
+  name: string;
   phone: string;
+  address: string;
 }
 
 interface UploadResponse {
@@ -27,57 +45,65 @@ export default function ProfilePage() {
     formState: { errors },
   } = useForm<IFormInput>();
 
+  const {
+    register: registerAddress,
+    handleSubmit: handleSubmitAddress,
+    formState: { errors: errorsAddress },
+  } = useForm<IFormInputAddress>();
+
+  const onSubmitAddress: SubmitHandler<IFormInputAddress> = (data) => {
+    console.log(data);
+  };
+
   const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleFileSubmit = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setSelectedFile(file);
-    console.log("File selected:", file);
-
-    // Tạo FormData và đảm bảo key là 'file'
-    const formData = new FormData();
-    formData.append("file", file); // API yêu cầu key là 'file'
-
-    try {
-      const response = await fetch("http://14.225.207.72/api/upload/image", {
-        method: "POST",
-        body: formData,
-        headers: {
-          // Không đặt Content-Type ở đây, để trình duyệt tự thêm boundary
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data);
-    } catch (error) {
-      console.error("Upload failed:", error);
-    }
+  const showModal = () => {
+    setIsModalOpen(true);
   };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const onChange: DatePickerProps["onChange"] = (date, dateString) => {
+    console.log(date, dateString);
+  };
+
+  const { data, isLoading, isError, error } = useQuery<IFormInput>({
+    queryKey: ["userProfile", user?.token],
+    queryFn: async () => {
+      const res = await userApiRequest.updateProfile(
+        {
+          personID: "",
+          fullName: "",
+          email: "",
+          phoneNumber: "",
+          dateOfBirth: "",
+          image: "",
+          gender: 1,
+        },
+        user?.token
+      );
+      return res;
+    },
+  });
 
   console.log(user);
   return (
-    <div className=" flex flex-col items-center bg-sky-50">
-      <div className="w-full max-w-4xl bg-white pt-2 p-6 rounded-lg shadow-md ">
+    <div className=" flex flex-col items-center ">
+      <div className="w-full bg-white pt-2 p-6 rounded-lg shadow-md ">
         <h1 className="text-2xl font-semibold mb-4 text-black-2">
           Thông tin cá nhân
         </h1>
         <div className="flex justify-around">
           <div className="">
             <Avatar />
-            {/* <div>
-              <input type="file" onChange={handleFileSubmit} />
-              {selectedFile && <p>Ảnh đã chọn: {selectedFile.name}</p>}
-            </div> */}
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -87,10 +113,12 @@ export default function ProfilePage() {
                   className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
                   type="text"
                   defaultValue={user?.name}
-                  {...register("name", { required: "Tên là bắt buộc" })}
+                  {...register("fullName", { required: "Tên là bắt buộc" })}
                 />
-                {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                {errors.fullName && (
+                  <p className="text-red-500 text-sm">
+                    {errors.fullName.message}
+                  </p>
                 )}
               </div>
               <div>
@@ -110,26 +138,11 @@ export default function ProfilePage() {
                   <p className="text-red-500 text-sm">{errors.email.message}</p>
                 )}
               </div>
-              <div>
-                <label className="block text-gray-700">Ngày sinh</label>
-                <input
-                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
-                  defaultValue="11/2/2000"
-                  {...register("birthDate", {
-                    required: "Ngày sinh là bắt buộc",
-                  })}
-                />
-                {errors.birthDate && (
-                  <p className="text-red-500 text-sm">
-                    {errors.birthDate.message}
-                  </p>
-                )}
-              </div>
 
               <div>
                 <label className="block text-gray-700">Giới tính</label>
                 <select
-                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
+                  className="w-full border border-gray-300 rounded px-3 py-2.5 mt-1 text-black-2"
                   {...register("gender", { required: "Giới tính là bắt buộc" })}
                 >
                   <option value="male">Nam</option>
@@ -147,13 +160,34 @@ export default function ProfilePage() {
                 <input
                   className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2 "
                   defaultValue="0969696969"
-                  {...register("phone", {
+                  {...register("phoneNumber", {
                     required: "số điện thoại là bắt buộc",
                   })}
                 />
-                {errors.address && (
+                {errors.phoneNumber && (
                   <p className="text-red-500 text-sm">
-                    {errors.address.message}
+                    {errors.phoneNumber.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-gray-700">Ngày sinh</label>
+                {/* <input
+                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
+                  defaultValue="11/2/2000"
+                  {...register("dateOfBirth", {
+                    required: "Ngày sinh là bắt buộc",
+                  })}
+                /> */}
+                <DatePicker
+                  onChange={onChange}
+                  size="large"
+                  defaultValue={dayjs("10/01/2001", dateFormat)}
+                  format={dateFormat}
+                />
+                {errors.dateOfBirth && (
+                  <p className="text-red-500 text-sm">
+                    {errors.dateOfBirth.message}
                   </p>
                 )}
               </div>
@@ -170,7 +204,8 @@ export default function ProfilePage() {
                   </p>
                 )}
               </div> */}
-              <div className="flex justify-end mt-6">
+            </div>
+            <div className="flex justify-end mt-6">
               <button
                 type="submit"
                 className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -178,18 +213,73 @@ export default function ProfilePage() {
                 Lưu thay đổi
               </button>
             </div>
-            </div>
-            {/* <div className="flex justify-end mt-6">
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                Lưu thay đổi
-              </button>
-            </div> */}
           </form>
         </div>
       </div>
+      <div className="w-full bg-white pt-2 p-6 rounded-lg shadow-md mt-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold mb-4 text-black-2">
+            Địa chỉ giao hàng của bạn
+          </h1>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+            onClick={() => showModal()}
+          >
+            Thêm địa chỉ mới{" "}
+          </button>
+        </div>
+
+        <div className="flex flex-col space-y-4"></div>
+      </div>
+      <Modal
+        title="Basic Modal"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <form onSubmit={handleSubmitAddress(onSubmitAddress)}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-gray-700">Tên người nhận</label>
+              <input
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
+                type="text"
+                defaultValue={user?.name}
+                {...register("fullName", { required: "Tên là bắt buộc" })}
+              />
+              {errorsAddress.name && (
+                <p className="text-red-500 text-sm">
+                  {errorsAddress.name.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-gray-700">Điện thoại</label>
+              <input
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
+                defaultValue=""
+              />
+              {errorsAddress.phone && (
+                <p className="text-red-500 text-sm">
+                  {errorsAddress.phone.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="block text-gray-700">Địa chỉ</label>
+            <input
+              className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
+              defaultValue=""
+            />
+            {errorsAddress.address && (
+              <p className="text-red-500 text-sm">
+                {errorsAddress.address.message}
+              </p>
+            )}
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

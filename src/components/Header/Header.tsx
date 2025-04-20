@@ -99,7 +99,7 @@ export default function Header() {
         <Suspense>
           <HeaderSearch placeholder="Tìm kiếm board game yêu thích của bạn ..." />
         </Suspense>
-        <div className="flex justify-items-center space-x-6 sm:space-x-6 lg:space-x-10">
+        <div className="flex justify-items-center items-center space-x-6 sm:space-x-6 lg:space-x-10">
           {/* <Link href="/rental">
             <button className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded">
               Thuê board game
@@ -107,13 +107,13 @@ export default function Header() {
           </Link> */}
           <Link href="/cart">
             <Badge count={totalQuantity} showZero>
-              <BsBag className="size-7 fill-green-700" />
+              <BsBag className="size-8 fill-green-700" />
             </Badge>
           </Link>
 
           <Link href="/login" hidden={!isLogin}>
             <BsPersonCircle
-              className="size-7
+              className="size-8
            fill-green-700"
             />
           </Link>

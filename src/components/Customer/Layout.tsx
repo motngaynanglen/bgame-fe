@@ -17,7 +17,7 @@ export default function LayoutCustomer({
         </div>
 
         <div className="flex-grow bg-gray-50">
-          <div className="container mx-auto max-w-screen-xl px-2 sm:px-4 lg:px-6 flex relative">
+          <div className="container mx-auto max-w-screen-2xl px-2 sm:px-4 lg:px-6 flex relative">
             <aside className="w-1/4  bg-slate-600 text-white sticky top-[64px] h-[calc(100vh-64px)] border-r-2 border-gray-200">
               <SideBar />
             </aside>
