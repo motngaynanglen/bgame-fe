@@ -92,4 +92,15 @@ export function formatDateTime(dateString: string | Date, Type: "DATETIME" | "DA
 
   }
 }
+export const formatVND = (value: string | number): string => {
+  const number = typeof value === 'string' ? Number(value) : value;
+
+  if (isNaN(number)) return '0 ₫'; // hoặc bạn có thể trả về giá trị mặc định khác
+
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0,
+  }).format(number);
+};
 
