@@ -88,6 +88,18 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
     icon: <MdAddChart />,
   },
   {
+    key: "group-1-2",
+    label: (
+      <Link
+        href={"/staff/sale/detail-online"}
+        className={clsx("font-medium text-base")}
+      >
+        Chi tiết đơn hàng online  
+      </Link>
+    ),
+    icon: <MdAddChart />,
+  },
+  {
     key: "group-2",
     label: (
       <Link href={"/staff/bookings"} className={clsx("font-medium text-base")}>
