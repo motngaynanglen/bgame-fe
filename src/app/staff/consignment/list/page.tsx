@@ -141,7 +141,7 @@ const AddButtons: CollapseProps["items"] = [
   },
 ];
 
-export default function list({
+export default function List({
   searchParams,
 }: {
   searchParams?: { query?: string; page?: string };

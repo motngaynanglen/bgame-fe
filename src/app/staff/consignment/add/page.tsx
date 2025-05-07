@@ -85,7 +85,7 @@ const ProgressBar: React.FC<{ step: number; totalSteps: number }> = ({
   );
 };
 
-export default function add() {
+export default function Add() {
   const[mode, setMode] = useState<number>(0);
   const [step, setStep] = useState(1);
   const [createdProduct, setCreatedProduct] = useState<

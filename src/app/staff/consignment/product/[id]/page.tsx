@@ -24,7 +24,7 @@ const breadcrumb: BreadcrumbItemType[] = [
   },
 ];
 
-export default function page({ params, searchParams }: { params: { id: string }, searchParams?: { query?: string; page?: string; }; }) {
+export default function Page({ params, searchParams }: { params: { id: string }, searchParams?: { query?: string; page?: string; }; }) {
   const user = useAppContext().user;
   console.log(params.id);
   const productTemplate = useProduct({
