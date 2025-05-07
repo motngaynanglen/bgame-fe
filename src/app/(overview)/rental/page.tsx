@@ -1,34 +1,19 @@
 "use client";
 import productApiRequest from "@/src/apiRequests/product";
-import storeApiRequest from "@/src/apiRequests/stores";
 import CategoryFilter from "@/src/components/Filter/CategoryFilter";
 import CardProductRent from "@/src/components/Products/CardProductRent";
-import {
-  AppstoreOutlined,
-  FilterOutlined,
-  MailOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Checkbox,
-  Drawer,
-  MenuProps,
-  Pagination,
-  Select,
-  Space,
-} from "antd";
-import { useEffect, useState } from "react";
-import { AiOutlineClockCircle } from "react-icons/ai";
-import { BsPeople } from "react-icons/bs";
-import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
-import { useAppContext } from "../../app-provider";
-import { useStoreStore } from "@/src/store/shopStore";
-import { useQuery } from "@tanstack/react-query";
-import { useStores } from "@/src/hooks/useStores";
+import CartRental from "@/src/components/Products/CartRental";
 import { useSelectedStore } from "@/src/hooks/useSelectStoreId";
+import { useStores } from "@/src/hooks/useStores";
+import { FilterOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Drawer, MenuProps, Pagination, Space } from "antd";
+import { useState } from "react";
+import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
 import Loading from "../loading";
 
-type MenuItem = Required<MenuProps>["items"][number];
+import { useEffect } from "react";
+import { useRentalStore } from "@/src/store/rentalStore";
 
 interface BoardGame {
   id: string;
@@ -48,97 +33,6 @@ interface BoardGame {
   complexity: number;
 }
 
-const items: MenuItem[] = [
-  {
-    key: "sub1",
-    label: "Thể loại",
-    icon: <MailOutlined />,
-    children: [
-      {
-        key: "family",
-        label: (
-          <div>
-            <Checkbox>Gia Đình</Checkbox>
-          </div>
-        ),
-      },
-      {
-        key: "party",
-        label: (
-          <div>
-            <Checkbox>Party</Checkbox>
-          </div>
-        ),
-      },
-      {
-        key: "twoPlayer",
-        label: (
-          <div>
-            <Checkbox>Hai người</Checkbox>
-          </div>
-        ),
-      },
-    ],
-  },
-  {
-    key: "sub2",
-    label: "Giá tiền",
-    icon: <AppstoreOutlined />,
-    children: [
-      { key: "5", label: "Tất cả" },
-      { key: "6", label: "Dưới 100,000đ" },
-      { key: "7", label: "100,000đ - 500,000đ" },
-      { key: "8", label: "500,000đ - 1,000,000đ" },
-      { key: "9", label: "1,000,000đ - 5,000,000đ" },
-      { key: "10", label: "5,000,000đ - 10,000,000đ" },
-      { key: "11", label: "Trên 10,000,000đ" },
-    ],
-  },
-  // {
-  //   type: "divider",
-  // },
-  {
-    key: "sub3",
-    label: "Thời gian",
-    icon: <AiOutlineClockCircle />,
-    children: [
-      { key: "15", label: "Tất cả" },
-      { key: "16", label: "Dưới 30 phút" },
-      { key: "17", label: "30 - 60 phút" },
-      { key: "18", label: "60 - 120 phút" },
-      { key: "19", label: "Trên 120 phút" },
-    ],
-  },
-  {
-    key: "sub4",
-    label: "Số người chơi",
-    icon: <BsPeople />,
-    children: [
-      { key: "20", label: "Tất cả" },
-      { key: "21", label: "1 người" },
-      { key: "22", label: "2 người" },
-      { key: "23", label: "2-4 người" },
-      { key: "24", label: "5-8 người" },
-      { key: "25", label: "8+ người" },
-    ],
-  },
-];
-
-const storeSearchBody = {
-  search: "",
-  filter: [""],
-};
-
-interface Store {
-  id: string;
-  store_name: string;
-  address: string;
-}
-
-interface SelectStores {
-  value: string;
-  label: string;
-}
 export default function BoardGameRental() {
   const [open, setOpen] = useState(false);
   const {
@@ -157,6 +51,16 @@ export default function BoardGameRental() {
     setOpen(false);
   };
 
+  const setStoreId = useRentalStore(
+    (state: { setStoreId: any }) => state.setStoreId
+  );
+
+  useEffect(() => {
+    if (selectedStoreId) {
+      setStoreId(selectedStoreId);
+    }
+  }, [selectedStoreId, setStoreId]);
+
   const fetchBoardGamesByStoreId = async (storeId: string) => {
     try {
       const res = await productApiRequest.getListByStoreId({
@@ -165,8 +69,7 @@ export default function BoardGameRental() {
         paging: {
           pageNum: 1,
           pageSize: 10,
-          
-        }
+        },
       });
       return res;
     } catch (error) {
@@ -186,26 +89,14 @@ export default function BoardGameRental() {
   });
 
   if (storesLoading || rentalLoading) {
-    return (
-      <Loading/>
-    );
+    return <Loading />;
   }
 
-  if (storesError || rentalError) {
-    return (
-      <div>
-        Mất kết nối từ server:{" "}
-        {storesErrorData?.message ||
-          rentalErrorData?.message ||
-          "Unknown error"}
-      </div>
-    );
-  }
   return (
     <div>
       <Breadcrumb />
-      <div className="flex container min-h-screen mx-auto max-w-screen-2xl">
-        <main className="pt-4">
+      <div className="flex container min-h-screen mx-auto max-w-screen-3xl">
+        <main className=" W-4/6 p-4">
           <div className=" mb-4">
             <div className="flex ">
               <Space wrap>
@@ -219,19 +110,6 @@ export default function BoardGameRental() {
                 <p className="text-black font-semibold">
                   Địa điểm cửa hàng cho thuê:
                 </p>
-
-                {/* {isLoadingStores ? ( // Kiểm tra loading trước khi render Select
-                  <div>Loading stores...</div>
-                ) : (
-                  <Select
-                    defaultValue={
-                      stores.length > 0 ? stores[0].label : undefined
-                    }
-                    style={{ width: 400 }}
-                    options={stores}
-                    onChange={(value) => setSelectedStoreId(value)}
-                  />
-                )} */}
 
                 {stores.length > 0 ? (
                   <select
@@ -306,6 +184,9 @@ export default function BoardGameRental() {
             total={50}
           />
         </main>
+        <aside className="w-2/6 bg-slate-600 text-white sticky top-[64px] h-[calc(100vh-64px)] border-l-2 border-gray-200">
+          <CartRental />
+        </aside>
       </div>
     </div>
   );

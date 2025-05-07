@@ -181,6 +181,56 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
       },
     ],
   },
+  {
+    key: "group-4",
+    label: (
+      <Link
+        href={"/staff/sale/detail-online"}
+        className={clsx("font-medium text-base")}
+      >
+        Quản lý ký gửi  
+      </Link>
+    ),
+    icon: <MdAddChart />,
+    children: [
+      {
+        key: "40",
+        label: (
+          <Link
+            href={"/staff/consignment/pending"}
+            className={clsx("font-medium text-base")}
+          >
+            Đơn ký gửi chờ duyệt
+          </Link>
+        ),
+        icon: <AiOutlineUnorderedList />,
+      },
+      {
+        key: "41",
+        label: (
+          <Link
+            href={"/staff/consignment/list"}
+            className={clsx("font-medium text-base")}
+          >
+            Danh sách sản phẩm ký gửi
+          </Link>
+        ),
+        icon: <AiOutlineUnorderedList />,
+      },
+      {
+        key: "42",
+        label: (
+          <Link
+            href={"/staff/consignment/add"}
+            className={clsx("font-medium text-base")}
+          >
+            Tạo mới sản phẩm ký gửi
+          </Link>
+        ),
+        icon: <MdAddChart />,
+      },
+    ]
+  },
 ];
 export const staffRouter: DashboardRouter = {
   role: "staff",

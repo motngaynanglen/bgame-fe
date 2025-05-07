@@ -3,9 +3,9 @@ import { persist } from 'zustand/middleware';
 
 interface CartItem {
   id: string;
-  name: string;
+  name: string | null | undefined;
   image: string;
-  price: number;
+  price: number ;
   quantity: number;
 }
 

@@ -2,10 +2,10 @@
 
 import authApiRequest from "@/src/apiRequests/auth";
 import { useAppContext } from "@/src/app/app-provider";
-import Loading from "@/src/components/Loading/Loading";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
+import Loading from "../../loading";
 
 function LogoutLogic() {
   const router = useRouter();

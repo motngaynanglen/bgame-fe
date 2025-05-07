@@ -3,7 +3,6 @@ import bookListApiRequest from "@/src/apiRequests/bookList";
 import { useAppContext } from "@/src/app/app-provider";
 import { HttpError } from "@/src/lib/httpAxios";
 import { useRentalStore } from "@/src/store/rentalStore";
-import type { GetProps } from "antd";
 import {
   Button,
   DatePicker,
@@ -16,27 +15,12 @@ import {
 } from "antd";
 import type { CheckboxGroupProps } from "antd/es/checkbox";
 import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CustomDatePicker from "../DateRantalPicker/DateRental";
 import CustomRangePicker from "../DateRantalPicker/HourRental";
 import { notifyError, notifySuccess } from "../Notification/Notification";
-
-type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
-
-dayjs.extend(customParseFormat);
-
-const { RangePicker } = DatePicker;
-
-const range = (start: number, end: number) => {
-  const result = [];
-  for (let i = start; i < end; i++) {
-    result.push(i);
-  }
-  return result;
-};
-
+import StarBorder from "../Bits/StarBorder ";
 
 const options: CheckboxGroupProps<string>["options"] = [
   { label: "Thuê theo ngày", value: "days" },
@@ -46,6 +30,7 @@ const options: CheckboxGroupProps<string>["options"] = [
 function CardProductRent({
   id,
   idGroup,
+  
   storeId,
   image,
   title,
@@ -61,6 +46,7 @@ function CardProductRent({
 }: {
   id: string;
   idGroup: string;
+ 
   storeId: string | null;
   image: string;
   title: string;
@@ -78,6 +64,7 @@ function CardProductRent({
   const [api, contextHolder] = notification.useNotification();
   const { user } = useAppContext();
   const router = useRouter();
+  const { cartItems, addToCart, removeFromCart } = useRentalStore();
 
   //dong nay la state de hien thi modal va chon ngay
   const [selectedOption, setSelectedOption] = useState<"days" | "hours">(
@@ -90,7 +77,7 @@ function CardProductRent({
   //----------------------------------------------
 
   //dong nay la ham xu ly khi nhan nut dat truoc
-  const { addRental } = useRentalStore();
+  // const { addRental } = useRentalStore();
   const handleSubmit = async () => {
     if (!selectedDate) {
       message.error("Vui lòng chọn thời gian thuê.");
@@ -106,8 +93,8 @@ function CardProductRent({
       bookListItems: [
         {
           productTemplateID: id,
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ],
       storeId: storeId, // Store ID (Cập nhật nếu cần)
       from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
@@ -158,7 +145,7 @@ function CardProductRent({
       price: 30000, // Giá mẫu
     };
 
-    addRental(rentalData);
+    // addRental(rentalData);
     // console.log("Đặt trước thành công");
     // openNotificationWithIcon("success");
     setOpenResponsive(false);
@@ -169,10 +156,21 @@ function CardProductRent({
     //  nếu đã có người đặt trùng giờ thì thông báo lỗi
   };
 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const product = {
+      productTemplateID: idGroup,
+      name: title,
+      quantity: quantity,
+      image: image,
+    };
+    addToCart(product.productTemplateID, product.name, product.image);
+    notifySuccess("Thành công!", `${title} đã được thêm vào giỏ.`);
+    console.log("Thêm vào giỏ hàng:", id);
+  };
+
   const defaultImage = "/assets/images/bg1.jpg";
 
-  const { RangePicker } = DatePicker;
-  //body post len api
   const imageList = image.split("||");
   return (
     <div className="relative">
@@ -180,28 +178,22 @@ function CardProductRent({
       {contextHolder}
       <div
         onClick={() => setOpenResponsive(true)}
-        className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+        className="rounded-lg border max-w-[300px] border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800"
       >
-        <div className="relative h-full w-full">
+        <div className="relative h-[200px] w-full overflow-hidden rounded-t-md">
           <img
-            className={`h-50 w-full  object-cover transition-opacity rounded-t-md 
-              ${isRented ? " opacity-50" : ""}
-                `}
+            className={`w-full h-full object-cover transition-opacity rounded-t-md `}
             src={imageList[0]}
             alt=""
             onError={(e) => {
               (e.target as HTMLImageElement).src = defaultImage;
             }}
           />
-          {isRented && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white font-semibold">
-              Đang được thuê
-            </div>
-          )}
+        
         </div>
         <div className="pt-2">
           <div
-            className="uppercase text-base sm:text-xl font-medium leading-tight text-gray-900 hover:text-gray-500 dark:text-white 
+            className="uppercase text-base sm:text-lg font-medium leading-tight text-gray-900 hover:text-gray-500 dark:text-white 
     line-clamp-2 overflow-hidden break-words h-[36px] sm:h-[52px]"
           >
             {title}
@@ -219,47 +211,25 @@ function CardProductRent({
               (5)
             </p>
           </div>
-          <div className="mt-2">
-            {(quantity && quantity !== 0) ? (<span>Gổm {quantity} sản phẩm.</span>) : <></>}
-          </div>
-          {/* <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
-            <li className="flex items-center gap-2">
-              <AiOutlineClockCircle className="fill-black" />
-              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                {time}
-              </p>
-            </li>
-            <li className="flex items-center gap-2">
-              <BsPeople className="fill-black" />
-              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                {player}
-              </p>
-            </li>
-          </ul>
 
-          <ul className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
-            <li className="flex items-center gap-2">
-              <GoPeople className="fill-black" />
-              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                {age}+
-              </p>
-            </li>
-            <li className="flex items-center gap-2">
-              <LuBrain className="" />
-              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-                {complexity}/5
-              </p>
-            </li>
-          </ul> */}
-          {/* <button  onClick={(e) => e.stopPropagation()}>
-              <Link
-                href="/product-detail"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                
-              >
-                Đặt trước
-              </Link>
-            </button> */}
+          <div className="mt-2">
+            {quantity && quantity !== 0 ? (
+              <span>Gổm {quantity} sản phẩm.</span>
+            ) : (
+              <></>
+            )}
+          </div>
+          <div className="mt-4">
+            <StarBorder
+              as="button"
+              className="custom-class w-full"
+              color="cyan"
+              speed="2s"
+              onClick={handleAddToCart}
+            >
+              Đặt trước
+            </StarBorder>
+          </div>
         </div>
       </div>
 

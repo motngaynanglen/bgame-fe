@@ -1,5 +1,5 @@
 import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
-import { Menu, MenuProps, Button, Tag } from "antd";
+import { Menu, MenuProps, Button, Tag, Slider } from "antd";
 import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
@@ -30,20 +30,27 @@ export default function CategoryFilter() {
         { key: "Hai Người", label: "Hai người" },
       ],
     },
-    {
-      key: "sub2",
-      label: "Giá tiền",
-      icon: <AppstoreOutlined />,
-      children: [
-        // { key: "5", label: "Tất cả" },
-        { key: "Dưới 100,000đ", label: "Dưới 100,000đ" },
-        { key: "100,000đ - 500,000đ", label: "100,000đ - 500,000đ" },
-        { key: "500,000đ - 1,000,000đ", label: "500,000đ - 1,000,000đ" },
-        { key: "1,000,000đ - 5,000,000đ", label: "1,000,000đ - 5,000,000đ" },
-        { key: "5,000,000đ - 10,000,000đ", label: "5,000,000đ - 10,000,000đ" },
-        { key: "Trên 10,000,000đ", label: "Trên 10,000,000đ" },
-      ],
-    },
+    // {
+    //   key: "sub2",
+    //   label: "Giá tiền",
+    //   icon: <AppstoreOutlined />,
+    //   children: [
+    //     { key: "money", label: "money" },
+    //     {
+    //       key: "slider",
+    //       label: <PriceRangeSlider />,
+    //     },
+    //   ],
+    //   // children: [
+    //   //   // { key: "5", label: "Tất cả" },
+    //   //   { key: "Dưới 100,000đ", label: "Dưới 100,000đ" },
+    //   //   { key: "100,000đ - 500,000đ", label: "100,000đ - 500,000đ" },
+    //   //   { key: "500,000đ - 1,000,000đ", label: "500,000đ - 1,000,000đ" },
+    //   //   { key: "1,000,000đ - 5,000,000đ", label: "1,000,000đ - 5,000,000đ" },
+    //   //   { key: "5,000,000đ - 10,000,000đ", label: "5,000,000đ - 10,000,000đ" },
+    //   //   { key: "Trên 10,000,000đ", label: "Trên 10,000,000đ" },
+    //   // ],
+    // },
     {
       key: "sub3",
       label: "Thời gian",
@@ -95,7 +102,10 @@ export default function CategoryFilter() {
           Áp dụng bộ lọc
         </Button>
       </div>
-
+      <div className="p-2">
+        <p className="text-sm text-gray-500 mb-2">Chọn khoảng giá</p>
+        <PriceRangeSlider />
+      </div>
       {/* Menu */}
       <Menu
         onClick={handleMenuClick}
@@ -103,6 +113,42 @@ export default function CategoryFilter() {
         mode="inline"
         items={items}
       />
+    </div>
+  );
+}
+
+export function PriceRangeSlider() {
+  const [range, setRange] = useState<[number, number]>([0, 1000000]);
+
+  const handleChange = (value: number[]) => {
+    setRange([value[0], value[1]]);
+  };
+
+  return (
+    <div className="">
+      <Slider
+        range
+        min={0}
+        max={5000000}
+        step={10000}
+        value={range}
+        onChange={handleChange}
+        tooltip={{ formatter: (value) => `${value?.toLocaleString()}đ` }}
+      />
+
+      <div className="flex justify-between text-sm text-gray-700 mt-3">
+        <div>
+          <strong>Min:</strong> {range[0].toLocaleString()}đ
+        </div>
+        <div>
+          <strong>Max:</strong> {range[1].toLocaleString()}đ
+        </div>
+      </div>
+
+      <form>
+        <input type="hidden" name="min-value" value={range[0]} />
+        <input type="hidden" name="max-value" value={range[1]} />
+      </form>
     </div>
   );
 }

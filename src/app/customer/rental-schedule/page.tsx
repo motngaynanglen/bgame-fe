@@ -30,7 +30,7 @@ interface responseModel {
 }
 
 const RentalHistory = () => {
-  const { rentals } = useRentalStore();
+  const { cartItems } = useRentalStore();
   const router = useRouter();
 
 
@@ -46,7 +46,7 @@ const RentalHistory = () => {
   return (
     <div className=" p-4 w-full max-w-4xl bg-white mt-2 rounded-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Lịch sử thuê</h2>
-      {rentals.length === 0 ? (
+      {cartItems.length === 0 ? (
         <Empty description={<span>Bạn chưa có đơn đặt thuê</span>}>
           <Button onClick={() => router.push("/rental")} type="primary">
             Tìm thuê board game
@@ -64,7 +64,7 @@ const RentalHistory = () => {
           </thead>
 
           <tbody>
-            {rentals.map((rental, index) => (
+            {/* {cartItems.map((rental, index) => (
               <tr key={index} className="border text-center">
                 <td className="border p-2">{rental.title}</td>
                 <td className="border p-2">
@@ -79,7 +79,7 @@ const RentalHistory = () => {
                 </td>
                 <td className="border p-2">{rental.price.toLocaleString()}đ</td>
               </tr>
-            ))}
+            ))} */}
           </tbody>
         </table>
       )}
