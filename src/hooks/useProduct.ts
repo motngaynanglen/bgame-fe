@@ -15,7 +15,7 @@ interface BoardGame {
   category: string;
   player: string;
   complexity: number;
-  age: number;
+  age: string;
   number_of_players_min: number;
   number_of_players_max: number;
   hard_rank: number;
