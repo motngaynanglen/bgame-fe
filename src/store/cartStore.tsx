@@ -1,13 +1,14 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface CartItem {
   id: string;
   name: string | null | undefined;
   image: string;
-  price: number ;
+  price: number;
   quantity: number;
 }
+
 
 interface CartStore {
   cart: CartItem[];
@@ -15,17 +16,22 @@ interface CartStore {
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
   calculateTotal: () => number;
-  updateQuantity: (productId: string, quantity: number) => void; // Thêm hàm này
+  updateQuantity: (productId: string, quantity: number) => void;
+  buyNowItem: CartItem | null;
+  setBuyNowItem: (item: CartItem | null, quantity?: number) => void;
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       cart: [],
+      buyNowItem: null,
 
       addToCart: (product, quantity = 1) =>
         set((state) => {
-          const existingItem = state.cart.find((item) => item.id === product.id);
+          const existingItem = state.cart.find(
+            (item) => item.id === product.id
+          );
 
           if (existingItem) {
             return {
@@ -53,15 +59,22 @@ export const useCartStore = create<CartStore>()(
           0
         ),
 
-      updateQuantity: (productId, quantity) => // Thêm hàm này
+      updateQuantity: (
+        productId,
+        quantity // Thêm hàm này
+      ) =>
         set((state) => ({
           cart: state.cart.map((item) =>
             item.id === productId ? { ...item, quantity } : item
           ),
         })),
+
+      
+
+      setBuyNowItem: (item) => set({ buyNowItem: item }),
     }),
     {
-      name: 'cart',
+      name: "cart",
       storage: {
         getItem: (name) => {
           const item = sessionStorage.getItem(name);

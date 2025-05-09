@@ -7,7 +7,9 @@ import { Image, InputNumber, notification, Rate } from "antd";
 import Link from "next/link";
 import { useState } from "react";
 import { useCartStore } from "../../store/cartStore";
+import Magnet from "../Bits/Magnet ";
 import { notifySuccess } from "../Notification/Notification";
+import { useRouter } from "next/navigation";
 
 interface BoardGameInfo {
   id: string;
@@ -42,16 +44,33 @@ function ProductDetails({
   productId: string | string[] | undefined;
   onProductData: (data: BoardGameInfo | undefined) => void;
 }) {
+  const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   // const [boardgame, setBoardgame] = useState<BoardGameInfo | null>(null);
   const [api, contextHolder] = notification.useNotification();
   const { stores } = useStores();
 
-  const { addToCart } = useCartStore();
+  const { addToCart, setBuyNowItem } = useCartStore();
   const { addToWishlist } = useWishlistStore();
   const handleChange = (value: number | null) => {
     if (value !== null) {
       setQuantity(value);
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (data) {
+      const product = {
+        id: data.data.id,
+        product_group_ref_id: data.data.product_group_ref_id,
+        name: data.data.product_name,
+        price: data.data.sell_price,
+        quantity: quantity,
+        image: data.data.image,
+      };
+      setBuyNowItem(product, quantity);
+      router.push("/check-out");
+      console.log(product);
     }
   };
 
@@ -118,9 +137,9 @@ function ProductDetails({
     enabled: !!productId,
   });
 
-  if (isLoading) {
-    return <div>Loading board games...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Loading board games...</div>;
+  // }
 
   if (isError) {
     return <div>Mất kết nối từ server: {error?.message}</div>;
@@ -190,14 +209,14 @@ function ProductDetails({
 
           <div className="flex items-center space-x-2">
             <span className="text-gray-500">Nhà phát hành:</span>
-            <Link href="#" className="text-orange-500 hover:underline">
+            <Link href="#" className="text-tertiary hover:underline">
               {data?.data.publisher}
             </Link>
           </div>
           {/* category */}
           <div className="flex items-center space-x-2">
             <span className="text-gray-500">Mã sản phẩm: </span>
-            <Link href="#" className="text-orange-500 hover:underline">
+            <Link href="#" className="text-tertiary hover:underline">
               {data?.data.code}
             </Link>
           </div>
@@ -206,13 +225,13 @@ function ProductDetails({
             <span className="text-gray-500">Trạng thái:</span>
             <span className="text-green-500">
               {data.data.sales_quantity > 0 ? (
-                <p className="text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">
+                <span className="font-medium text-secondary dark:text-green-400">
                   Còn hàng
-                </p>
+                </span>
               ) : (
-                <p className="text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
+                <span className="font-medium text-red-500 dark:text-red-400">
                   Hết hàng
-                </p>
+                </span>
               )}
             </span>
           </div>
@@ -234,25 +253,28 @@ function ProductDetails({
             <button
               disabled={data.data.sales_quantity <= 0}
               onClick={handleAddProduct}
-              className={`bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600 ${
+              className={`bg-gradient-to-b from-tertiary to-gray-700 border  text-white px-4 py-2 rounded-lg hover:bg-orange-600 ${
                 data.data.sales_quantity > 0
                   ? ""
                   : "opacity-50 cursor-not-allowed"
               }`}
             >
-              Thêm sản phẩm vào giỏ hàng
+              Thêm vào giỏ hàng
             </button>
             {/* btn mua ngay */}
-            {/* <button
-              disabled={data.data.sales_quantity <= 0}
-              className={`bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 ${
-                data.data.sales_quantity > 0
-                  ? ""
-                  : "opacity-50 cursor-not-allowed"
-              }`}
-            >
-              Mua ngay
-            </button> */}
+            <Magnet padding={50} disabled={false} magnetStrength={4}>
+              <button
+                disabled={data.data.sales_quantity <= 0}
+                className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary ${
+                  data.data.sales_quantity > 0
+                    ? ""
+                    : "opacity-50 cursor-not-allowed"
+                }`}
+                onClick={handleBuyNow}
+              >
+                Mua ngay
+              </button>
+            </Magnet>
           </div>
 
           {/* btn them wishlist */}
@@ -260,13 +282,13 @@ function ProductDetails({
             <li>
               <button
                 // onClick={handleAddWishlist}
-                className="bg-orange-500  text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+                className="bg-gradient-to-b from-tertiary to-gray-700 border  text-white px-4 py-2 rounded-lg hover:bg-orange-600"
               >
                 Thêm vào danh sách yêu thích
               </button>
             </li>
           </ul>
-          <div>
+          {/* <div>
             <h6 className="font-semibold">Phương thức thanh toán</h6>
             <div className="flex space-x-4">
               {["visa2", "mastercard", "vnpay", "paypal", "pay"].map((item) => (
@@ -278,11 +300,20 @@ function ProductDetails({
                 />
               ))}
             </div>
-          </div>
+          </div> */}
           <div>
             <h2 className="p-1 font-semibold">
               Có {stores.length} cửa hàng còn sản phẩm
             </h2>
+            <div>
+              {/* <AnimatedList
+                items={stores.map((store) => store.store_name)}
+                onItemSelect={(item, index) => console.log(item, index)}
+                showGradients={true}
+                enableArrowNavigation={true}
+                displayScrollbar={true}
+              /> */}
+            </div>
             {stores.length > 0 ? (
               <ul
                 className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white 
