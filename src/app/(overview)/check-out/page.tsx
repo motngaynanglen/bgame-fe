@@ -221,7 +221,7 @@ export default function CheckOut() {
               <div key={item.id || index} className="flex items-center mb-4">
                 <img
                   src={imageUrls[0]}
-                  alt={item.name}
+                  alt={item.name || "Product image"}
                   className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
                 />
                 <div>

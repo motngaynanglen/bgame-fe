@@ -130,7 +130,7 @@ export default function AccountMenu({ hidden }: { hidden: boolean }) {
                   fill=""
                 />
               </svg>
-              Log Out
+              Đăng xuất
             </Link>
           </div>
         )}

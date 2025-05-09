@@ -55,7 +55,7 @@ const config: Config = {
     },
     extend: {
       textColor: {
-        'default': '#010101', // Đặt màu đen làm màu chữ mặc định
+        default: "#010101", // Đặt màu đen làm màu chữ mặc định
       },
       colors: {
         current: "currentColor",
@@ -74,8 +74,10 @@ const config: Config = {
         bodydark: "#AEB7C0",
         bodydark1: "#DEE4EE",
         bodydark2: "#8A99AF",
-        primary: "#3C50E0",
-        secondary: "#80CAEE",
+        primary: "#016236",
+        secondary: "#02894B",
+        tertiary: "#06040A",
+        quaternary: "#BED3AB",
         stroke: "#E2E8F0",
         gray: {
           ...colors.gray,
@@ -315,6 +317,15 @@ const config: Config = {
         5: "0px 1px 5px rgba(0, 0, 0, 0.2)",
       },
       keyframes: {
+        shine: {
+          "0%": { "background-position": "100%" },
+          "100%": { "background-position": "-100%" },
+        },
+        gradient: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
         linspin: {
           "100%": { transform: "rotate(360deg)" },
         },
@@ -327,6 +338,14 @@ const config: Config = {
           "75%": { transform: "rotate(810deg)" },
           "87.5%": { transform: "rotate(945deg)" },
           "100%": { transform: "rotate(1080deg)" },
+        },
+        "star-movement-bottom": {
+          "0%": { transform: "translate(0%, 0%)", opacity: "1" },
+          "100%": { transform: "translate(-100%, 0%)", opacity: "0" },
+        },
+        "star-movement-top": {
+          "0%": { transform: "translate(0%, 0%)", opacity: "1" },
+          "100%": { transform: "translate(100%, 0%)", opacity: "0" },
         },
         "left-spin": {
           "0%": { transform: "rotate(130deg)" },
@@ -360,6 +379,11 @@ const config: Config = {
         },
       },
       animation: {
+        shine: "shine 5s linear infinite",
+        "star-movement-bottom":
+          "star-movement-bottom linear infinite alternate",
+        "star-movement-top": "star-movement-top linear infinite alternate",
+        gradient: "gradient 8s linear infinite",
         linspin: "linspin 1568.2353ms linear infinite",
         easespin: "easespin 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both",
         "left-spin":

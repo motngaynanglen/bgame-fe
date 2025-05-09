@@ -88,7 +88,7 @@ export function middleware(request: NextRequest) {
         }
         case "CUSTOMER": {
           if (authPaths.some((path) => pathname.startsWith(path))) {
-            return NextResponse.redirect(new URL("/user/profile", request.url));
+            return NextResponse.redirect(new URL("/customer", request.url));
           }
           if (managePaths.some((path) => pathname.startsWith(path))) {
             return NextResponse.redirect(new URL("/logout", request.url));

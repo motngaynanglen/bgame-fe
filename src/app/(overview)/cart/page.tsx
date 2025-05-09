@@ -63,7 +63,7 @@ export default function ShoppingCart() {
                         width={96}
                         height={96}
                         src={imageUrls[0]}
-                        alt={item.name}
+                        // alt={item.name}
                         className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
                         loading="lazy"
                       />

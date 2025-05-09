@@ -11,7 +11,6 @@ function CardHotDeal({
   price,
   soldOut,
   complexity,
-  age,
   time,
   player,
   quantity,
@@ -23,7 +22,6 @@ function CardHotDeal({
   price: number;
   soldOut: boolean;
   complexity: number;
-  age: number;
   time: string;
   player: string;
   quantity: number;
@@ -50,14 +48,14 @@ function CardHotDeal({
     console.log("Thêm vào giỏ hàng:", id);
   };
   return (
-    <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105 card-product w-full min-w-0">
+    <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105 card-product w-full min-w-0 ">
       <>{contextHolder}</>
       <div className="relative w-full h-[400px] perspective-1000">
         <div className=" w-full h-full transform-3d">
           {/* Mặt sau */}
           <div className="card-back backface-hidden overflow-hidden  absolute rotate-y-180 w-full h-full  rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
             <img
-              src={"/assets/images/Card-back.jpg"}
+              src={"/assets/images/Card-back2.jpg"}
               alt=""
               className={`w-full h-full object-cover transition-opacity rounded-t-md `}
             />
