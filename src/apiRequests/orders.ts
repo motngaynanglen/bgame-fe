@@ -15,4 +15,10 @@ export const orderApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+    getOrderById: (body: any, sessionToken?: string) => 
+    http.post<CommonResType>("/api/Order/get-by-id", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
 };

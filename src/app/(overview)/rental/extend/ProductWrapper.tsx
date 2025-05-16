@@ -1,7 +1,7 @@
 "use client";
 import bookListApiRequest from "@/src/apiRequests/bookList";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
-import CardProductRent from "@/src/components/Products/CardProductRent";
+import CardProductRent from "@/src/components/Card/CardProductRent";
 import { Card } from "antd";
 import { useEffect, useState } from "react";
 

@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "../../ClickOutside";
-import UserImage from "@/src/public/assets/images/blog-author.png"
+import UserImage from "@/src/public/assets/images/blog-author.png";
 import { AiOutlineDown } from "react-icons/ai";
+import { useAppContext } from "@/src/app/app-provider";
 
 interface ProfileType {
-  name: string
-  role: string
-  avatar: string | undefined
+  name: string;
+  role: string;
+  avatar: string | undefined;
 }
+
 // const items: MenuProps['items'] = [
 //   {
 //     key: '1',
@@ -58,11 +60,13 @@ interface ProfileType {
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { user } = useAppContext();
+
   const profile: ProfileType = {
-    name: "Đoàn Sỹ Bách",
-    role: "FullstackDev",
-    avatar: undefined
-  }
+    name: user?.name ?? "Nhân viên mới",
+    role: user?.role ?? "Nhân viên",
+    avatar: undefined,
+  };
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
@@ -168,7 +172,10 @@ const DropdownUser = () => {
               </Link>
             </li>
           </ul>
-          <Link href={"/logout"} className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+          <Link
+            href={"/logout"}
+            className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+          >
             <svg
               className="fill-current"
               width="22"

@@ -1,6 +1,6 @@
 "use client";
 import CategoryFilter from "@/src/components/Filter/CategoryFilter";
-import CardProduct from "@/src/components/Products/CardProduct";
+import CardProduct from "@/src/components/Card/CardProduct";
 import { useProducts } from "@/src/hooks/useProduct";
 import { AppstoreOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Drawer, Pagination } from "antd";
@@ -87,16 +87,16 @@ export default function ProductsPage({
   return (
     <div className="container min-h-screen mx-auto max-w-screen-3xl">
       <div className="flex flex-col lg:flex-row">
-        <aside className="hidden sm:block w-1/4  text-white sticky top-[64px] h-[calc(100vh-64px)] border-l-2 border-gray-200 overflow-y-auto">
+        <aside className="hidden lg:block w-1/4  text-white sticky top-[64px] h-[calc(100vh-64px)] border-l-2 border-gray-200 overflow-y-auto">
           <CategoryFilter />
         </aside>
-        <main className="w-full md:w-3/4 p-4">
+        <main className="w-full lg:w-3/4 p-4">
           <div className="mb-4 flex flex-col lg:flex-row justify-between items-start lg:items-center border-2 border-gray-900 p-4 rounded-lg bg-gray-800 text-white space-y-4 lg:space-y-0">
             <div className="flex items-center">
               <h1 className="text-xl md:text-2xl font-bold pr-2">Sản phẩm</h1>
             </div>
 
-            <div className="flex flex-col-reverse lg:flex-row lg:items-center w-full lg:w-auto">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center w-full lg:w-auto">
               {/* Bộ lọc */}
               <div className="flex justify-end lg:hidden mb-2">
                 <Button
@@ -110,7 +110,7 @@ export default function ProductsPage({
               </div>
 
               {/* Sắp xếp */}
-              <div className="flex items-center justify-between w-full lg:justify-end">
+              <div className="flex items-center justify-between w-full sm:justify-end">
                 <AppstoreOutlined className="mx-2" />
                 <p className="mr-2 font-bold whitespace-nowrap">Sắp xếp theo</p>
                 <select
@@ -137,7 +137,7 @@ export default function ProductsPage({
           </Drawer>
           <div className="flex flex-col lg:flex-row">
             {/* Product Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 w-full">
               {products
                 // .filter((boardgame) => boardgame.sales_quantity > 0)
                 .map((product) => {

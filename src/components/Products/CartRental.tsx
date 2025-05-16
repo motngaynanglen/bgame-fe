@@ -133,8 +133,8 @@ export default function CartRental() {
                     <div className="ml-4 sm:ml-0 mr-4">
                       <h1 className="text-lg font-semibold">{item.name}</h1>
 
-                      <div className="flex items-center justify-center space-x-4 sm:hidden">
-                        <InputNumber min={1} defaultValue={item.quantity} />
+                      <div className="flex items-center justify-start space-x-4 ">
+                        <span className="text-base">SL: {item.quantity}</span>
                       </div>
                     </div>
 

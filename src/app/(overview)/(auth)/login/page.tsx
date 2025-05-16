@@ -51,6 +51,7 @@ export default function LoginPage() {
         name: result.data.name,
         role: result.data.role,
         token: result.data.jwt,
+        expiresAt: expires, // <-- thêm dòng này để lưu expiresAt
       });
       router.push("/");
       router.refresh();

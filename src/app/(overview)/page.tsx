@@ -23,7 +23,7 @@ const data = [
     label: "Trading Card Game",
     height: 300,
   },
-  { id: 4, image: "/assets/images/bg4.jpg", label: "Phụ Kiện", height: 300 },
+  // { id: 4, image: "/assets/images/bg4.jpg", label: "Phụ Kiện", height: 300 },
   {
     id: 5,
     image: "/assets/images/bg5.jpg",
@@ -35,7 +35,7 @@ const data = [
 export default function Home() {
   return (
     <div className="bg-gray-100 ">
-      <section className="relative h-[600px] bg-gradient-to-b from-gray-900 to-gray-100 py-20 text-center">
+      <section className="relative  min-h-[600px] md:min-h-[auto] bg-gradient-to-b from-gray-900 to-gray-100 py-20 text-center">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-white mb-4">
             Board Game Impact

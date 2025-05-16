@@ -236,7 +236,7 @@ export default function Consignment() {
               Impact. Boardgame Impact sẽ cố gắng bán nó thay mặt tôi với mức
               giá tôi đã nhập ở trên. Tôi vẫn giữ quyền sở hữu mặt hàng này cho
               đến khi nó được bán. Người Mua mặt hàng này sẽ có 3 ngày để trả
-              lại nó cho Boardgame Impacts nếu họ cảm thấy tình trạng của mặt
+              lại nó cho Boardgame Impact nếu họ cảm thấy tình trạng của mặt
               hàng không đúng như đã ghi trên phiếu này (trừ trường hợp không
               được trả lại). Sau 3 ngày,Boardgame Impact sẽ cấp cho tôi một
               khoản tín dụng cửa hàng bằng 75% giá mà tôi đã nhập ở trên. Thông
@@ -244,9 +244,9 @@ export default function Consignment() {
               được. Boardgame Impact có thể trả lại mặt hàng không bán được này
               cho tôi. Tôi hiểu rằng nếu tôi không đến lấy mặt hàng trong vòng
               30 ngày kể từ khi được thông báo rằng mặt hàng đang được trả lại
-              cho tôi, mặt hàng đó sẽ trở thành tài sản của Here Be Books &
-              Games. Tôi hiểu rằng tôi không được gửi bán lại một mặt hàng không
-              bán được trong ít nhất 60 ngày sau khi nó được trả lại.
+              cho tôi, mặt hàng đó sẽ trở thành tài sản củaBoardgame Impact. Tôi
+              hiểu rằng tôi không được gửi bán lại một mặt hàng không bán được
+              trong ít nhất 60 ngày sau khi nó được trả lại.
             </p>
             <p className="text-sm text-gray-600 mb-2">
               Boardgame Impact không chịu trách nhiệm về bất kỳ thiệt hại nào

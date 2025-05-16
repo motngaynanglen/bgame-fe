@@ -1,7 +1,7 @@
 "use client";
 import productApiRequest from "@/src/apiRequests/product";
 import CategoryFilter from "@/src/components/Filter/CategoryFilter";
-import CardProductRent from "@/src/components/Products/CardProductRent";
+import CardProductRent from "@/src/components/Card/CardProductRent";
 import CartRental from "@/src/components/Products/CartRental";
 import { useSelectedStore } from "@/src/hooks/useSelectStoreId";
 import { useStores } from "@/src/hooks/useStores";
@@ -14,6 +14,7 @@ import Loading from "../loading";
 
 import { useEffect } from "react";
 import { useRentalStore } from "@/src/store/rentalStore";
+import TimeSlotDisplay from "./extend/TimeSlotDisplay";
 
 interface BoardGame {
   id: string;
@@ -88,15 +89,18 @@ export default function BoardGameRental() {
     enabled: !!selectedStoreId,
   });
 
-  if (storesLoading || rentalLoading) {
+  
+
+  if (storesLoading) {
     return <Loading />;
   }
 
   return (
     <div>
       <Breadcrumb />
+      <TimeSlotDisplay storeid={selectedStoreId ?? ""} />
       <div className="flex container min-h-screen mx-auto max-w-screen-3xl">
-        <main className=" W-4/6 p-4">
+        <main className=" lg:w-3/4 p-4">
           <div className=" mb-4">
             <div className="flex ">
               <Space wrap>
@@ -107,6 +111,16 @@ export default function BoardGameRental() {
                 >
                   Bộ Lọc
                 </Button>
+
+                <Button
+                  type="primary"
+                  icon={<FilterOutlined />}
+                  onClick={showDrawer}
+                  className="block lg:hidden "
+                >
+                  Giỏ hàng thuê
+                </Button>
+
                 <p className="text-black font-semibold">
                   Địa điểm cửa hàng cho thuê:
                 </p>
@@ -133,15 +147,6 @@ export default function BoardGameRental() {
             {/* Filter */}
             {/* <div className="hidden lg:block lg:basis-1/4 pr-4">
               <CategoryFilter />
-            </div> */}
-            {/* <div className="block lg:hidden mb-4">
-              <Button
-                type="primary"
-                icon={<FilterOutlined />}
-                onClick={showDrawer}
-              >
-                Bộ Lọc
-              </Button>
             </div> */}
 
             {/* Drawer cho mobile */}
@@ -184,7 +189,7 @@ export default function BoardGameRental() {
             total={50}
           />
         </main>
-        <aside className="w-2/6 bg-slate-600 text-white sticky top-[64px] h-[calc(100vh-64px)] border-l-2 border-gray-200">
+        <aside className="hidden lg:block w-1/4 bg-slate-600 text-white sticky top-[64px] h-[calc(100vh-64px)] border-l-2 border-gray-200">
           <CartRental />
         </aside>
       </div>

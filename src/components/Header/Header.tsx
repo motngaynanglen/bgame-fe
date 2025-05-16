@@ -30,14 +30,14 @@ const items: MenuItem[] = [
         key: "discount",
       },
       {
+        label: "Phụ kiện",
+        key: "accessory",
+      },
+      {
         label: <Link href={"/used-games"}>Hàng đã qua sử dụng</Link>,
         key: "used",
       },
     ],
-  },
-  {
-    label: "Phụ kiện",
-    key: "accessory",
   },
   {
     label: <Link href={"/rental"}>Thuê board game</Link>,
