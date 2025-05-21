@@ -55,7 +55,7 @@ function CardHotDeal({
           {/* Mặt sau */}
           <div className="card-back backface-hidden overflow-hidden  absolute rotate-y-180 w-full h-full  rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
             <img
-              src={"/assets/images/Card-back2.jpg"}
+              src={"/assets/images/card-back2.jpg"}
               alt=""
               className={`w-full h-full object-cover transition-opacity rounded-t-md `}
             />

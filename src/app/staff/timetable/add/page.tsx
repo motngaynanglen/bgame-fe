@@ -2,7 +2,7 @@
 import productApiRequest from "@/src/apiRequests/product";
 import storeApiRequest from "@/src/apiRequests/stores";
 import CategoryFilter from "@/src/components/Filter/CategoryFilter";
-import CardProductRent from "@/src/components/Products/CardProductRent";
+import CardProductRent from "@/src/components/Card/CardProductRent";
 import {
   AppstoreOutlined,
   FilterOutlined,
