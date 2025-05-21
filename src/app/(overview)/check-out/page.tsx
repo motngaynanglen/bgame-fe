@@ -8,9 +8,10 @@ import { HttpError } from "@/src/lib/httpAxios";
 import { useCartStore } from "@/src/store/cartStore";
 import { List, Modal, Radio, RadioChangeEvent } from "antd";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAppContext } from "../../app-provider";
+import { formatVND } from "@/src/lib/utils";
 
 interface FormData {
   email: string;
@@ -36,11 +37,19 @@ const data = [
 
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
-  const { cart, calculateTotal, clearCart, buyNowItem  } = useCartStore();
+  const { cart, calculateTotal, clearCart, buyNowItem } = useCartStore();
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+
   const { user } = useAppContext();
   const [value, setValue] = useState(1);
   const productsToCheckout = buyNowItem ? [buyNowItem] : cart;
+
+
+  const totalProductCount = productsToCheckout.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Tính số cửa hàng duy nhất (dựa vào item.storeID hoặc item.shopID)
+  const uniqueStoreIDs = new Set(productsToCheckout.map(item => item.storeId));
+  const totalStores = uniqueStoreIDs.size;
 
   const onChange = (e: RadioChangeEvent) => {
     setValue(e.target.value);
@@ -71,7 +80,7 @@ export default function CheckOut() {
       console.log("Đơn hàng đã được tạo:", body);
       if (res.statusCode == "200") {
         setOpenResponsive(true);
-        clearCart(); 
+        clearCart();
 
       } else
         notifyError(
@@ -92,7 +101,12 @@ export default function CheckOut() {
       }
     }
   };
-  
+
+  const [clientOnlyTotal, setClientOnlyTotal] = useState("0");
+
+  useEffect(() => {
+    setClientOnlyTotal(formatVND(calculateTotal()));
+  }, [cart]);
 
   return (
     <div className="container mx-auto p-4 bg-sky-50 min-h-screen ">
@@ -213,25 +227,31 @@ export default function CheckOut() {
 
         {/* ds sản phẩm, chọn phương thúc thanh toán  */}
         <div className="w-full ps-4 lg:w-1/3 mt-6 lg:mt-0">
-          <h2 className="text-xl font-semibold mb-4">
-            Đơn hàng 
-            {/* ({totalQuantity} sản phẩm) */}
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold mb-2">
+              Đơn hàng:
+            </h2>
+            <span>Gồm {totalProductCount} sản phẩm, từ {totalStores} cửa hàng</span>
+          </div>
+
           {productsToCheckout.map((item, index) => {
             const imageUrls = item.image?.split("||") || [];
             return (
-              <div key={item.id || index} className="flex items-center mb-4">
+              <div
+                key={item.id || index}
+                className={"flex items-center mb-4 pb-2" + (index === productsToCheckout.length - 1 ? "" : " border-b-2")}
+              >
                 <img
                   src={imageUrls[0]}
                   alt={item.name || "Product image"}
-                  className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
+                  className="w-20 h-20 object-cover rounded mr-4"
                 />
-                <div>
-                  <p className="text-lg uppercase">{item.name}</p>
-                  <p className="font-semibold">
-                    {item.price?.toLocaleString() || '0'}đ{" "}
+                <div className="flex-1">
+                  <p className="font-semibold">{item.name}</p>
+                  <p className="text-md text-gray-600">
+                    Giá: {formatVND(item.price)}
                   </p>
-                  <p>Số lượng: {item.quantity }</p>
+                  <p>Số lượng: {item.quantity}</p>
                 </div>
               </div>
             );
@@ -270,7 +290,7 @@ export default function CheckOut() {
           <div className="mb-4">
             <div className="flex justify-between">
               <span>Tạm tính</span>
-              <span>{calculateTotal().toLocaleString("vi-VN")}₫</span>
+              <span>{clientOnlyTotal}</span>
             </div>
             <div className="flex justify-between">
               <span>Phí vận chuyển</span>
@@ -279,7 +299,7 @@ export default function CheckOut() {
           </div>
           <div className="flex justify-between font-semibold text-xl mb-4">
             <span>Tổng cộng</span>
-            <span>{calculateTotal().toLocaleString("vi-VN")}₫</span>
+            <span>{clientOnlyTotal}</span>
           </div>
 
           <div className="my-6">

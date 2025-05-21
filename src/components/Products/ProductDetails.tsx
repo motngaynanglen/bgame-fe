@@ -67,6 +67,12 @@ function ProductDetails({
         price: data.data.sell_price,
         quantity: quantity,
         image: data.data.image,
+        storeId: undefined,
+        storeList: stores.map((store) => ({
+          id: store.id,
+          name: store.store_name,
+          quantity: 0,
+        })),
       };
       setBuyNowItem(product, quantity);
       router.push("/check-out");
@@ -87,6 +93,12 @@ function ProductDetails({
         price: data.data.sell_price,
         quantity: quantity,
         image: data.data.image,
+        storeId: undefined,
+        storeList: stores.map((store) => ({
+          id: store.id,
+          name: store.store_name,
+          quantity: quantity,
+        }))
       };
       addToCart(product, quantity); // Thêm sản phẩm với số lượng được chọn
       notifySuccess(
