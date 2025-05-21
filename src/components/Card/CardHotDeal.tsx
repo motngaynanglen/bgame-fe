@@ -1,5 +1,5 @@
 "use client";
-import { useCartStore } from "@/src/store/cartStore";
+import { CartItem, useCartStore } from "@/src/store/cartStore";
 import { Button, notification, Rate } from "antd";
 import { useRouter } from "next/navigation";
 import { notifySuccess } from "../Notification/Notification";
@@ -35,13 +35,15 @@ function CardHotDeal({
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const product = {
+    const product:CartItem = {
       id: id,
-      product_group_ref_id: product_group_ref_id,
+      // product_group_ref_id: product_group_ref_id,
       name: title,
       price: price,
       quantity: quantity,
       image: image,
+      storeId: undefined,
+      storeList: undefined,
     };
     addToCart(product, (quantity = 1));
     notifySuccess("Thành công!", `${title} đã được thêm vào giỏ.`);
