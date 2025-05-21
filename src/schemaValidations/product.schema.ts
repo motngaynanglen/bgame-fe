@@ -47,6 +47,7 @@ export const productResSchema = z.object({
     rent_price_per_hour: z.number().optional().nullable(),
     publisher: z.string().optional().nullable(),
     age: z.string().optional().nullable(),
+    rent_quantity: z.number().optional(),
     number_of_player_min: z.number().optional().nullable(),
     number_of_player_max: z.number().optional().nullable(),
     hard_rank: z.string().optional().nullable(),

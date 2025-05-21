@@ -26,11 +26,11 @@ function Masonry({ data }: MasonryProps) {
   useEffect(() => {
     const updateColumns = () => {
       if (window.matchMedia("(min-width: 1500px)").matches) {
-        setColumns(5);
-      } else if (window.matchMedia("(min-width: 1000px)").matches) {
         setColumns(4);
+      } else if (window.matchMedia("(min-width: 1000px)").matches) {
+        setColumns(2);
       } else if (window.matchMedia("(min-width: 600px)").matches) {
-        setColumns(3);
+        setColumns(2);
       } else {
         setColumns(1);
       }
@@ -56,7 +56,8 @@ function Masonry({ data }: MasonryProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const fixedHeight = 250;
+  const fixedHeight =
+    typeof window !== "undefined" && window.innerWidth < 600 ? 100 : 250;
   const [heights, gridItems] = useMemo<[number[], GridItem[]]>(() => {
     const heights = new Array(columns).fill(0);
     const gridItems = data.map((child) => {

@@ -7,7 +7,7 @@ import { AiOutlineDown } from "react-icons/ai";
 import { useAppContext } from "@/src/app/app-provider";
 
 interface ProfileType {
-  name: string;
+  name: string | "";
   role: string;
   avatar: string | undefined;
 }
@@ -63,7 +63,7 @@ const DropdownUser = () => {
   const { user } = useAppContext();
 
   const profile: ProfileType = {
-    name: user?.name ?? "Nhân viên mới",
+    name: user?.name ?? "",
     role: user?.role ?? "Nhân viên",
     avatar: undefined,
   };
