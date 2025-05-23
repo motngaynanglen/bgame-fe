@@ -7,6 +7,7 @@ import Link from "next/link";
 import { formatVND } from "@/src/lib/utils";
 import { set } from "zod";
 import storeApiRequest from "@/src/apiRequests/stores";
+import { notifyError } from "@/src/components/Notification/Notification";
 
 const { Option } = Select;
 
@@ -50,19 +51,28 @@ export default function TemplateForm() {
 
   const fetchStoreList = async (templateId: string): Promise<StoreItem[]> => {
     setStoreLoading(true);
+    try {
+      const res = await storeApiRequest.getListAndProductCountById({
+        product_template_id: templateId,
+      });
+      const { data } = res.data;
 
-    const res = await storeApiRequest.getListAndProductCountById({
-      product_template_id: templateId,
-    });
-    const { data } = res.data;
+      // Map dữ liệu trả về sang định dạng dùng trong cart
+      return data.store.map((store: any) => ({
+        id: store.store_id,
+        name: store.store_name,
+        quantity: store.sales_count, // hoặc tính tùy theo logic bạn cần
+      }));
+    } catch (error) {
+      notifyError(
+        "Đặt trước thất bại",
+        "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+      );
 
-    setStoreLoading(false);
-    // Map dữ liệu trả về sang định dạng dùng trong cart
-    return data.store.map((store: any) => ({
-      id: store.store_id,
-      name: store.store_name,
-      quantity: store.sales_count, // hoặc tính tùy theo logic bạn cần
-    }));
+      return [];
+    } finally {
+      setStoreLoading(false);
+    }
 
   };
   const reloadStoreList = async (templateId: string) => {
@@ -104,29 +114,29 @@ export default function TemplateForm() {
               </div>
               <div className="flex flex-col gap-2 items-end">
                 <div className="gap-2 flex items-center">
-                <Select
-                  disabled={storeLoading}
-                  loading={storeLoading}
-                  showSearch
-                  placeholder="Chọn cửa hàng"
-                  style={{ width: 200 }}
-                  optionFilterProp="children"
-                  onChange={(val) => handleStoreChange(item.id, val)}
-                >
-                  {item.storeList?.map((store) => (
-                    <Option
-                      key={store.id}
-                      value={store.id}
-                      disabled={store.quantity < item.quantity}
-                    >
-                      {store.name} ({store.quantity} sẵn có)
-                    </Option>
-                  ))}
-                </Select>
-                <Button
-                  icon={<ReloadOutlined />}
-                  onClick={() => reloadStoreList(item.id)}
-                />
+                  <Select
+                    disabled={storeLoading}
+                    loading={storeLoading}
+                    showSearch
+                    placeholder="Chọn cửa hàng"
+                    style={{ width: 200 }}
+                    optionFilterProp="children"
+                    onChange={(val) => handleStoreChange(item.id, val)}
+                  >
+                    {item.storeList?.map((store) => (
+                      <Option
+                        key={store.id}
+                        value={store.id}
+                        disabled={store.quantity < item.quantity}
+                      >
+                        {store.name} ({store.quantity} sẵn có)
+                      </Option>
+                    ))}
+                  </Select>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    onClick={() => reloadStoreList(item.id)}
+                  />
                 </div>
                 <Button
                   danger
