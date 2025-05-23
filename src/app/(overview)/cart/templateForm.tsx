@@ -1,10 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useCartStore } from "@/src/store/cartStore";
+import { StoreItem, useCartStore } from "@/src/store/cartStore";
 import { Card, Select, Button, InputNumber, Divider, Empty } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, ReloadOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { formatVND } from "@/src/lib/utils";
+import { set } from "zod";
+import storeApiRequest from "@/src/apiRequests/stores";
+import { notifyError } from "@/src/components/Notification/Notification";
 
 const { Option } = Select;
 
@@ -16,7 +19,7 @@ export default function TemplateForm() {
     calculateTotal,
   } = useCartStore();
   const [clientOnlyTotal, setClientOnlyTotal] = useState("0");
-
+  const [storeLoading, setStoreLoading] = useState(false);
   useEffect(() => {
     setClientOnlyTotal(formatVND(calculateTotal()));
   }, [cart]);
@@ -45,6 +48,46 @@ export default function TemplateForm() {
 
   const canCheckout = unassignedItems.length === 0;
 
+
+  const fetchStoreList = async (templateId: string): Promise<StoreItem[]> => {
+    setStoreLoading(true);
+    try {
+      const res = await storeApiRequest.getListAndProductCountById({
+        product_template_id: templateId,
+      });
+      const { data } = res.data;
+
+      // Map dữ liệu trả về sang định dạng dùng trong cart
+      return data.store.map((store: any) => ({
+        id: store.store_id,
+        name: store.store_name,
+        quantity: store.sales_count, // hoặc tính tùy theo logic bạn cần
+      }));
+    } catch (error) {
+      notifyError(
+        "Có lỗi xảy ra khi tải danh sách cửa hàng.",
+        "Vui lòng thử lại sau."
+      );
+
+      return [];
+    } finally {
+      setStoreLoading(false);
+    }
+
+  };
+  const reloadStoreList = async (templateId: string) => {
+    const newStoreList = await fetchStoreList(templateId);
+
+    // Cập nhật storeList trong cart
+    const updatedCart = cart.map((item) =>
+      item.id === templateId ? { ...item, storeList: newStoreList } : item
+    );
+
+    useCartStore.setState({ cart: updatedCart });
+
+
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Giỏ hàng</h1>
@@ -70,23 +113,31 @@ export default function TemplateForm() {
                 </div>
               </div>
               <div className="flex flex-col gap-2 items-end">
-                <Select
-                  showSearch
-                  placeholder="Chọn cửa hàng"
-                  style={{ width: 200 }}
-                  optionFilterProp="children"
-                  onChange={(val) => handleStoreChange(item.id, val)}
-                >
-                  {item.storeList?.map((store) => (
-                    <Option
-                      key={store.id}
-                      value={store.id}
-                      disabled={store.quantity < item.quantity}
-                    >
-                      {store.name} ({store.quantity} sẵn có)
-                    </Option>
-                  ))}
-                </Select>
+                <div className="gap-2 flex items-center">
+                  <Select
+                    disabled={storeLoading}
+                    loading={storeLoading}
+                    showSearch
+                    placeholder="Chọn cửa hàng"
+                    style={{ width: 200 }}
+                    optionFilterProp="children"
+                    onChange={(val) => handleStoreChange(item.id, val)}
+                  >
+                    {item.storeList?.map((store) => (
+                      <Option
+                        key={store.id}
+                        value={store.id}
+                        disabled={store.quantity < item.quantity}
+                      >
+                        {store.name} ({store.quantity} sẵn có)
+                      </Option>
+                    ))}
+                  </Select>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    onClick={() => reloadStoreList(item.id)}
+                  />
+                </div>
                 <Button
                   danger
                   icon={<DeleteOutlined />}
@@ -129,7 +180,6 @@ export default function TemplateForm() {
                   showSearch
                   value={item.storeId}
                   onChange={(val) => handleStoreChange(item.id, val)}
-                  // style={{ width: }}
                   optionFilterProp="children"
                 >
                   {item.storeList?.map((store) => (
@@ -142,6 +192,10 @@ export default function TemplateForm() {
                     </Option>
                   ))}
                 </Select>
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={() => reloadStoreList(item.id)}
+                />
                 <div className="flex justify-between items-center w-full ms-3">
                   <span className="text-sm  text-gray-500">
                     Số lượng sẵn có: {item.storeList?.find(store => store.id === item.storeId)?.quantity} sản phẩm
@@ -196,10 +250,10 @@ export default function TemplateForm() {
           <Button
             type="primary"
             disabled={!canCheckout || cart.length === 0}
-            // onClick={() => {
-            //   // Gọi API tạo đơn hàng ở đây
-            //   alert("Tạo đơn hàng!");
-            // }}
+          // onClick={() => {
+          //   // Gọi API tạo đơn hàng ở đây
+          //   alert("Tạo đơn hàng!");
+          // }}
           >
             Tiến hành thanh toán
           </Button>
