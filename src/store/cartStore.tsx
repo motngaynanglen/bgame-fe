@@ -1,12 +1,20 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface CartItem {
+
+export interface StoreItem {
+  id: string;
+  name: string;
+  quantity: number;
+}
+export interface CartItem {
   id: string;
   name: string | null | undefined;
   image: string;
   price: number;
   quantity: number;
+  storeId?: string | null; // Id store được chọn
+  storeList?: StoreItem[] | null ; // Danh sách store tương ứng với sản phẩm
 }
 
 
@@ -29,6 +37,7 @@ export const useCartStore = create<CartStore>()(
 
       addToCart: (product, quantity = 1) =>
         set((state) => {
+          const imageUrl =product.image.split('||')[0]
           const existingItem = state.cart.find(
             (item) => item.id === product.id
           );
@@ -37,12 +46,12 @@ export const useCartStore = create<CartStore>()(
             return {
               cart: state.cart.map((item) =>
                 item.id === product.id
-                  ? { ...item, quantity: item.quantity + quantity }
+                  ? { ...item, quantity: item.quantity + quantity, image: imageUrl }
                   : item
               ),
             };
           } else {
-            return { cart: [...state.cart, { ...product, quantity }] };
+            return { cart: [...state.cart, { ...product, quantity, image: imageUrl }] };
           }
         }),
 

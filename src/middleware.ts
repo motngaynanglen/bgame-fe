@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
 
-const privatePaths = ["/profile", "/user",  "/manager", '/staff']; //"/admin", 
+const privatePaths = ["/customer", "/user",  "/manager", '/staff']; //"/admin", 
 const managePaths = ["/admin", "/manager", '/staff',];
 const authPaths = ["/login", "/register"];
 // const adminPaths = ['/admin/:part*'];
