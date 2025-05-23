@@ -1,13 +1,9 @@
 "use client";
-import React, { useState } from "react";
-import { useAppContext } from "../app-provider";
-import { CldUploadButton, CldUploadWidget } from "next-cloudinary";
+import { DatePicker, DatePickerProps, Modal } from "antd";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Avatar from "../../components/Customer/Avatar";
-import { Divide } from "react-feather";
-import { DatePicker, DatePickerProps, Divider, Modal } from "antd";
-import { useQuery } from "@tanstack/react-query";
-import userApiRequest from "@/src/apiRequests/user";
+import { useAppContext } from "../app-provider";
 
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -75,24 +71,24 @@ export default function ProfilePage() {
     console.log(date, dateString);
   };
 
-  const { data, isLoading, isError, error } = useQuery<IFormInput>({
-    queryKey: ["userProfile", user?.token],
-    queryFn: async () => {
-      const res = await userApiRequest.updateProfile(
-        {
-          personID: "",
-          fullName: "",
-          email: "",
-          phoneNumber: "",
-          dateOfBirth: "",
-          image: "",
-          gender: 1,
-        },
-        user?.token
-      );
-      return res;
-    },
-  });
+  // const { data, isLoading, isError, error } = useQuery<IFormInput>({
+  //   queryKey: ["userProfile", user?.token],
+  //   queryFn: async () => {
+  //     const res = await userApiRequest.updateProfile(
+  //       {
+  //         personID: "",
+  //         fullName: "",
+  //         email: "",
+  //         phoneNumber: "",
+  //         dateOfBirth: "",
+  //         image: "",
+  //         gender: 1,
+  //       },
+  //       user?.token
+  //     );
+  //     return res;
+  //   },
+  // });
 
   console.log(user);
   return (

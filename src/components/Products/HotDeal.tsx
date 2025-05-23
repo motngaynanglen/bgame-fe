@@ -5,7 +5,7 @@ import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import CardHotDeal from "./CardHotDeal";
+import CardHotDeal from "../Card/CardHotDeal";
 
 export default function HotDeal({ category }: { category: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,17 +39,17 @@ export default function HotDeal({ category }: { category: string }) {
   }, [products]);
 
   return (
-    <div className="container md:p-3" ref={containerRef}>
+    <div className="container mx-auto" ref={containerRef}>
       <Divider variant="dashed" style={{ borderColor: "#7cb305" }}>
         <h1 className="text-2xl p-1 font-bold uppercase bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
           {category}
         </h1>
       </Divider>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {products
           .filter((boardgame) => boardgame.sales_quantity > 0) // Lọc các sản phẩm có số lượng bán ra lớn hơn 0
-          .slice(0, 5) // Lấy 5 sản phẩm đầu tiên
+          .slice(0, 6) // Lấy 6 sản phẩm đầu tiên
           .map((boardgame, index) => {
             const imageUrls = boardgame.image?.split("||") || [];
             return (

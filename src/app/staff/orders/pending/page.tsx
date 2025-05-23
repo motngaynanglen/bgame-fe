@@ -292,7 +292,7 @@ export default function StaffManagePendingOrders({
                 pagination={false}
             />
             <br />
-            <AntdCustomPagination totalPages={paging?.paging.pageCount ?? 1} />
+            <AntdCustomPagination totalPages={paging?.paging?.pageCount ?? 1} />
             {/* {useData === undefined ? (
                 <TableSkeleton />
             ) : (

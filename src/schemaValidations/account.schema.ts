@@ -9,6 +9,7 @@ export const AccountRes = z
       token: z.string(),
       avatar: z.string().optional(),
       sessionToken: z.string().optional(),
+      expiresAt: z.string().optional()
     }),
     message: z.string()
   })

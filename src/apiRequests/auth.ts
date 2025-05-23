@@ -11,7 +11,7 @@ const authApiRequest = {
   login: (body: LoginBodyType) =>
     http.post<LoginResType>("/api/Login/login", body),
   register: (body: RegisterBodyType) =>
-    http.post<RegisterResType>("/api/Auth/register", body),
+    http.post<RegisterResType>("/api/Login/create-customer", body),
   auth: (body: {
     sessionToken: string;
     sessionRole: string;

@@ -32,7 +32,7 @@ const RegisterBodyData = {
     username: "Đây là Bách",
     email: "B@gmail.com",
     password: "",
-    fullname: "",
+    fullName: "",
     phoneNumber: "",
     confirmPassword: ""
 };

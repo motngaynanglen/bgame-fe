@@ -9,7 +9,7 @@ export const RegisterBody = z
     username: z.string().min(8, "Tài khoản không được dưới 8 kí tự.").max(20, "Tài khoản không dài quá 20 kí tự."),
     email: z.string().email("Không đúng định dạng Email."),
     password: z.string().min(6, "Mật khẩu không được dưới 6 kí tự.").max(30, "Mật khẩu không dài quá 30 kí tự."),
-    fullname: z.string().trim().min(2, "Tên không được dưới 2 kí tự.").max(50, "Tên không dài quá 50 kí tự."),
+    fullName: z.string().trim().min(2, "Tên không được dưới 2 kí tự.").max(50, "Tên không dài quá 50 kí tự."),
     phoneNumber: z.string().regex(phoneRegex, "Không đúng định dạng số điện thoại").optional(),
     confirmPassword: z.string().min(6).max(100).optional(),
   })

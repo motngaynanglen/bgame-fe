@@ -1,9 +1,7 @@
 "use client";
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import CheckOutSuccess from "@/src/components/CheckOut/CheckOutSuccess";
-import {
-  notifyError
-} from "@/src/components/Notification/Notification";
+import { notifyError } from "@/src/components/Notification/Notification";
 import { HttpError } from "@/src/lib/httpAxios";
 import { useCartStore } from "@/src/store/cartStore";
 import { List, Modal, Radio, RadioChangeEvent } from "antd";
@@ -38,11 +36,13 @@ const data = [
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
   const { cart, calculateTotal, clearCart, buyNowItem } = useCartStore();
+
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const { user } = useAppContext();
   const [value, setValue] = useState(1);
   const productsToCheckout = buyNowItem ? [buyNowItem] : cart;
+  const [paymentMethod, setPaymentMethod] = useState("cod");
 
 
   const totalProductCount = productsToCheckout.reduce((sum, item) => sum + item.quantity, 0);
@@ -81,7 +81,6 @@ export default function CheckOut() {
       if (res.statusCode == "200") {
         setOpenResponsive(true);
         clearCart();
-
       } else
         notifyError(
           "Đặt trước thất bại!",
@@ -107,6 +106,7 @@ export default function CheckOut() {
   useEffect(() => {
     setClientOnlyTotal(formatVND(calculateTotal()));
   }, [cart]);
+
 
   return (
     <div className="container mx-auto p-4 bg-sky-50 min-h-screen ">
@@ -227,6 +227,7 @@ export default function CheckOut() {
 
         {/* ds sản phẩm, chọn phương thúc thanh toán  */}
         <div className="w-full ps-4 lg:w-1/3 mt-6 lg:mt-0">
+
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold mb-2">
               Đơn hàng:
@@ -246,12 +247,14 @@ export default function CheckOut() {
                   alt={item.name || "Product image"}
                   className="w-20 h-20 object-cover rounded mr-4"
                 />
+
                 <div className="flex-1">
                   <p className="font-semibold">{item.name}</p>
                   <p className="text-md text-gray-600">
                     Giá: {formatVND(item.price)}
                   </p>
                   <p>Số lượng: {item.quantity}</p>
+
                 </div>
               </div>
             );
@@ -306,12 +309,26 @@ export default function CheckOut() {
             <h2 className="text-xl font-semibold mb-4">Thanh toán</h2>
             <div className="space-y-4">
               <div className="flex items-center">
-                <input type="radio" name="payment" className="mr-2" />
+                <input
+                  type="radio"
+                  name="payment"
+                  className="mr-2"
+                  value="bank"
+                  checked={paymentMethod === "bank"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
                 <label>Chuyển khoản</label>
                 <i className="fas fa-money-bill-wave ml-2"></i>
               </div>
               <div className="flex items-center">
-                <input type="radio" name="payment" className="mr-2" />
+                <input
+                  type="radio"
+                  name="payment"
+                  className="mr-2"
+                  value="cod"
+                  checked={paymentMethod === "cod"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
                 <label>Thu hộ (COD)</label>
                 <i className="fas fa-money-bill-wave ml-2"></i>
               </div>

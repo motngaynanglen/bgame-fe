@@ -1,85 +1,116 @@
-import { SearchOutlined } from "@ant-design/icons";
+"use client";
+import productApiRequest from "@/src/apiRequests/product";
+import { usePOSStore } from "@/src/store/posStore";
+import { useMutation } from "@tanstack/react-query";
+import type { TableProps } from "antd";
 import {
+  AutoComplete,
   Button,
   Empty,
   Input,
   InputNumber,
   QRCode,
-  Select,
   Space,
+  Spin,
   Table,
 } from "antd";
-import React from "react";
-import type { TableProps } from "antd";
-import TypedInputNumber from "antd/es/input-number";
+import React, { useEffect, useState } from "react";
 
-interface DataType {
+interface Product {
+  id: string;
   key: string;
-  name: string;
+  product_name: string;
+  code: string; // Added the missing 'code' property
   quantity: number;
-  price: string;
+  price: number;
   total: string;
+  image: string;
 }
 
-// const columns: TableProps<DataType>["columns"] = [
-//   {
-//     title: "STT",
-//     dataIndex: "key",
-//     width: 50,
-//   },
-//   {
-//     title: "Tên hàng",
-//     dataIndex: "name",
-//   },
-//   {
-//     title: "SL",
-//     dataIndex: "quantity",
-//     width: 100,
-//   },
-//   {
-//     title: "Đơn giá",
-//     dataIndex: "price",
-//     width: 150,
-//   },
-//   {
-//     title: "Thành tiền",
-//     dataIndex: "total",
-//     width: 150,
-//   },
-//   {
-//     title: "",
-//     key: "action",
-//     width: 100,
-//     render: (_, record) => (
-//       <Space size="middle">
-//         <a>Delete</a>
-//       </Space>
-//     ),
-//   },
-// ];
-
-const dataSource = [
-  {
-    key: "1",
-    name: "Nana",
-    quantity: 1,
-    price: "350.000",
-    total: "350,000",
-  },
-  {
-    key: "2",
-    name: "Catan",
-    quantity: 1,
-    price: "500.000",
-    total: "500.000",
-  },
-];
+interface POSComponentProps {
+  billIndex: number;
+}
 
 export default function POSComponent() {
-  const [data, setData] = React.useState<DataType[]>(dataSource);
-  const columns: TableProps<DataType>["columns"] = [
-    { title: "STT", dataIndex: "key", width: 50 },
-    { title: "Tên hàng", dataIndex: "name" },
+  const {
+    bills,
+    activeBillIndex,
+    addItemToActiveBill,
+    updateItemQuantityInActiveBill,
+    removeItemFromActiveBill,
+    createBill,
+    calculateActiveBillTotal,
+  } = usePOSStore();
+  //  const bill = bills[billIndex];
+  const [options, setOptions] = useState<
+    { value: string; label: React.ReactNode; product: Product }[]
+  >([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [invoiceItems, setInvoiceItems] = useState<Product[]>([]);
+
+  // if (!bill) {
+  //   return <div>Không tìm thấy hóa đơn</div>;
+  // }
+  useEffect(() => {
+    if (activeBillIndex === null) {
+      createBill();
+    }
+  }, [activeBillIndex, createBill]);
+  const currentItems =
+    activeBillIndex !== null ? bills[activeBillIndex]?.items || [] : [];
+
+  const searchProducts = useMutation({
+    mutationFn: async (code: string) => {
+      const res = await productApiRequest.getByCode({ code }); // Trả về 1 sản phẩm
+      return res.data;
+    },
+    onSuccess: (products) => {
+      if (Array.isArray(products) && products.length > 0) {
+        const opts = products.map((product: Product) => ({
+          value: product.code,
+          label: `${product.code} - ${product.product_name} - ${
+            product.price?.toLocaleString?.() || ""
+          }đ`,
+          product,
+        }));
+        setOptions(opts);
+      } else {
+        setOptions([]);
+      }
+    },
+    onError: () => {
+      setOptions([]);
+    },
+  });
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    if (value.trim()) {
+      searchProducts.mutate(value);
+    } else {
+      setOptions([]);
+    }
+  };
+
+  const handleSelect = (value: string) => {
+    const selected = options.find((o) => o.value === value);
+    if (selected) {
+      addItemToActiveBill(selected.product);
+      setSearchTerm("");
+      setOptions([]);
+    }
+  };
+
+  const totalQuantity = currentItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  const totalAmount = calculateActiveBillTotal().toLocaleString();
+
+  //
+  const columns: TableProps<Product>["columns"] = [
+    { title: "STT", dataIndex: "index", width: 50 },
+    { title: "Tên hàng", dataIndex: "product_name" },
     {
       title: "SL",
       dataIndex: "quantity",
@@ -102,36 +133,45 @@ export default function POSComponent() {
       width: 100,
       render: (_, record) => (
         <Space size="middle">
-          <a>Delete</a>
+          <a onClick={() => removeItemFromActiveBill(record.id)}>Xóa</a>
         </Space>
       ),
     },
   ];
-  const handleQuantityChange = (key: string, newQuantity: number | null) => {
+
+  const handleQuantityChange = (itemId: string, newQuantity: number | null) => {
     if (newQuantity !== null) {
-      setData((prevData) =>
-        (prevData ?? []).map((item) =>
-          item.key === key ? { ...item, quantity: newQuantity } : item
-        )
-      );
+      updateItemQuantityInActiveBill(itemId, newQuantity);
     }
   };
   return (
     <div>
       <div className="grid grid-cols-3 gap-4">
         {/* Left Panel - Sản phẩm */}
-        <div className="col-span-2 ">
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="Tìm sản phẩm hoặc nhập mã"
-            className="mb-2"
-          />
+        <div className="col-span-2 relative">
+          <AutoComplete
+            className="w-full md:w-96"
+            value={searchTerm}
+            options={options}
+            onSearch={handleSearch}
+            onSelect={handleSelect}
+            notFoundContent={
+              searchProducts.isPending ? (
+                <Spin size="small" />
+              ) : (
+                "Không tìm thấy sản phẩm"
+              )
+            }
+          >
+            <Input.Search placeholder="Nhập mã sản phẩm..." enterButton />
+          </AutoComplete>
+
           <Table
-            dataSource={data}
+            dataSource={currentItems}
             columns={columns}
             pagination={false}
             size="small"
-            locale={{ emptyText: <Empty description="No Data"></Empty> }}
+            locale={{ emptyText: <Empty description="No Data" /> }}
           />
         </div>
 
@@ -144,7 +184,7 @@ export default function POSComponent() {
           <div className="mb-2 space-y-2">
             <div className="flex justify-between">
               <span className="text-xl">Tổng SL hàng:</span>{" "}
-              <span className="text-xl">2</span>
+              <span className="text-xl">{totalAmount}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xl">Giảm giá:</span>{" "}
@@ -158,7 +198,7 @@ export default function POSComponent() {
             </div>
             <div className="flex justify-between">
               <span className="text-xl">Thực thu:</span>{" "}
-              <span className="text-xl">18,000</span>
+              <span className="text-xl">{totalAmount}</span>
             </div>
           </div>
           <div className="space-y-2 mb-4">

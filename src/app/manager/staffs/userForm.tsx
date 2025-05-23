@@ -10,7 +10,7 @@ const RegisterBodyDefaults = {
     username: "jsun969",
     email: "",
     password: "",
-    fullname: "",
+    fullName: "",
     phoneNumber: "",
     dateOfBirth: new Date(),
     confirmPassword: ""
@@ -41,7 +41,7 @@ export default function UserForm({ staff }: { staff?: RegisterBodyType }) {
                 <FormItem control={control} name="email" label="Email">
                     <Input />
                 </FormItem>
-                <FormItem control={control} name="fullname" label="Full Name">
+                <FormItem control={control} name="fullName" label="Full Name">
                     <Input />
                 </FormItem>
                 <FormItem control={control} name="phoneNumber" label="phone">

@@ -72,7 +72,7 @@ export default function Add() {
       salePrice: data.salePrice,
       image: data.image,
     };
-    console.log("Sản phẩm đã được tạo:", body);
+    console.log("thông tin Sản phẩm :", body);
 
     try {
       const res = await consignmentApiRequest.createConsignment(
