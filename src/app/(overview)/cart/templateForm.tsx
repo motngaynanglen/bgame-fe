@@ -65,8 +65,8 @@ export default function TemplateForm() {
       }));
     } catch (error) {
       notifyError(
-        "Đặt trước thất bại",
-        "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+        "Có lỗi xảy ra khi tải danh sách cửa hàng.",
+        "Vui lòng thử lại sau."
       );
 
       return [];
