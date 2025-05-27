@@ -53,15 +53,15 @@ export default function TemplateForm() {
     setStoreLoading(true);
     try {
       const res = await storeApiRequest.getListAndProductCountById({
-        product_template_id: templateId,
+        productTemplateId: templateId,
       });
-      const { data } = res.data;
+      const data: StoreItem[]  = res.data;
 
       // Map dữ liệu trả về sang định dạng dùng trong cart
-      return data.store.map((store: any) => ({
+      return data.map((store: any) => ({
         id: store.store_id,
         name: store.store_name,
-        quantity: store.sales_count, // hoặc tính tùy theo logic bạn cần
+        quantity: store.sale_count, // hoặc tính tùy theo logic bạn cần
       }));
     } catch (error) {
       notifyError(
