@@ -4,7 +4,7 @@ import CheckOutSuccess from "@/src/components/CheckOut/CheckOutSuccess";
 import { notifyError } from "@/src/components/Notification/Notification";
 import { HttpError } from "@/src/lib/httpAxios";
 import { useCartStore } from "@/src/store/cartStore";
-import { List, Modal, Radio, RadioChangeEvent } from "antd";
+import { Button, List, Modal, Radio, RadioChangeEvent } from "antd";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -37,8 +37,6 @@ export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
   const { cart, calculateTotal, clearCart, buyNowItem } = useCartStore();
 
-  const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-
   const { user } = useAppContext();
   const [value, setValue] = useState(1);
   const productsToCheckout = buyNowItem ? [buyNowItem] : cart;
@@ -57,15 +55,15 @@ export default function CheckOut() {
 
   const {
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     handleSubmit,
   } = useForm<FormData>();
 
   const handleCreateOrder = async (formData: FormData) => {
-    const customerID = null;
+    
     const body = {
-      customerID,
-      orderItems: cart.map((item) => ({
+      orders: cart.map((item) => ({
+        storeId: item.storeId, // Sử dụng storeId từ item
         productTemplateID: item.id,
         quantity: item.quantity,
       })),
@@ -76,8 +74,7 @@ export default function CheckOut() {
     };
 
     try {
-      const res = await orderApiRequest.createOrder(body, user?.token);
-      console.log("Đơn hàng đã được tạo:", body);
+      const res = await orderApiRequest.createOrderByCustomer(body, user?.token);
       if (res.statusCode == "200") {
         setOpenResponsive(true);
         clearCart();
@@ -87,6 +84,9 @@ export default function CheckOut() {
           res.message || "Vui lòng thử lại sau."
         );
     } catch (error: any) {
+      if(error instanceof HttpError && error.status === 422) {
+
+      }
       if (error instanceof HttpError && error.status === 401) {
         notifyError("Đặt trước thất bại!", "bạn cần đăng nhập để tiếp tục");
         // router.push("/login");
@@ -135,11 +135,13 @@ export default function CheckOut() {
             </div>
 
             <form
+            
               className="space-y-4"
               onSubmit={handleSubmit(handleCreateOrder)}
             >
               <input
                 type="email"
+                disabled={isSubmitting}
                 placeholder="Email"
                 className="w-full p-2 border border-gray-300 rounded"
                 {...register("email", { required: "Email là bắt buộc" })}
@@ -149,6 +151,7 @@ export default function CheckOut() {
               )}
               <input
                 type="text"
+                disabled={isSubmitting}
                 placeholder="Họ và tên"
                 className="w-full p-2 border border-gray-300 rounded"
                 {...register("fullName", { required: "Họ và tên là bắt buộc" })}
@@ -158,6 +161,7 @@ export default function CheckOut() {
               )}
               <input
                 type="tel"
+                disabled={isSubmitting}
                 placeholder="Số điện thoại"
                 className="w-full p-2 border border-gray-300 rounded"
                 {...register("phoneNumber", {
@@ -169,6 +173,7 @@ export default function CheckOut() {
               )}
               <input
                 type="text"
+                disabled={isSubmitting}
                 placeholder="Địa chỉ"
                 className="w-full p-2 border border-gray-300 rounded"
                 {...register("address", { required: "Địa chỉ là bắt buộc" })}
@@ -214,12 +219,14 @@ export default function CheckOut() {
                 <a href="/cart" className="text-blue-500">
                   Quay về giỏ hàng
                 </a>
-                <button
-                  type="submit"
+                <Button
+                  htmlType="submit"
+                  disabled={isSubmitting}
+                  loading={isSubmitting}
                   className="bg-green-500 text-white p-2 rounded"
                 >
                   ĐẶT HÀNG
-                </button>
+                </Button>
               </div>
             </form>
           </div>
