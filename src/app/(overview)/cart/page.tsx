@@ -22,6 +22,7 @@ export default function ShoppingCartPage() {
 //       <div className="max-w-5xl mx-auto space-y-8  border-4 border-gray-800 p-4 rounded-lg bg-gray-900">
 //         {/* Shopping Cart Header */}
 //         <h2 className="text-2xl font-bold ">Giỏ Hàng </h2>
+//         <TemplateForm />
 //         {/* tiêu đề */}
 //         <div className="hidden sm:grid grid-cols-[3fr_1fr_1fr_1fr_0.5fr] bg-gray-800 p-4 rounded-lg ">
 //           <div className="flex items-center justify-start ">
@@ -168,25 +169,25 @@ export default function ShoppingCartPage() {
 //         </div>
 
 //         {/* Action Buttons */}
-//         <div className="flex justify-between">
-//           <button
-//             type="button"
-//             className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600"
-//           >
-//             Tiếp tục mua hàng
-//           </button>
-//           <button
-//             className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${
-//               cart.length === 0
-//                 ? "opacity-50 cursor-not-allowed"
-//                 : "hover:bg-blue-500"
-//             }`}
-//             disabled={cart.length === 0}
-//             onClick={() => router.push("/check-out")}
-//           >
-//             Tiến hành thanh toán
-//           </button>
-//         </div>
+        // <div className="flex justify-between">
+        //   <button
+        //     type="button"
+        //     className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600"
+        //   >
+        //     Tiếp tục mua hàng
+        //   </button>
+        //   <button
+        //     className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${
+        //       cart.length === 0
+        //         ? "opacity-50 cursor-not-allowed"
+        //         : "hover:bg-blue-500"
+        //     }`}
+        //     disabled={cart.length === 0}
+        //     onClick={() => router.push("/check-out")}
+        //   >
+        //     Tiến hành thanh toán
+        //   </button>
+        // </div>
 //       </div>
 //     </div>
 //   );

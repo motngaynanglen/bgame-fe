@@ -5,15 +5,15 @@ import { useRentalStore } from "@/src/store/rentalStore";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Empty } from "antd";
 import { useRouter } from "next/navigation";
-
+import { useAppContext } from "../../app-provider";
+import { use } from "react";
 
 interface item {
- rent_price: number;
- rent_price_per_hour: number;
- 
+  rent_price: number;
+  rent_price_per_hour: number;
 }
 interface Booklist {
-  id: string; 
+  id: string;
   customer_id: string;
   from: string;
   to: string;
@@ -32,21 +32,30 @@ interface responseModel {
 const RentalHistory = () => {
   const { cartItems } = useRentalStore();
   const router = useRouter();
-
+  const { user } = useAppContext();
 
   const { data, isLoading, isError, error } = useQuery<responseModel>({
-    queryKey: ["boardgameByID"],
+    queryKey: ["rentalHistory"],
     queryFn: async () => {
       // Hàm gọi API
-      const res = await bookListApiRequest.getBookListHistory({ });
-      return res;
+      const res = await bookListApiRequest.getBookListHistory(
+        {
+          paging: {
+            pageNum: 1,
+            pageSize: 10,
+          },
+        },
+        user?.token
+      );
+      return res.data;
     },
-    
   });
+
+  console.log("RentalHistory", data);
   return (
-    <div className=" p-4 w-full max-w-4xl bg-white mt-2 rounded-lg shadow-md">
+    <div className=" p-4 w-full bg-white mt-2 rounded-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Lịch sử thuê</h2>
-      {cartItems.length === 0 ? (
+      {data?.data.length === 0 ? (
         <Empty description={<span>Bạn chưa có đơn đặt thuê</span>}>
           <Button onClick={() => router.push("/rental")} type="primary">
             Tìm thuê board game
@@ -83,7 +92,6 @@ const RentalHistory = () => {
           </tbody>
         </table>
       )}
-      
     </div>
   );
 };
