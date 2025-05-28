@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAppContext } from "../../app-provider";
 import { formatVND } from "@/src/lib/utils";
+import transactionApiRequest from "@/src/apiRequests/transaction";
 
 interface FormData {
   email: string;
@@ -33,10 +34,14 @@ const data = [
   "Giao hàng qua Viettel Post",
 ];
 
+interface PaymentData {
+  id?: string;
+  url?: string;
+}
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
   const { cart, calculateTotal, clearCart, buyNowItem } = useCartStore();
-
+  const [paymentData, setPaymentData] = useState<PaymentData | undefined>(undefined);
   const { user } = useAppContext();
   const [value, setValue] = useState(1);
   const productsToCheckout = buyNowItem ? [buyNowItem] : cart;
@@ -59,8 +64,42 @@ export default function CheckOut() {
     handleSubmit,
   } = useForm<FormData>();
 
+  const handlePaymentAction = async (id: string) => {
+    console.log(paymentData);
+    if (!paymentData || !paymentData.id) {
+      notifyError("Lỗi thanh toán", "Không có dữ liệu thanh toán.");
+      return;
+    }
+    try {
+      // Gọi API để lấy URL thanh toán
+      const res = await transactionApiRequest.performTransaction(
+        {
+          referenceID: id,
+          type: 1, // "bank" hoặc "cod"
+        },
+        user?.token
+      );
+      if (res.statusCode === "200") {
+        setPaymentData({ id: id, url: res.data });
+        handleRedirectToPayment();
+      } else {
+        notifyError("Lỗi thanh toán", res.message || "Vui lòng thử lại sau.");
+      }
+    } catch (error) {
+      notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
+      return;
+    }
+  }
+  const handleRedirectToPayment = () => {
+    if (paymentData && paymentData.url) {
+      window.open(paymentData.url, '_blank');
+    } else {
+      notifyError("Lỗi thanh toán", "Không có URL thanh toán để chuyển hướng.");
+    }
+  }
+
   const handleCreateOrder = async (formData: FormData) => {
-    
+
     const body = {
       orders: cart.map((item) => ({
         storeId: item.storeId, // Sử dụng storeId từ item
@@ -77,14 +116,15 @@ export default function CheckOut() {
       const res = await orderApiRequest.createOrderByCustomer(body, user?.token);
       if (res.statusCode == "200") {
         setOpenResponsive(true);
-        clearCart();
+        setPaymentData({ id: res.data ?? undefined, url: undefined })
+        // clearCart();
       } else
         notifyError(
           "Đặt trước thất bại!",
           res.message || "Vui lòng thử lại sau."
         );
     } catch (error: any) {
-      if(error instanceof HttpError && error.status === 422) {
+      if (error instanceof HttpError && error.status === 422) {
 
       }
       if (error instanceof HttpError && error.status === 401) {
@@ -106,7 +146,9 @@ export default function CheckOut() {
   useEffect(() => {
     setClientOnlyTotal(formatVND(calculateTotal()));
   }, [cart]);
+  useEffect(() => {
 
+  }, [paymentData]);
 
   return (
     <div className="container mx-auto p-4 bg-sky-50 min-h-screen ">
@@ -135,7 +177,7 @@ export default function CheckOut() {
             </div>
 
             <form
-            
+
               className="space-y-4"
               onSubmit={handleSubmit(handleCreateOrder)}
             >
@@ -219,14 +261,24 @@ export default function CheckOut() {
                 <a href="/cart" className="text-blue-500">
                   Quay về giỏ hàng
                 </a>
-                <Button
-                  htmlType="submit"
-                  disabled={isSubmitting}
-                  loading={isSubmitting}
-                  className="bg-green-500 text-white p-2 rounded"
-                >
-                  ĐẶT HÀNG
-                </Button>
+                <div className="gap-2 flex items-center">
+                  <Button
+                    disabled={paymentData?.id === undefined ? true : false}
+                    onClick={() => handlePaymentAction(paymentData?.id || "")}
+                    // loading={isSubmitting}
+                    color="green"
+                  >
+                    THỰC HIỆN THANH TOÁN
+                  </Button>
+                  <Button
+                    htmlType="submit"
+                    disabled={isSubmitting}
+                    loading={isSubmitting}
+                    className="bg-green-500 text-white p-2 rounded"
+                  >
+                    ĐẶT HÀNG
+                  </Button>
+                </div>
               </div>
             </form>
           </div>
@@ -349,10 +401,11 @@ export default function CheckOut() {
         title="Thông báo"
         centered
         open={openResponsive}
+        onCancel={() => setOpenResponsive(false)}
         footer={null}
-        closable={false}
+        closable={true}
       >
-        <CheckOutSuccess />
+        <CheckOutSuccess id={paymentData?.id} />
       </Modal>
     </div>
   );
