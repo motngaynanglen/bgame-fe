@@ -240,7 +240,7 @@ export default function Add() {
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
             >
-              Gửi đơn đăng ký
+              Tạo đơn 
             </button>
           </div>
         </form>

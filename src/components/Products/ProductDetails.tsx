@@ -10,6 +10,7 @@ import { useCartStore } from "../../store/cartStore";
 import Magnet from "../Bits/Magnet ";
 import { notifySuccess } from "../Notification/Notification";
 import { useRouter } from "next/navigation";
+import storeApiRequest from "@/src/apiRequests/stores";
 
 interface BoardGameInfo {
   id: string;
@@ -98,7 +99,7 @@ function ProductDetails({
           id: store.id,
           name: store.store_name,
           quantity: quantity,
-        }))
+        })),
       };
       addToCart(product, quantity); // Thêm sản phẩm với số lượng được chọn
       notifySuccess(
@@ -149,6 +150,24 @@ function ProductDetails({
     enabled: !!productId,
   });
 
+  console.log("hehe: ", productId);
+
+  const { data: storesData, isLoading: isLoadingStores, isError: isErrorStores, error: errorStore } = useQuery({
+    queryKey: ["storesByProductTemplateId", productId],
+    queryFn: async () => {
+      const res = await storeApiRequest.getListAndProductCountById({
+        productTemplateId: productId,
+      });
+      return res.data;
+    },
+    enabled: !!productId,
+  });
+  console.log("first: ", storesData);
+
+  if (isLoadingStores) {
+    return <div>Loading stores...</div>;
+  }
+
   // if (isLoading) {
   //   return <div>Loading board games...</div>;
   // }
@@ -156,6 +175,8 @@ function ProductDetails({
   if (isError) {
     return <div>Mất kết nối từ server: {error?.message}</div>;
   }
+  if(isErrorStores) {
+    return <div>Mất kết nối từ server: {errorStore?.message}</div>;}
 
   onProductData(data?.data);
 
@@ -274,7 +295,7 @@ function ProductDetails({
               Thêm vào giỏ hàng
             </button>
             {/* btn mua ngay */}
-            <Magnet padding={50} disabled={false} magnetStrength={4}>
+            <Magnet padding={10} disabled={false} magnetStrength={2}>
               <button
                 disabled={data.data.sales_quantity <= 0}
                 className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary ${
@@ -315,34 +336,26 @@ function ProductDetails({
           </div> */}
           <div>
             <h2 className="p-1 font-semibold">
-              Có {stores.length} cửa hàng còn sản phẩm
+              Có {(storesData && Array.isArray(storesData) ? storesData.length : 0)} cửa hàng còn sản phẩm
             </h2>
-            <div>
-              {/* <AnimatedList
-                items={stores.map((store) => store.store_name)}
-                onItemSelect={(item, index) => console.log(item, index)}
-                showGradients={true}
-                enableArrowNavigation={true}
-                displayScrollbar={true}
-              /> */}
-            </div>
-            {stores.length > 0 ? (
+
+            {storesData && storesData.length > 0 ? (
               <ul
                 className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white 
                      max-h-[100px] sm:max-h-[150px] overflow-y-auto"
               >
-                {stores.map((store) => (
+                {storesData.map((store: any) => (
                   <li
                     key={store.id}
                     className="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600"
                   >
                     {store.store_name} -{" "}
-                    <Link
+                    {/* <Link
                       className="hover: underline-offset-1"
                       href={"https://maps.app.goo.gl/zMYvU3sV4LiMevgr5"}
-                    >
-                      {store.address}
-                    </Link>
+                    > */}
+                    {store.address}
+                    {/* </Link> */}
                   </li>
                 ))}
               </ul>

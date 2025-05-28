@@ -50,7 +50,7 @@ export default function DetailOrder() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 border-2 border-gray-400 rounded-lg ">
+    <div className="min-w-xl mx-auto p-6  border-gray-400 rounded-lg ">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-primary mb-6">
           Chi tiết đơn hàng {data.order_code}
@@ -168,7 +168,7 @@ export default function DetailOrder() {
                     <p className="text-sm text-gray-500">Qty: 1</p>
                   </div>
                   <p className="text-violet-600 font-semibold">
-                    {(item.current_price).toLocaleString()}đ
+                    {item.current_price.toLocaleString()}đ
                   </p>
                 </div>
               );
@@ -176,8 +176,19 @@ export default function DetailOrder() {
           </div>
 
           {/* Total */}
-          <div className="border-t mt-4 pt-4 text-right text-lg font-bold text-violet-600">
-            Tổng tiền: {(data.total_price).toLocaleString()}đ
+          <div className="grid grid-cols-5  gap-6 border-t">
+            <div className="col-span-4 mt-4 pt-4 text-right text-lg font-bold text-violet-600">
+              Tổng tiền <br />
+              Phí vận chuyển <br />
+              Mã giảm giá <br />
+              Thành tiền
+            </div>
+            <div className=" mt-4 pt-4 text-right text-lg font-bold text-violet-600">
+              {data.total_price.toLocaleString()}đ<br />
+              0đ <br />
+              0đ <br />
+              {data.total_price.toLocaleString()}đ
+            </div>
           </div>
         </div>
       </div>
