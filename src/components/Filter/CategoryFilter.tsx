@@ -118,7 +118,7 @@ export default function CategoryFilter() {
 }
 
 export function PriceRangeSlider() {
-  const [range, setRange] = useState<[number, number]>([0, 1000000]);
+  const [range, setRange] = useState<[number, number]>([0, 5000000]);
 
   const handleChange = (value: number[]) => {
     setRange([value[0], value[1]]);

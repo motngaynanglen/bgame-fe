@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -10,7 +11,7 @@ type OrderStatus =
   | "PREPARED";
 
 interface Order {
-  id: string
+  id: string;
   code: string;
   email: string;
   full_name: string;
@@ -54,80 +55,82 @@ export default function OrderCard({ order }: OrderCardProps) {
   };
 
   return (
-    <section className="bg-white antialiased ">
+    <section className="bg-white antialiased hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg shadow-md  m-2">
       <div className="mt-6 flow-root sm:mt-8 ">
         <div className="divide-y divide-gray-700 dark:divide-gray-700">
-          <div className="flex flex-wrap items-center gap-y-4 py-6 ">
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-                Mã đơn:
-              </dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                <a href="#" className="hover:underline">
-                  #FWB127364372
-                </a>
-              </dd>
-            </dl>
+          <Link href={`/customer/order/${order.id}`}>
+            <div className="flex flex-wrap items-center gap-y-4 p-6 ">
+              <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
+                  Mã đơn:
+                </dt>
+                <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
+                  <a href="#" className="hover:underline">
+                    #FWB127364372
+                  </a>
+                </dd>
+              </dl>
 
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-                Ngày đặt:
-              </dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                {formatDate(order.created_at)}
-              </dd>
-            </dl>
+              <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
+                  Ngày đặt:
+                </dt>
+                <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
+                  {formatDate(order.created_at)}
+                </dd>
+              </dl>
 
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-                Tổng tiền:
-              </dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                {formatCurrency(order.total_price)}
-              </dd>
-            </dl>
+              <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
+                  Tổng tiền:
+                </dt>
+                <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
+                  {formatCurrency(order.total_price)}
+                </dd>
+              </dl>
 
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-                Trạng thái:
-              </dt>
-              <dd className={getStatusColor(order.status)}>
-                <span>
-                  {order.status === "DELIVERING"
-                    ? "Đang giao hàng"
-                    : order.status === "SENT"
-                    ? "Đã giao hàng"
-                    : order.status === "CANCELLED"
-                    ? "Đã hủy"
-                    : "Chờ xác nhận"}
-                </span>
-              </dd>
-            </dl>
+              <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
+                  Trạng thái:
+                </dt>
+                <dd className={getStatusColor(order.status)}>
+                  <span>
+                    {order.status === "DELIVERING"
+                      ? "Đang giao hàng"
+                      : order.status === "SENT"
+                      ? "Đã giao hàng"
+                      : order.status === "CANCELLED"
+                      ? "Đã hủy"
+                      : "Chờ xác nhận"}
+                  </span>
+                </dd>
+              </dl>
 
-            <div className="w-full grid sm:grid-cols-2 lg:flex lg:w-64 lg:items-center lg:justify-end gap-4">
-              {order.status === "SENT" ? (
+              <div className="w-full grid sm:grid-cols-2 lg:flex lg:w-64 lg:items-center lg:justify-end gap-4">
+                {order.status === "SENT" ? (
+                  <button
+                    type="button"
+                    className="w-full rounded-lg border border-green-700 px-3 py-2 text-center text-sm font-medium text-green-700 hover:bg-green-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-300 dark:border-green-500 dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white dark:focus:ring-green-900 lg:w-auto"
+                  >
+                    Mua lại
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
+                  >
+                    Hủy đơn
+                  </button>
+                )}
                 <button
-                  type="button"
-                  className="w-full rounded-lg border border-green-700 px-3 py-2 text-center text-sm font-medium text-green-700 hover:bg-green-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-300 dark:border-green-500 dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white dark:focus:ring-green-900 lg:w-auto"
+                  onClick={() => router.push(`order/${order.id}`)}
+                  className="w-full inline-flex justify-center rounded-lg  border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700 lg:w-auto"
                 >
-                  Mua lại
+                  Chi tiết 
                 </button>
-              ) : (
-                <button
-                  type="button"
-                  className="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
-                >
-                  Hủy đơn
-                </button>
-              )}
-              <button
-                onClick={() => router.push(`order/${order.id}`)}
-                className="w-full inline-flex justify-center rounded-lg  border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700 lg:w-auto"
-              >
-                Chi tiết đơn hàng
-              </button>
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </section>

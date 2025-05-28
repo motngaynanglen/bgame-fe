@@ -89,15 +89,31 @@ export default function BoardGameRental() {
     enabled: !!selectedStoreId,
   });
 
-  
-
   if (storesLoading) {
     return <Loading />;
   }
 
+  if (storesError) {
+    return (
+      <div>Error: {storesErrorData?.message || "Failed to load stores."}</div>
+    );
+  }
+
+  if (rentalLoading) {
+    return <Loading />;
+  }
+
+  if (rentalError) {
+    return (
+      <div>
+        Error: {rentalErrorData?.message || "Failed to load rental products."}
+      </div>
+    );
+  }
+
   return (
     <div>
-      <Breadcrumb />
+      <Breadcrumb title="Dịch vụ thuê board game" subtitle="Tại BoardGame Impact"/>
       <TimeSlotDisplay storeid={selectedStoreId ?? ""} />
       <div className="flex container min-h-screen mx-auto max-w-screen-3xl">
         <main className=" lg:w-3/4 p-4">
@@ -146,8 +162,8 @@ export default function BoardGameRental() {
           <div className="flex flex-col lg:flex-row">
             {/* Filter */}
             {/* <div className="hidden lg:block lg:basis-1/4 pr-4">
-              <CategoryFilter />
-            </div> */}
+                <CategoryFilter />
+              </div> */}
 
             {/* Drawer cho mobile */}
             <Drawer
@@ -160,25 +176,31 @@ export default function BoardGameRental() {
             </Drawer>
             {/* Product Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {data?.data.map((boardgame: BoardGame) => (
-                <CardProductRent
-                  key={boardgame.id}
-                  id={boardgame.id}
-                  idGroup={boardgame.product_group_ref_id}
-                  storeId={selectedStoreId ?? null}
-                  quantity={boardgame.quantity}
-                  image={boardgame.image}
-                  price={boardgame.price}
-                  title={boardgame.product_name}
-                  isRented={boardgame.status}
-                  rent_price={boardgame.rent_price}
-                  rent_price_per_hour={boardgame.rent_price_per_hour}
-                  complexity={boardgame.complexity}
-                  age={boardgame.age}
-                  time={boardgame.time}
-                  player={boardgame.player}
-                />
-              ))}
+              {Array.isArray(data?.data) && data.data.length > 0 ? (
+                data.data.map((boardgame: BoardGame) => (
+                  <CardProductRent
+                    key={boardgame.id}
+                    id={boardgame.id}
+                    idGroup={boardgame.product_group_ref_id}
+                    storeId={selectedStoreId ?? null}
+                    quantity={boardgame.quantity}
+                    image={boardgame.image}
+                    price={boardgame.price}
+                    title={boardgame.product_name}
+                    isRented={boardgame.status}
+                    rent_price={boardgame.rent_price}
+                    rent_price_per_hour={boardgame.rent_price_per_hour}
+                    complexity={boardgame.complexity}
+                    age={boardgame.age}
+                    time={boardgame.time}
+                    player={boardgame.player}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-500 py-10">
+                  Cửa hàng chưa có sản phẩm cho thuê.
+                </div>
+              )}
             </div>
           </div>
           {/* Pagination */}
