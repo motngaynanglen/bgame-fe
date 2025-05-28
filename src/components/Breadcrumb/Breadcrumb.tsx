@@ -1,5 +1,5 @@
 
-function Breadcrumb() {
+function Breadcrumb({title , subtitle}: {title: string, subtitle: string}) {
   return (
     <div className="relative">
       <img
@@ -9,7 +9,8 @@ function Breadcrumb() {
       />
       <div className="absolute inset-0 flex flex-col items-start justify-center px-16 ">
         <h2 className="text-white text-3xl font-bold bg-gray-700 py-5 px-4">
-          Dịch vụ thuê board game <br /> tại cửa hàng BoGemStore
+          {/* Dịch vụ thuê board game <br /> tại cửa hàng BoGemStore */}
+          {title} <br /> {subtitle}
         </h2>
       </div>
     </div>

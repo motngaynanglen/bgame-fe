@@ -54,7 +54,7 @@ export default function ProductWrapper({ storeid, date }: { storeid: string, dat
             <Card className="my-5" loading={loading} title="Danh sách sản phẩm cho thuê" >
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-                    {(products.map((boardgame, index) => (
+                    {(products?.map((boardgame, index) => (
                         <CardProductRent
                             key={index}
                             id={boardgame.id}
