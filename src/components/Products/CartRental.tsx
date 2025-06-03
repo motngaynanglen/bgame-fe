@@ -21,8 +21,8 @@ import { HttpError } from "@/src/lib/httpAxios";
 import { useAppContext } from "@/src/app/app-provider";
 import bookListApiRequest from "@/src/apiRequests/bookList";
 
-export default function CartRental() {
-  const { cartItems,  removeFromCart } = useRentalStore();
+export default function CartRental({storeId}: { storeId: string | null }) {
+  const { cartItems, removeFromCart } = useRentalStore();
   const router = useRouter();
   const { user } = useAppContext();
 
@@ -51,19 +51,18 @@ export default function CartRental() {
         productTemplateID: item.productTemplateID,
         quantity: item.quantity,
       })),
-      // storeId: storeId, // Store ID (Cập nhật nếu cần)
+      storeId: storeId, // Store ID (Cập nhật nếu cần)
       from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
       to: selectedDate ? selectedDate[1]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
       bookType: selectedOption === "days" ? 1 : 0, // 1 = theo ngày, 0 = theo giờ
     };
-
-    console.log(postData);
 
     try {
       const response = await bookListApiRequest.createBookList(
         postData,
         user.token
       );
+      console.log("Tại vì sao", postData);
       if (response.statusCode == "200") {
         notifySuccess(
           "Đặt trước thành công!",
@@ -105,9 +104,7 @@ export default function CartRental() {
                 </span>
               }
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-            >
-              
-            </Empty>
+            ></Empty>
           </div>
         ) : (
           <div>

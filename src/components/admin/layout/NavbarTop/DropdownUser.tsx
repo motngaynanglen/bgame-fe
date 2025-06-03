@@ -1,10 +1,12 @@
-import { use, useState } from "react";
+"use client";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "../../ClickOutside";
 import UserImage from "@/src/public/assets/images/blog-author.png";
 import { AiOutlineDown } from "react-icons/ai";
 import { useAppContext } from "@/src/app/app-provider";
+import { useRouter } from "next/navigation";
 
 interface ProfileType {
   name: string | "";
@@ -59,8 +61,24 @@ interface ProfileType {
 // }
 
 const DropdownUser = () => {
+  const [hasMounted, setHasMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useAppContext();
+
+  const router = useRouter();
+
+  // Check if the component has mounted to avoid hydration issues
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && !user) {
+      router.push("/login");
+    }
+  }, [hasMounted, user, router]);
+
+  if (!hasMounted || !user) return null;
 
   const profile: ProfileType = {
     name: user?.name ?? "",
@@ -69,10 +87,9 @@ const DropdownUser = () => {
   };
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
-      <Link
+      <div
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-4"
-        href="#"
+        className="flex items-center gap-4 cursor-pointer"
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
@@ -92,7 +109,7 @@ const DropdownUser = () => {
         </span>
 
         <AiOutlineDown />
-      </Link>
+      </div>
 
       {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (

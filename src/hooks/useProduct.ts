@@ -42,7 +42,7 @@ export const useProducts = (currentPage: number = 1, pageSize: number = 15) => {
     queryFn: async () => {
       const res = await productApiRequest.getList({
         search: "",
-        filter: [],
+        filter: null,
         paging: {
           pageNum: currentPage,
           pageSize,

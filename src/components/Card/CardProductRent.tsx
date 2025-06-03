@@ -1,26 +1,26 @@
 "use client";
-import bookListApiRequest from "@/src/apiRequests/bookList";
+
+import { bookListApiRequest } from "@/src/apiRequests/bookList";
 import { useAppContext } from "@/src/app/app-provider";
 import { HttpError } from "@/src/lib/httpAxios";
 import { useRentalStore } from "@/src/store/rentalStore";
 import {
   Button,
-  DatePicker,
   Divider,
   message,
   Modal,
   notification,
   Radio,
-  Rate,
+  Rate
 } from "antd";
 import type { CheckboxGroupProps } from "antd/es/checkbox";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import StarBorder from "../Bits/StarBorder ";
 import CustomDatePicker from "../DateRantalPicker/DateRental";
 import CustomRangePicker from "../DateRantalPicker/HourRental";
 import { notifyError, notifySuccess } from "../Notification/Notification";
-import StarBorder from "../Bits/StarBorder ";
 
 const options: CheckboxGroupProps<string>["options"] = [
   { label: "Thuê theo ngày", value: "days" },
@@ -30,7 +30,6 @@ const options: CheckboxGroupProps<string>["options"] = [
 function CardProductRent({
   id,
   idGroup,
-  
   storeId,
   image,
   title,
@@ -46,7 +45,6 @@ function CardProductRent({
 }: {
   id: string;
   idGroup: string;
- 
   storeId: string | null;
   image: string;
   title: string;
@@ -159,7 +157,7 @@ function CardProductRent({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     const product = {
-      productTemplateID: idGroup,
+      productTemplateID: id,
       name: title,
       quantity: quantity,
       image: image,

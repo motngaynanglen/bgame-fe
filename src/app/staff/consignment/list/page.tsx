@@ -1,30 +1,23 @@
 "use client";
-import { CreateButton } from "@/src/components/admin/Button";
-import {
-  InvoicesTableSkeleton,
-  TableSkeleton,
-} from "@/src/components/admin/layout/skeletons";
+import consignmentApiRequest from "@/src/apiRequests/consignment";
+import productApiRequest from "@/src/apiRequests/product";
+import { useAppContext } from "@/src/app/app-provider";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import SearchBar from "@/src/components/admin/table/search";
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
+import type { CollapseProps, TableProps } from "antd";
 import {
   Breadcrumb,
   Button,
-  Card,
   Col,
   Collapse,
   message,
-  Pagination,
   Row,
   Space,
   Table,
-  Tag,
 } from "antd";
-import type { CollapseProps, TableProps } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { Suspense, useEffect, useState } from "react";
-import productApiRequest from "@/src/apiRequests/product";
-import { useAppContext } from "@/src/app/app-provider";
 
 const role: string = "staff";
 const baseUrl: string = "/" + role + "/consignment" + "/product";
@@ -32,15 +25,14 @@ const manageUrl = (id: string): string => `${baseUrl}/${id}`;
 interface DataType {
   key: string;
   id: string;
-  product_group_ref_id: string;
   product_name: string;
-  image: string;
-  price: number;
-  rent_price: number;
-  rent_price_per_hour: number;
-  sales_quantity: number;
-  rent_quantity: number;
-  tags: string[];
+  description: string;
+  condition: number;
+  missing: string;
+  expected_price: number;
+  sale_price: number;
+  images: string;
+  status: string;
 }
 interface PagingType {
   pageNum: number;
@@ -55,19 +47,45 @@ const columns: TableProps<DataType>["columns"] = [
     render: (text) => <a>{text}</a>,
   },
   {
-    title: "Giá cơ bản",
-    dataIndex: "price",
-    key: "price",
+    title: "Giá bán",
+    dataIndex: "sale_price",
+    key: "sale_price",
+    render: (text) => (
+      <span>
+        {text.toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        })}
+      </span>
+    ),
   },
   {
-    title: "Số lượng bán",
-    dataIndex: "sales_quantity",
-    key: "sales_quantity",
+    title: "Hiện trạng",
+    dataIndex: "condition",
+    key: "condition",
+    render: (text) => {
+      switch (text) {
+        case 0:
+          return <span>New in Shrink</span>;
+        case 1:
+          return <span>Chưa qua sử dụng</span>;
+        case 2:
+          return <span>Đã qua sử dụng</span>;
+        case 3:
+          return <span>Tốt</span>;
+        case 4:
+          return <span>Khá</span>;  
+        case 5:
+          return <span>Kém</span>;
+        default:
+          return <span>Không xác định</span>;
+      }
+    },
   },
   {
-    title: "Số lượng thuê",
-    dataIndex: "rent_quantity",
-    key: "rent_quantity",
+    title: "trạng thái",
+    dataIndex: "status",
+    key: "status",
   },
   // {
   //     title: 'Tags',
@@ -152,11 +170,9 @@ export default function List({
   const { user } = useAppContext();
 
   const apiBody = {
-    search: searchParams?.query ?? "",
-    filter: ["string"],
     paging: {
-      pageNum: searchParams?.page ?? 1,
-      pageSize: 10,
+      pageNum: 1,
+      pageSize: 20,
     },
   };
 
@@ -168,7 +184,7 @@ export default function List({
       return;
     }
     try {
-      const response = await productApiRequest.getListByRole(
+      const response = await consignmentApiRequest.getConsignmentList(
         apiBody,
         user.token
       );

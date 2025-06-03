@@ -3,7 +3,8 @@ import { orderApiRequest } from "@/src/apiRequests/orders";
 import { useQuery } from "@tanstack/react-query";
 import { Divider } from "antd";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useMemo } from "react";
+import { Divide } from "react-feather";
 
 interface OrderItem {
   order_item_id: string;
@@ -45,15 +46,33 @@ export default function DetailOrder() {
   console.log("data", data);
   console.log("data order", data?.order_items);
 
-  if (isLoading || !data) {
-    return <div className="text-white">Loading...</div>;
-  }
+  // if (isLoading || !data) {
+  //   return <div className="text-white">Loading...</div>;
+  // }
+
+  const groupedItems = useMemo(() => {
+    if (!data) return [];
+
+    const map = new Map();
+    for (const item of data.order_items) {
+      const key = item.product_template_id;
+      if (map.has(key)) {
+        map.get(key).quantity += 1;
+      } else {
+        map.set(key, {
+          ...item,
+          quantity: 1,
+        });
+      }
+    }
+    return Array.from(map.values());
+  }, [data]);
 
   return (
     <div className="min-w-xl mx-auto p-6  border-gray-400 rounded-lg ">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-primary mb-6">
-          Chi tiết đơn hàng {data.order_code}
+          Chi tiết đơn hàng {data?.order_code}
         </h2>
         {/* Order Status (vẫn ở hàng riêng) */}
         <div className="flex mb-6">
@@ -61,9 +80,9 @@ export default function DetailOrder() {
             Trạng thái đơn hàng:{" "}
           </h3>
           <span className={`px-2 rounded-full  font-medium`}>
-            {data.order_status === "DELIVERING" && "Đang giao hàng"}
-            {data.order_status === "SENT" && "Đã giao hàng"}
-            {data.order_status === "CANCELLED" && "Đã huỷ"}
+            {data?.order_status === "DELIVERING" && "Đang giao hàng"}
+            {data?.order_status === "SENT" && "Đã giao hàng"}
+            {data?.order_status === "CANCELLED" && "Đã huỷ"}
           </span>
         </div>
       </div>
@@ -81,7 +100,7 @@ export default function DetailOrder() {
                     Tên người nhận
                   </dt>
                   <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                    {data.full_name}
+                    {data?.full_name}
                   </dd>
                 </dl>
                 <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
@@ -89,7 +108,7 @@ export default function DetailOrder() {
                     Địa chỉ
                   </dt>
                   <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                    {data.address}
+                    {data?.address}
                   </dd>
                 </dl>
                 <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
@@ -97,7 +116,7 @@ export default function DetailOrder() {
                     Email
                   </dt>
                   <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                    {data.email}
+                    {data?.email}
                   </dd>
                 </dl>
                 <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
@@ -105,7 +124,7 @@ export default function DetailOrder() {
                     Số điện thoại
                   </dt>
                   <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                    {data.phone_number}
+                    {data?.phone_number}
                   </dd>
                 </dl>
               </div>
@@ -149,45 +168,48 @@ export default function DetailOrder() {
           </h3>
           <div className="space-y-4">
             {" "}
-            {data.order_items.map((item) => {
+            {groupedItems.map((item) => {
               const image = item.template_image.split("||")[0];
               return (
                 <div
-                  key={item.order_item_id}
+                  key={item.product_template_id}
                   className="flex gap-4 items-start"
                 >
                   <img
                     src={image}
                     alt={item.template_product_name}
-                    className="w-16 h-16 object-cover rounded"
+                    className="w-24 h-24 object-cover rounded"
                   />
                   <div className="flex-1">
-                    <p className="font-medium text-gray-800">
+                    <p className="font-medium text-base text-gray-800">
                       {item.template_product_name}
                     </p>
-                    <p className="text-sm text-gray-500">Qty: 1</p>
+                    <p className="text-sm text-gray-500">
+                      Số lượng: {item.quantity}
+                    </p>
                   </div>
                   <p className="text-violet-600 font-semibold">
-                    {item.current_price.toLocaleString()}đ
+                    {(item.current_price * item.quantity).toLocaleString()} đ
                   </p>
                 </div>
               );
             })}
           </div>
+          <Divider />
 
           {/* Total */}
-          <div className="grid grid-cols-5  gap-6 border-t">
-            <div className="col-span-4 mt-4 pt-4 text-right text-lg font-bold text-violet-600">
+          <div className="grid grid-cols-5">
+            <div className="col-span-4  text-right text-lg font-bold text-violet-600">
               Tổng tiền <br />
               Phí vận chuyển <br />
               Mã giảm giá <br />
               Thành tiền
             </div>
-            <div className=" mt-4 pt-4 text-right text-lg font-bold text-violet-600">
-              {data.total_price.toLocaleString()}đ<br />
+            <div className="text-right text-lg font-bold text-violet-600">
+              {data?.total_price.toLocaleString()}đ<br />
               0đ <br />
               0đ <br />
-              {data.total_price.toLocaleString()}đ
+              {data?.total_price.toLocaleString()}đ
             </div>
           </div>
         </div>

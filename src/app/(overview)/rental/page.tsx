@@ -93,23 +93,23 @@ export default function BoardGameRental() {
     return <Loading />;
   }
 
-  if (storesError) {
-    return (
-      <div>Error: {storesErrorData?.message || "Failed to load stores."}</div>
-    );
-  }
+  // if (storesError) {
+  //   return (
+  //     <div>Error: {storesErrorData?.message || "Failed to load stores."}</div>
+  //   );
+  // }
 
   if (rentalLoading) {
     return <Loading />;
   }
 
-  if (rentalError) {
-    return (
-      <div>
-        Error: {rentalErrorData?.message || "Failed to load rental products."}
-      </div>
-    );
-  }
+  // if (rentalError) {
+  //   return (
+  //     <div>
+  //       Error: {rentalErrorData?.message || "Failed to load rental products."}
+  //     </div>
+  //   );
+  // }
 
   return (
     <div>
@@ -212,7 +212,7 @@ export default function BoardGameRental() {
           />
         </main>
         <aside className="hidden lg:block w-1/4 bg-slate-600 text-white sticky top-[64px] h-[calc(100vh-64px)] border-l-2 border-gray-200">
-          <CartRental />
+          <CartRental  storeId={selectedStoreId ?? null}/>
         </aside>
       </div>
     </div>

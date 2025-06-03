@@ -2,7 +2,6 @@ import productApiRequest from "@/src/apiRequests/product";
 import uploadApiRequest from "@/src/apiRequests/upload";
 import { useAppContext } from "@/src/app/app-provider";
 import TipTapEditor from "@/src/components/TipTapEditor/TipTapEditor";
-import { useObjectUrls } from "@/src/hooks/useObjectURL";
 import { HttpError } from "@/src/lib/httpAxios";
 import { productFullFormSchema, ProductFullFormType, productModel } from "@/src/schemaValidations/product.schema";
 import { InboxOutlined } from "@ant-design/icons";
@@ -10,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Col, Form, Input, message, Row, Space, Upload, UploadFile, UploadProps } from "antd";
 import { RcFile, UploadChangeParam } from "antd/es/upload";
 import { useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
 
 const { Dragger } = Upload;

@@ -1,35 +1,26 @@
 "use client";
 import bookListApiRequest from "@/src/apiRequests/bookList";
+import { orderApiRequest } from "@/src/apiRequests/orders";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import SearchBar from "@/src/components/admin/table/search";
+import { formatDateTime, formatVND } from "@/src/lib/utils";
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
+import type { CollapseProps, TableProps } from "antd";
 import {
   Breadcrumb,
   Button,
   Col,
   DatePicker,
   message,
-  Modal,
-  Radio,
   Row,
-  Select,
   Space,
   Table,
   Tag,
 } from "antd";
-import type { CollapseProps, TableProps } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
+import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
-import {
-  formatDateTime,
-  formatTimeStringRemoveSeconds,
-  formatVND,
-} from "@/src/lib/utils";
-import dayjs from "@/src/lib/dayjs ";
-import { CheckboxGroupProps } from "antd/es/checkbox";
-import { orderApiRequest } from "@/src/apiRequests/orders";
-import { useRouter } from "next/navigation";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -98,6 +89,8 @@ export default function StaffManageOrder({
   const [mode, setMode] = useState<number>(0);
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
   const [tableLoading, setTableLoading] = useState<boolean>(true);
+  const [hasMounted, setHasMounted] = useState(false);
+
   const { user } = useAppContext();
   const apiBody = {
     paging: {
@@ -108,23 +101,54 @@ export default function StaffManageOrder({
 
   const router = useRouter();
 
+  // Check if the component has mounted to avoid hydration issues
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && !user) {
+      router.push("/login");
+    }
+  }, [hasMounted, user, router]);
+
   const fetchTableData = async () => {
     setTableLoading(true);
+
     if (!user) {
       message.error("Bạn cần đăng nhập để đặt trước.");
       setTableLoading(false);
       return;
     }
-    const response = await orderApiRequest.getOrderHistory(apiBody, user.token);
-    const data: DataType[] | undefined = response.data?.map(
-      (item: DataType) => ({
-        ...item,
-        key: item.id, // Gán id vào key
-      })
-    );
-    setPaging(response.paging);
-    setTableLoading(false);
-    return data;
+
+    try {
+      const response = await orderApiRequest.getOrderHistory(
+        apiBody,
+        user.token
+      );
+
+      const data: DataType[] | undefined = response.data?.map(
+        (item: DataType) => ({
+          ...item,
+          key: item.id,
+        })
+      );
+
+      setPaging(response.paging);
+      return data;
+    } catch (error: any) {
+      // Kiểm tra nếu lỗi là 401 (token hết hạn)
+      if (error.response?.status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        router.push("/login"); // Chuyển hướng về login
+      } else {
+        message.error("Đã xảy ra lỗi khi tải dữ liệu.");
+        console.error(error);
+      }
+      return;
+    } finally {
+      setTableLoading(false);
+    }
   };
   useEffect(() => {
     fetchTableData().then((result) => {

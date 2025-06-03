@@ -1,9 +1,10 @@
 "use client";
-import { orderApiRequest } from "@/src/apiRequests/orders";
-import { useQuery } from "@tanstack/react-query";
-import { Button, Divider, Table } from "antd";
+import { orderApiRequest, orderItemApiRequest } from "@/src/apiRequests/orders";
+import { useAppContext } from "@/src/app/app-provider";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Divider, message } from "antd";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useMemo } from "react";
 
 interface OrderItem {
   order_item_id: string;
@@ -31,6 +32,11 @@ interface OrderDetail {
 
 export default function OrderDetail() {
   const { id } = useParams();
+  const { user } = useAppContext();
+
+  const [codesByItem, setCodesByItem] = React.useState<Record<string, string>>(
+    {}
+  );
   const { data, isLoading } = useQuery<OrderDetail>({
     queryKey: ["order", id],
     queryFn: async () => {
@@ -41,12 +47,58 @@ export default function OrderDetail() {
     },
   });
 
+  const updateItemMutation = useMutation({
+    mutationFn: async ({
+      orderItemId,
+      productCode,
+    }: {
+      orderItemId: string;
+      productCode: string;
+    }) => {
+      return await orderItemApiRequest.updateOrderItem(
+        {
+          orderID: data!.order_id,
+          orderItemId,
+          productCode: productCode, 
+        },
+        user?.token
+      );
+    },
+    onSuccess: () => {
+      message.success("Cập nhật thành công");
+    },
+    onError: () => {
+      message.error("Có lỗi khi cập nhật. Vui lòng thử lại.");
+    },
+  });
+
+  const handleCodeChange = (orderItemId: string, value: string) => {
+    setCodesByItem((prev) => ({
+      ...prev,
+      [orderItemId]: value,
+    }));
+  };
+
+  const handleUpdateItem = (orderItemId: string) => {
+    const productCode = codesByItem[orderItemId] || "";
+    if (!productCode) {
+      message.error("Bạn phải nhập mã code trước khi cập nhật.");
+      return;
+    }
+    updateItemMutation.mutate({ orderItemId, productCode });
+  };
   console.log("data", data);
   console.log("data order", data?.order_items);
+  // console.log()
 
   if (isLoading || !data) {
     return <div className="text-white">Loading...</div>;
   }
+  console.log("orderItemData", data);
+
+  
+
+  
   return (
     <div className="min-h-screen text-white p-4 sm:p-6">
       <div className="w-full mx-auto bg-gray-800 rounded-lg p-6 space-y-6">
@@ -120,6 +172,7 @@ export default function OrderDetail() {
                   <th className="border border-gray-100 p-2">Giá</th>
                   <th className="border border-gray-100 p-2">Thành tiền</th>
                   <th className="border border-gray-100 p-2">Code </th>
+                  <th className="border border-gray-100 p-2"></th>
                 </tr>
               </thead>
               <tbody>
@@ -143,7 +196,21 @@ export default function OrderDetail() {
                         type="text"
                         className="p-2 w-full bg-gray-800"
                         placeholder="Nhập mã code"
+                        value={codesByItem[item.order_item_id] || ""}
+                        onChange={(e) =>
+                          handleCodeChange(item.order_item_id, e.target.value)
+                        }
+                        // onBlur={() => handleUpdateItem(item.order_item_id)}
                       />
+                    </td>
+                    <td className="border border-gray-100 p-2">
+                      <button
+                        className="w-full hover:text-green-500"
+                        onClick={() => handleUpdateItem(item.order_item_id)}
+                        // disabled={updateItemMutation.isLoading}
+                      >
+                        Cập nhật
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -218,9 +285,9 @@ export default function OrderDetail() {
           )}
 
           {/* Nút xuất hóa đơn */}
-          <div className="flex justify-end">
+          {/* <div className="flex justify-end">
             <Button type="primary">Xuất hóa đơn</Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

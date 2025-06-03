@@ -145,7 +145,7 @@ const request = async <Response>(
                 });
             }
         }
-        throw new Error('Unexpected error occurred during API request');
+        throw error;
     }
 };
 
