@@ -39,7 +39,7 @@ export default function LoginPage() {
       // LOGIN BẮT ĐẦU TỪ ĐÂY
       const result = await authApiRequest.login(value);
       console.log(result);
-      const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
+      const expires = new Date(Date.now() + 6 * 60 * 60 * 1000).toUTCString();
 
       await authApiRequest.auth({
         sessionToken: result.data.jwt,

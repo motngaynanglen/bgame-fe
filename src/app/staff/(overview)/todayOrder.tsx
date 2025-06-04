@@ -1,23 +1,28 @@
 "use client"
 
-import { formatTimeStringRemoveSeconds, formatTimeStringToTimestamp } from "@/src/lib/utils";
-import { Button, Card, Col, Row, Space, Table, TableProps, Tag, Typography } from "antd";
+import { orderApiRequest } from "@/src/apiRequests/orders";
+import { formatDateTime, formatTimeStringRemoveSeconds, formatTimeStringToTimestamp } from "@/src/lib/utils";
+import { Button, Card, Col, message, Row, Space, Table, TableProps, Tag, Typography } from "antd";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AiFillEye } from "react-icons/ai";
 import { LuSettings2 } from "react-icons/lu";
+import { useAppContext } from "../../app-provider";
+import dayjs from "@/src/lib/dayjs ";
+import bookListApiRequest from "@/src/apiRequests/bookList";
 
 interface DataType {
     key: string;
+    id: string;
     name: string;
-    tags: string[];
+    tag: string;
     time: string;
     imagehref: string | undefined;
 }
 
 const columns: TableProps<DataType>['columns'] = [
     {
-        title: 'Sản Phẩm',
+        title: 'Người thuê',
         dataIndex: 'name',
         key: 'name',
         render: (_, record) => (
@@ -34,12 +39,12 @@ const columns: TableProps<DataType>['columns'] = [
         ),
     },
     {
-        title: 'Thời gian',
+        title: 'Thời gian bắt đầu',
         dataIndex: 'time',
         key: 'time',
         render: (_, record) => (
             <>
-                {formatTimeStringRemoveSeconds(record.time)}
+                {record.time }
             </>
         ),
         onFilter: (value, record) => record.name.indexOf(value as string) === 0,
@@ -51,19 +56,15 @@ const columns: TableProps<DataType>['columns'] = [
         key: 'tags',
         dataIndex: 'tags',
         filterMode: "menu",
-        render: (_, { tags }) => (
+        render: (_, { tag }) => (
             <>
-                {tags.map((tag) => {
-                    let color = tag.length > 5 ? 'geekblue' : 'green';
-                    if (tag === 'loser') {
-                        color = 'volcano';
-                    }
-                    return (
-                        <Tag color={color} key={tag}>
-                            {tag.toUpperCase()}
-                        </Tag>
-                    );
-                })}
+                <Tag color={
+                    tag === 'CANCEL' ? 'volcano' :
+                        tag.length > 5 ? 'geekblue' :
+                            'green'
+                }>
+                    {tag.toUpperCase()}
+                </Tag>
             </>
         ),
         filters: [
@@ -88,61 +89,59 @@ const columns: TableProps<DataType>['columns'] = [
     },
 ];
 
-const data: DataType[] = [
-    {
-        key: '1',
-        name: 'John Brown',
-        time: "07:11:00",
-        tags: ['nice', 'developer'],
-        imagehref: undefined,
-    },
-    {
-        key: '2',
-        name: 'PHÚC THIỆN',
-        time: "10:11:00",
-        tags: ['loser'],
-        imagehref: undefined,
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        time: "14:00:00",
-        tags: ['cool', 'teacher'],
-        imagehref: undefined,
-    },
-    {
-        key: '4',
-        name: 'John Brown',
-        time: "09:45:00",
-        tags: ['nice', 'developer'],
-        imagehref: undefined,
-    },
-    {
-        key: '5',
-        name: 'Jim Green',
-        time: "17:11:00",
-        tags: ['loser'],
-        imagehref: undefined,
-    },
-    {
-        key: '6',
-        name: 'Joe Black',
-        time: "18:51:00",
-        tags: ['cool', 'teacher'],
-        imagehref: undefined,
-    },
-
-];
+const defaultToDay = {
+    from: dayjs().hour(1).minute(0).second(0).toISOString(),
+    to: dayjs().hour(23).minute(0).second(0).toISOString(),
+};
 export default function StaffDashboardToDayOrder() {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
+    const [tableLoading, setTableLoading] = useState<boolean>(true);
+    const { user } = useAppContext();
+    const apiBody = {
+        from: defaultToDay.from,
+        to: defaultToDay.to,
+        paging: {
+            pageNum: 1,
+            pageSize: 20,
+        },
+    };
 
     useEffect(() => {
-        const fetchData = () => {
-            return new Promise<DataType[]>((resolve) => {
-                setTimeout(() => {
-                    resolve(data);
-                }, 5000); // 3-second delay
-            });
+        const fetchData = async () => {
+            setTableLoading(true);
+            if (!user) {
+                message.error("Bạn cần đăng nhập để đặt trước.");
+                setTableLoading(false);
+                return;
+            }
+            try {
+                const response = await bookListApiRequest.getBookListHistory(
+                    apiBody,
+                    user.token
+                );
+                if (!response || response.data === undefined || response.data.length === 0) {
+                    message.error(response?.message || "Không có dữ liệu đơn hàng.");
+                    response.data?.length && setData([]);
+                    setTableLoading(false);
+                    return;
+                }
+                const data: DataType[] | undefined = response.data?.map(
+                    (item: any) => ({
+                        key: item.id,
+                        id: item.id,
+                        name: item.customer_name,
+                        tag: item.status,
+                        time: formatDateTime(item.from, "TIME") // Gán id vào key
+                    })
+                );
+                return data;
+            }
+            catch (error) {
+                console.error("Error fetching order history:", error);
+                message.error("Lỗi khi tải dữ liệu đơn hàng.");
+            } finally {
+                setTableLoading(false);
+            }
         };
 
         fetchData().then((result) => {
@@ -173,7 +172,7 @@ export default function StaffDashboardToDayOrder() {
     function CardBody() {
         return (
             <>
-                <Table<DataType> columns={columns} dataSource={useData} pagination={false} />
+                <Table<DataType> columns={columns} dataSource={useData} pagination={false} loading={tableLoading} />
             </>
         )
     }
