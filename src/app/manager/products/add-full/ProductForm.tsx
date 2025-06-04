@@ -1,0 +1,322 @@
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Button, Select, message, Card, Tabs, Space, Upload, Row, Col, InputNumber, ConfigProvider, Image } from 'antd';
+import { SearchOutlined, PlusOutlined, InboxOutlined } from '@ant-design/icons';
+import type { TabsProps, UploadFile, UploadProps } from 'antd';
+import axios from 'axios';
+import { ProductResType, productTemplateBodyType, productTemplateSchema } from '@/src/schemaValidations/product.schema';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAppContext } from '@/src/app/app-provider';
+import { useImageUploader } from '@/src/hooks/useImageUploader';
+import { RcFile } from 'antd/es/upload';
+import productApiRequest from '@/src/apiRequests/product';
+import TipTapEditor from '@/src/components/TipTapEditor/TipTapEditor';
+import { FormItem } from 'react-hook-form-antd';
+import Dragger from 'antd/es/upload/Dragger';
+import { on } from 'events';
+
+const { Option } = Select;
+type Mode = 'select' | 'create'
+const defaultValues: productTemplateBodyType = {
+  id: null,
+  productGroupRefId: undefined,
+  productName: "",
+  images: [],
+  price: 0,
+  rentPrice: 0,
+  rentPricePerHour: 0,
+  hardRank: 0,
+  age: 0,
+  numberOfPlayerMin: 0,
+  numberOfPlayerMax: 0,
+  description: "",
+};
+const beforeUpload = (file: File) => {
+  const isImage = file.type.startsWith("image/");
+  const isLt20MB = file.size / 1024 / 1024 <= 20;
+  if (!isImage) {
+    message.error("Chỉ cho phép ảnh!");
+    return Upload.LIST_IGNORE;
+  }
+  if (!isLt20MB) {
+    message.error("Dung lượng ảnh phải ≤ 20MB!");
+    return Upload.LIST_IGNORE;
+  }
+  return true;
+};
+const uploadProps: UploadProps = {
+  accept: "image/*",
+  beforeUpload: beforeUpload,
+  multiple: true,
+  maxCount: 10,
+  listType: "picture",
+  showUploadList: {
+    showPreviewIcon: true,
+    showRemoveIcon: true,
+  },
+};
+type ProductTemplateFormProps = {
+  productGroupRefId: string;
+  onProductTemplateCreated?: (groupRefId: string) => void;
+};
+export default function ProductFrom({ productGroupRefId, onProductTemplateCreated }: ProductTemplateFormProps) {
+  const { user } = useAppContext();
+  const [mode, setMode] = useState<Mode>('select')
+  const [imageList, setImageList] = useState<string[] | string>([]);
+  const { uploadImages, uploading } = useImageUploader();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+
+  const [productList, setProductList] = useState<ProductResType[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
+
+  const form = useForm<productTemplateBodyType>({
+    resolver: zodResolver(productTemplateSchema),
+    defaultValues: {
+      ...defaultValues,
+      productGroupRefId: productGroupRefId || undefined,
+    },
+  });
+  const { control, handleSubmit, reset, formState: { errors, isSubmitting, isValid } } = form;
+
+
+  const fetchProductList = async () => {
+    if (!productGroupRefId) return;
+    try {
+      const res = await productApiRequest.getListByGroupRefId({ productGroupRefId: productGroupRefId });
+      setProductList(res.data || []);
+    } catch {
+      message.error("Không thể lấy danh sách sản phẩm");
+    }
+  };
+
+  useEffect(() => {
+    if (mode === "select") {
+      fetchProductList();
+    }
+  }, [mode, productGroupRefId]);
+
+  const handleSelectProduct = (id: string) => {
+    const selected = productList.find((p) => p.id === id);
+    if (!selected) return;
+    setSelectedProductId(id);
+    setFileList(selected.image ? selected.image.split("||").map((url) => ({
+      uid: url,
+      name: url.split('/').pop() || 'image',
+      status: 'done',
+      url: url,
+    })) : []);
+    onProductTemplateCreated?.(id);
+    form.reset({
+      ...defaultValues,
+      productGroupRefId: productGroupRefId || undefined,
+      id: selected.id,
+      productName: selected.product_name ?? "",
+      images: selected.image?.split("||") || [],
+      price: selected.price || 0,
+      rentPrice: selected.rent_price || 0,
+      rentPricePerHour: selected.rent_price_per_hour || 0,
+      hardRank: selected.hard_rank || 0,
+      age: selected.age || 0,
+      numberOfPlayerMin: selected.number_of_player_min || 0,
+      numberOfPlayerMax: selected.number_of_player_max || 0,
+      description: selected.description || "",
+    });
+
+  };
+
+  const onSubmit = async (values: productTemplateBodyType) => {
+    if (!isValid) {
+      message.error("Vui lòng kiểm tra lại thông tin đã nhập.");
+      return;
+    }
+    if (isSubmitting) {
+      message.warning('Đang gửi yêu cầu, vui lòng đợi phản hồi từ hệ thống.');
+      return;
+    }
+    if (!user) {
+      return message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
+    }
+
+    try {
+      if (productGroupRefId === undefined || productGroupRefId === null || productGroupRefId === "") {
+        message.error("Vui lòng chọn nhóm sản phẩm trước khi tạo sản phẩm.");
+        return;
+      }
+      const imageFiles = fileList
+        .map((f) => f.originFileObj)
+        .filter((f): f is RcFile => !!f);
+
+      const imageList = await uploadImages(imageFiles, 'list');
+
+      if (!imageList) return;
+
+      const body: productTemplateBodyType = {
+        ...values,
+        productGroupRefId: productGroupRefId,
+        images: imageList,
+      };
+
+      const res = await productApiRequest.createTemplate(body, user.token);
+
+      message.success("Thêm sản phẩm thành công!");
+      const createdId = res.data ?? "";
+      onProductTemplateCreated?.(createdId);
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : "Lỗi khi thêm sản phẩm");
+    }
+  };
+  const handleModeChange = (value: Mode) => {
+    setMode(value);
+    if (value === "create") {
+      reset(defaultValues);
+    } else {
+      reset(defaultValues);
+    }
+  };
+  const title = () => {
+    return (
+      <Space className="w-full justify-between">
+        Nhóm sản phẩm
+        < Select value={mode} onChange={handleModeChange} style={{ width: 150 }
+        }>
+          <Option value="select">Chọn sẵn</Option>
+          <Option value="create">Tạo mới</Option>
+        </Select >
+      </Space >
+    );
+  };
+  return (
+    <>
+      {/* <ConfigProvider prefixCls="form-ant"> */}
+      <Card title={title()} style={{ marginBottom: 16 }} styles={{ header: { backgroundColor: '#5c6cfa', color: '#ffffff' } }}>
+        {mode === "select" && (
+          <Select
+            showSearch
+            placeholder="Chọn sản phẩm"
+            style={{ width: "100%", marginBottom: 12 }}
+            onChange={handleSelectProduct}
+            value={selectedProductId || undefined}
+            optionFilterProp="children"
+          >
+            {productList.map((p) => (
+              <Option key={p.id} value={p.id}>
+                <Image src={p.image ?? undefined} alt={p.product_name ?? undefined} />
+                {p.product_name}
+              </Option>
+            ))}
+          </Select>
+        )}
+
+        <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+          <Row gutter={[16, 16]}>
+            {/* --- THÔNG TIN CHUNG --- */}
+            <Col span={24}>
+              <Card size="small" title="Thông tin sản phẩm">
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <FormItem control={control} name="productName" label="Tên sản phẩm chi tiết">
+                      <Input />
+                    </FormItem>
+                  </Col>
+                  <Col span={12}>
+                    <FormItem control={control} name="age" label="Độ tuổi gợi ý">
+                      <InputNumber min={1} style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
+            {/* --- GIÁ CẢ --- */}
+            <Col span={12}>
+              <Card size="small" title="Giá bán và giá thuê">
+                <Row gutter={16}>
+                  <Col span={8}>
+                    <FormItem control={control} name="price" label="Giá bán">
+                      <InputNumber style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                  <Col span={8}>
+                    <FormItem control={control} name="rentPrice" label="Giá thuê">
+                      <InputNumber style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                  <Col span={8}>
+                    <FormItem control={control} name="rentPricePerHour" label="Giá thuê theo giờ">
+                      <InputNumber style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
+
+            {/* --- THÔNG SỐ KỸ THUẬT --- */}
+            <Col span={12}>
+              <Card size="small" title="Thông số kỹ thuật">
+                <Row gutter={16}>
+                  <Col span={6}>
+                    <FormItem control={control} name="hardRank" label="Độ khó (1–10)">
+                      <InputNumber min={1} max={10} style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                  <Col span={9}>
+                    <FormItem control={control} name="numberOfPlayerMin" label="Số người chơi tối thiểu">
+                      <InputNumber min={1} style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                  <Col span={9}>
+                    <FormItem control={control} name="numberOfPlayerMax" label="Số người chơi tối đa">
+                      <InputNumber min={1} style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
+
+            {/* --- MÔ TẢ --- */}
+            <Col span={24}>
+              <Card size="small" title="Mô tả chi tiết">
+                <FormItem control={control} name="description" label="Mô tả">
+                  <TipTapEditor />
+                </FormItem>
+              </Card>
+            </Col>
+
+            {/* --- HÌNH ẢNH --- */}
+            <Col span={24}>
+              <Card size="small" title="Hình ảnh sản phẩm">
+                <Form.Item label="Hình ảnh">
+                  <Dragger
+                    {...uploadProps}
+                    fileList={fileList}
+                    onChange={(info) => setFileList(info.fileList)}
+                    disabled={uploading}
+                  >
+                    <p className="ant-upload-drag-icon">
+                      <InboxOutlined />
+                    </p>
+                    <p className="ant-upload-text">Kéo và thả hoặc chọn ảnh</p>
+                    <p className="ant-upload-hint">Tối đa 10 ảnh, mỗi ảnh ≤ 20MB</p>
+                  </Dragger>
+                </Form.Item>
+              </Card>
+            </Col>
+
+            {/* --- BUTTON --- */}
+            <Col span={24} style={{ textAlign: "right" }}>
+              <Space>
+                <Button onClick={() => reset()} disabled={isSubmitting}>Làm mới</Button>
+                <Button type="primary" htmlType="submit" loading={isSubmitting}>
+                  {isSubmitting ? "Đang xử lý..." : "Tạo sản phẩm"}
+                </Button>
+              </Space>
+            </Col>
+          </Row>
+        </Form>
+
+      </Card>
+      {/* </ConfigProvider> */}
+    </>
+
+  );
+}

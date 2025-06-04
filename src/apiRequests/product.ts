@@ -38,6 +38,12 @@ const productApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+  getListByGroupRefId: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Product/get-by-group-ref-id", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
   getByCode: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/Product/get-by-code", body, {
       headers: {
