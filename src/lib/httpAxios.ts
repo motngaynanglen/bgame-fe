@@ -12,6 +12,7 @@ const STATUS_CODES = {
     ENTITY_ERROR: 422,
     AUTHENTICATION_ERROR: 401,
     NOT_FOUND: 404,
+    BAD_REQUEST: 400,
     // AUTHENTICATION_FAIL: 404,
     SERVER_ERROR: 500,
 } as const;
@@ -43,7 +44,7 @@ type EntityErrorField = {
     message: string
 }
 export class EntityError extends HttpError {
-    status: 422
+    status: 422 | 400
     message: string
     data: EntityErrordata
     constructor({ status, message, data }: { status: 422; message: string; data: EntityErrordata }) {
@@ -141,6 +142,18 @@ const request = async <Response>(
                 throw new HttpError({
                     status: STATUS_CODES.NOT_FOUND,
                     message: 'Resource not found',
+                    data: data,
+                });
+            }else if (status === STATUS_CODES.ENTITY_ERROR) {
+                throw new HttpError({
+                    status: STATUS_CODES.ENTITY_ERROR,
+                    message: 'Lỗi logic khi tạo dữ liệu',
+                    data: data,
+                });
+            }else if (status === STATUS_CODES.BAD_REQUEST) {
+                throw new HttpError({
+                    status: STATUS_CODES.BAD_REQUEST,
+                    message: 'Lỗi logic khi tạo dữ liệu',
                     data: data,
                 });
             }

@@ -89,9 +89,7 @@ export default function BoardGameRental() {
     enabled: !!selectedStoreId,
   });
 
-  if (storesLoading) {
-    return <Loading />;
-  }
+
 
   // if (storesError) {
   //   return (
@@ -113,7 +111,7 @@ export default function BoardGameRental() {
 
   return (
     <div>
-      <Breadcrumb title="Dịch vụ thuê board game" subtitle="Tại BoardGame Impact"/>
+      <Breadcrumb title="Dịch vụ thuê board game" subtitle="Tại BoardGame Impact" />
       <TimeSlotDisplay storeid={selectedStoreId ?? ""} />
       <div className="flex container min-h-screen mx-auto max-w-screen-3xl">
         <main className=" lg:w-3/4 p-4">
@@ -176,7 +174,7 @@ export default function BoardGameRental() {
             </Drawer>
             {/* Product Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Array.isArray(data?.data) && data.data.length > 0 ? (
+              {((Array.isArray(data?.data) && data.data.length > 0) || storesLoading) ? (
                 data.data.map((boardgame: BoardGame) => (
                   <CardProductRent
                     key={boardgame.id}

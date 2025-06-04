@@ -84,15 +84,15 @@ export default function TemplateForm() {
     setStoreLoading(true);
     try {
       const res = await storeApiRequest.getListAndProductCountById({
-        product_template_id: templateId,
+        productTemplateId: templateId,
       });
-      const { data } = res.data;
+      const data: StoreItem[] = res.data;
 
       // Map dữ liệu trả về sang định dạng dùng trong cart
-      return data.store.map((store: any) => ({
+      return data.map((store: any) => ({
         id: store.store_id,
         name: store.store_name,
-        quantity: store.sales_count, // hoặc tính tùy theo logic bạn cần
+        quantity: store.sale_count, // hoặc tính tùy theo logic bạn cần
       }));
     } catch (error) {
       notifyError(
@@ -251,27 +251,29 @@ export default function TemplateForm() {
                 </div>
               </div>
               <div className="h-24 flex flex-col  justify-around  items-end">
-                <Select
-                  showSearch
-                  value={item.storeId}
-                  onChange={(val) => handleStoreChange(item.id, val)}
-                  optionFilterProp="children"
-                  className="w-full"
-                >
-                  {item.storeList?.map((store) => (
-                    <Option
-                      key={store.id}
-                      value={store.id}
-                      disabled={store.quantity < item.quantity}
-                    >
-                      {store.name}
-                    </Option>
-                  ))}
-                </Select>
-                {/* <Button
-                  icon={<ReloadOutlined />}
-                  onClick={() => reloadStoreList(item.id)}
-                /> */}
+                <div className="gap-2 flex items-center">
+                  <Select
+                    showSearch
+                    value={item.storeId}
+                    onChange={(val) => handleStoreChange(item.id, val)}
+                    optionFilterProp="children"
+                    className="w-full"
+                  >
+                    {item.storeList?.map((store) => (
+                      <Option
+                        key={store.id}
+                        value={store.id}
+                        disabled={store.quantity < item.quantity}
+                      >
+                        {store.name} ({store.quantity} sẵn có)
+                      </Option>
+                    ))}
+                  </Select>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    onClick={() => reloadStoreList(item.id)}
+                  />
+                </div>
                 <div className="flex justify-between items-center w-full ms-3">
                   <span className="text-sm  text-gray-500">
                     Số lượng sẵn có:{" "}
@@ -349,7 +351,7 @@ export default function TemplateForm() {
         </div>
         <div className="border-t border-gray-700 pt-4 flex justify-between font-bold text-lg">
           <span>Tổng tiền: </span>
-          <span> {calculateTotal().toLocaleString("vi-VN")}₫</span>
+          <span> {clientOnlyTotal}</span>
         </div>
       </div>
 
@@ -362,11 +364,10 @@ export default function TemplateForm() {
           Tiếp tục mua hàng
         </button>
         <button
-          className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${
-            cart.length === 0
+          className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${cart.length === 0
               ? "opacity-50 cursor-not-allowed"
               : "hover:bg-blue-500"
-          }`}
+            }`}
           disabled={cart.length === 0}
           onClick={() => router.push("/check-out")}
         >

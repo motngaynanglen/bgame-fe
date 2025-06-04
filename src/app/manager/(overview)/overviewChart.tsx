@@ -23,18 +23,25 @@ const OverviewChart = () => {
   const chartInstance = useRef<Chart | null>(null);
 
   const [data, setData] = useState<ChartData>({
-    labels: ['Label 1', 'Label 2', 'Label 3'],
+    labels: ['Tháng 1', 'Tháng 2', 'Tháng 3'],
     datasets: [
       {
-        label: 'Người',
-        data: [65, 59, 80],
+        label: 'Tổng doanh thu',
+        data: [65000, 59000, 80000],
         borderColor: 'rgba(75,192,192,1)',
         borderWidth: 2,
         fill: false,
       },
       {
-        label: 'Khỉ',
-        data: [12, 50, 100],
+        label: 'Sản phẩm đã bán',
+        data: [30000, 35000, 40000],
+        borderColor: 'rgba(75,192,192,1)',
+        borderWidth: 2,
+        fill: false,
+      },
+      {
+        label: 'Sản phẩm cho thuê',
+        data: [35000, 24000, 20000],
         borderColor: 'rgba(75,192,192,1)',
         borderWidth: 2,
         fill: false,

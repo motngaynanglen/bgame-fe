@@ -145,39 +145,3 @@ function StoreInfoForm({ control, watch, setValue }: { control: any, watch: any,
     </>
   );
 }
-
-export default function StoreUpdateForm() {
-  const [form] = Form.useForm();
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { isSubmitting },
-  } = useForm<StoreFormValues>({ defaultValues });
-
-  const onSubmit = async (values: StoreFormValues) => {
-    const imageUrls = values.imageFiles?.map((f) => f.url || f.response?.url || "").filter(Boolean) || [];
-    const imageString = imageUrls.join("||");
-    const finalData = { ...values, image: imageString };
-    console.log("Submit Data:", finalData);
-    message.success("Cập nhật thông tin thành công!");
-  };
-
-  return (
-    <Form onFinish={handleSubmit(onSubmit)} layout="vertical">
-      <h3>Thông tin cửa hàng</h3>
-      <StoreInfoForm control={control} watch={watch} setValue={setValue} />
-      <h3>Thông tin quản lý</h3>
-      <ManagerInfoForm control={control} />
-      <Form.Item style={{ textAlign: "right" }}>
-        <Space>
-          <Button htmlType="reset">Làm mới</Button>
-          <Button type="primary" htmlType="submit" loading={isSubmitting}>
-            Cập nhật
-          </Button>
-        </Space>
-      </Form.Item>
-    </Form>
-  );
-}
