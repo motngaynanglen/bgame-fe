@@ -12,6 +12,7 @@ import {
   Col,
   Collapse,
   message,
+  Modal,
   Row,
   Space,
   Table,
@@ -39,87 +40,6 @@ interface PagingType {
   pageSize: number;
   pageCount: number;
 }
-const columns: TableProps<DataType>["columns"] = [
-  {
-    title: "Tên sản phẩm",
-    dataIndex: "product_name",
-    key: "product_name",
-    render: (text) => <a>{text}</a>,
-  },
-  {
-    title: "Giá bán",
-    dataIndex: "sale_price",
-    key: "sale_price",
-    render: (text) => (
-      <span>
-        {text.toLocaleString("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        })}
-      </span>
-    ),
-  },
-  {
-    title: "Hiện trạng",
-    dataIndex: "condition",
-    key: "condition",
-    render: (text) => {
-      switch (text) {
-        case 0:
-          return <span>New in Shrink</span>;
-        case 1:
-          return <span>Chưa qua sử dụng</span>;
-        case 2:
-          return <span>Đã qua sử dụng</span>;
-        case 3:
-          return <span>Tốt</span>;
-        case 4:
-          return <span>Khá</span>;  
-        case 5:
-          return <span>Kém</span>;
-        default:
-          return <span>Không xác định</span>;
-      }
-    },
-  },
-  {
-    title: "trạng thái",
-    dataIndex: "status",
-    key: "status",
-  },
-  // {
-  //     title: 'Tags',
-  //     key: 'tags',
-  //     dataIndex: 'tags',
-  //     render: (_, { tags }) => (
-  //         <>
-  //             {tags.map((tag) => {
-  //                 let color = tag.length > 5 ? 'geekblue' : 'green';
-  //                 if (tag === 'loser') {
-  //                     color = 'volcano';
-  //                 }
-  //                 return (
-  //                     <Tag color={color} key={tag}>
-  //                         {tag.toUpperCase()}
-  //                     </Tag>
-  //                 );
-  //             })}
-  //         </>
-  //     ),
-  // },
-  {
-    title: "",
-    key: "action",
-    render: (_, record) => (
-      <Space size="middle">
-        <Button type="link" href={manageUrl(record.id)}>
-          Manage
-        </Button>
-        <a>Delete</a>
-      </Space>
-    ),
-  },
-];
 
 const breadcrumb: BreadcrumbItemType[] = [
   {
@@ -168,6 +88,129 @@ export default function List({
   const [paging, setPaging] = useState<PagingType | undefined>(undefined);
   const [tableLoading, setTableLoading] = useState<boolean>(true);
   const { user } = useAppContext();
+
+  const handleDelete = async (id: string) => {
+    Modal.confirm({
+      title: "Xác nhận xóa sản phẩm",
+      content: "Bạn có chắc chắn muốn xóa sản phẩm này?",
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          if (!user) {
+            message.error("Bạn cần đăng nhập để thực hiện thao tác này");
+            return;
+          }
+
+          setTableLoading(true);
+          await consignmentApiRequest.deleteConsignment(
+            { consignmentOrderId: id },
+            user.token
+          );
+          message.success("Xóa sản phẩm thành công");
+
+          fetchTableData().then((result) => {
+            setData(result);
+          });
+        } catch (error) {
+          message.error("Xóa sản phẩm thất bại");
+          console.error("Delete error:", error);
+        } finally {
+          setTableLoading(false);
+        }
+      },
+    });
+  };
+
+  const columns: TableProps<DataType>["columns"] = [
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "product_name",
+      key: "product_name",
+      render: (text) => <a>{text}</a>,
+    },
+    {
+      title: "Giá bán",
+      dataIndex: "sale_price",
+      key: "sale_price",
+      render: (text) => (
+        <span>
+          {text.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })}
+        </span>
+      ),
+    },
+    {
+      title: "Hiện trạng",
+      dataIndex: "condition",
+      key: "condition",
+      render: (text) => {
+        switch (text) {
+          case 0:
+            return <span>New in Shrink</span>;
+          case 1:
+            return <span>Chưa qua sử dụng</span>;
+          case 2:
+            return <span>Đã qua sử dụng</span>;
+          case 3:
+            return <span>Tốt</span>;
+          case 4:
+            return <span>Khá</span>;
+          case 5:
+            return <span>Kém</span>;
+          default:
+            return <span>Không xác định</span>;
+        }
+      },
+    },
+    {
+      title: "trạng thái",
+      dataIndex: "status",
+      key: "status",
+    },
+    // {
+    //     title: 'Tags',
+    //     key: 'tags',
+    //     dataIndex: 'tags',
+    //     render: (_, { tags }) => (
+    //         <>
+    //             {tags.map((tag) => {
+    //                 let color = tag.length > 5 ? 'geekblue' : 'green';
+    //                 if (tag === 'loser') {
+    //                     color = 'volcano';
+    //                 }
+    //                 return (
+    //                     <Tag color={color} key={tag}>
+    //                         {tag.toUpperCase()}
+    //                     </Tag>
+    //                 );
+    //             })}
+    //         </>
+    //     ),
+    // },
+    {
+      title: "",
+      key: "action",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button type="link" href={manageUrl(record.id)}>
+            Manage
+          </Button>
+          <Button
+            type="link"
+            danger
+            onClick={() => handleDelete(record.id)}
+            // loading={tableLoading}
+          >
+            Delete
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
   const apiBody = {
     paging: {

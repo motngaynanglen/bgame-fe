@@ -1,10 +1,9 @@
 import { ItemType, MenuItemType } from "antd/es/menu/interface";
-import { DashboardRouter } from "./route.schema";
-import Link from "next/link";
 import clsx from "clsx";
-import { ReconciliationOutlined, UserOutlined } from "@ant-design/icons";
+import Link from "next/link";
 import { AiOutlineBook, AiOutlineUnorderedList } from "react-icons/ai";
 import { MdAddChart } from "react-icons/md";
+import { DashboardRouter } from "./route.schema";
 
 /**
  *  All Dashboard Routes
@@ -193,18 +192,18 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
     ),
     icon: <MdAddChart />,
     children: [
-      {
-        key: "40",
-        label: (
-          <Link
-            href={"/staff/consignment/pending"}
-            className={clsx("font-medium text-base")}
-          >
-            Đơn ký gửi chờ duyệt
-          </Link>
-        ),
-        icon: <AiOutlineUnorderedList />,
-      },
+      // {
+      //   key: "40",
+      //   label: (
+      //     <Link
+      //       href={"/staff/consignment/pending"}
+      //       className={clsx("font-medium text-base")}
+      //     >
+      //       Đơn ký gửi chờ duyệt
+      //     </Link>
+      //   ),
+      //   icon: <AiOutlineUnorderedList />,
+      // },
       {
         key: "41",
         label: (
