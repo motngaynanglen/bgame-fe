@@ -24,7 +24,7 @@ import { formatVND } from '@/src/lib/utils';
 const { Title, Text, Paragraph } = Typography;
 const { Panel } = Collapse;
 
-export default function ProductDetailView({ product }:{ product: ProductResType }){
+export default function ProductDetailView({ product }: { product: ProductResType }) {
     const [showDetails, setShowDetails] = useState(true);
     if (!product) {
         return null;
@@ -90,7 +90,7 @@ export default function ProductDetailView({ product }:{ product: ProductResType 
         { label: 'Độ tuổi', value: formatField(product.age) },
         { label: 'Số người chơi tối thiểu', value: formatField(product.number_of_player_min) },
         { label: 'Số người chơi tối đa', value: formatField(product.number_of_player_max) },
-        { label: 'Độ khó', value: formatField(product.hard_rank) },
+        { label: 'Độ khó', value: formatField(product.difficulty) },
     ];
     const DetailsHeader = () => {
         return (

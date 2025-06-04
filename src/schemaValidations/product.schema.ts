@@ -50,7 +50,7 @@ export const productResSchema = z.object({
     rent_quantity: z.number().optional(),
     number_of_player_min: z.number().optional().nullable(),
     number_of_player_max: z.number().optional().nullable(),
-    hard_rank: z.number().optional().nullable(),
+    difficulty: z.number().optional().nullable(),
     description: z.string().optional().nullable(),
     condition: z.enum(["SALES_PRODUCT", "RENTAL_PRODUCT"]),
     status: z.enum(["ACTIVE", "INACTIVE"]),
@@ -75,7 +75,7 @@ export const productTemplateSchema = z.object({
         .refine((val) => val % 1000 === 0, { message: "Giá phải là bội số của 1000" }),
     rentPricePerHour: z.number().min(0, "Giá thuê theo giờ không được âm").max(1000000, "Giá thuê theo giờ quá lớn")
         .refine((val) => val % 1000 === 0, { message: "Giá phải là bội số của 1000" }),
-    hardRank: z.number(),
+    difficulty: z.number(),
     age: z.number(),
     numberOfPlayerMin: z.number(),
     numberOfPlayerMax: z.number(),
