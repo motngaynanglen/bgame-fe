@@ -90,7 +90,7 @@ export default function ProductDetailView({ product }:{ product: ProductResType 
         { label: 'Độ tuổi', value: formatField(product.age) },
         { label: 'Số người chơi tối thiểu', value: formatField(product.number_of_player_min) },
         { label: 'Số người chơi tối đa', value: formatField(product.number_of_player_max) },
-        { label: 'Độ khó', value: formatField(product.hard_rank) },
+        { label: 'Độ khó', value: formatField(product.difficulty) },
     ];
     const DetailsHeader = () => {
         return (
