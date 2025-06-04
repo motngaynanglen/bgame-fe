@@ -78,7 +78,7 @@ const DropdownUser = () => {
     }
   }, [hasMounted, user, router]);
 
-  if (!hasMounted || !user) return null;
+  if (!hasMounted) return null;
 
   const profile: ProfileType = {
     name: user?.name ?? "",

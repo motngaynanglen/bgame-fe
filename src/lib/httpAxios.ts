@@ -11,6 +11,7 @@ const STATUS_CODES = {
     OK: 200,
     ENTITY_ERROR: 422,
     AUTHENTICATION_ERROR: 401,
+    PERMISSION_DENIED: 403,
     NOT_FOUND: 404,
     BAD_REQUEST: 400,
     // AUTHENTICATION_FAIL: 404,
@@ -158,24 +159,30 @@ const request = async <Response>(
             } else if (status === STATUS_CODES.SERVER_ERROR) {
                 throw new HttpError({
                     status: STATUS_CODES.SERVER_ERROR,
-                    message: 'Server error',
+                    message: 'Ôi không! Máy chủ đang cập nhật hoặc gặp sự cố. Vui lòng thử lại sau.',
                     data: data.data,
                 });
             } else if (status === STATUS_CODES.AUTHENTICATION_ERROR) {
-                setStoredUser(null); // Xóa thông tin người dùng khỏi localStorage
+                // setUser(null); // Xóa thông tin người dùng khỏi localStorage
 
                 // if (typeof window !== 'undefined') {
                 //     window.location.href = '/login'; // Chuyển hướng đến trang đăng nhập
                 //   }
                 throw new HttpError({
                     status: STATUS_CODES.AUTHENTICATION_ERROR,
-                    message: 'Authentication error',
+                    message: 'Bạn cần đăng nhập để thực hiện thao tác này',
+                    data: data.data,
+                });
+            }else if (status === STATUS_CODES.PERMISSION_DENIED) {
+                throw new HttpError({
+                    status: STATUS_CODES.PERMISSION_DENIED,
+                    message: 'Bạn không có quyền truy cập vào tài nguyên này',
                     data: data.data,
                 });
             } else if (status === STATUS_CODES.NOT_FOUND) {
                 throw new HttpError({
                     status: STATUS_CODES.NOT_FOUND,
-                    message: 'Resource not found',
+                    message: 'Không tìm thấy tài nguyên',
                     data: data,
                 });
             } else if (status === STATUS_CODES.ENTITY_ERROR) {
