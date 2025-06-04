@@ -104,3 +104,7 @@ export const formatVND = (value: string | number): string => {
   }).format(number);
 };
 
+export function toISOStringWithOffset(date: Date, offsetHours: number) {
+  const local = new Date(date.getTime() - offsetHours * 60 * 60 * 1000);
+  return local.toISOString();
+}

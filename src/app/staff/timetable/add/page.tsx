@@ -12,6 +12,7 @@ import {
   Button,
   Checkbox,
   Drawer,
+  Empty,
   MenuProps,
   message,
   Pagination,
@@ -23,6 +24,7 @@ import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
 import { useAppContext } from "@/src/app/app-provider";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
+import CardRentProductTemplate, { CardProductRentProps } from "./ProductRentCard";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -139,12 +141,11 @@ interface SelectStores {
   label: string;
 }
 export default function BoardGameRental() {
-  const [boardgames, setBoardgames] = useState<BoardGame[]>([]); // sau khi fetch xong sẽ set vào đây
+  const [boardgames, setBoardgames] = useState<CardProductRentProps[]>([]); // sau khi fetch xong sẽ set vào đây
   const [stores, setStores] = useState<SelectStores[]>([]);
   const [open, setOpen] = useState(false);
   const [isLoadingStores, setIsLoadingStores] = useState(true);
   const { user } = useAppContext();
-  const selectedStoreId = null
   const showDrawer = () => {
     setOpen(true);
   };
@@ -157,7 +158,8 @@ export default function BoardGameRental() {
     console.log("click ", e);
   };
 
-  const fetchBoardGamesByStoreId = async (storeId: string) => {
+  const fetchBoardGames = async () => {
+    setIsLoadingStores(true);
     if (!user) {
       message.error("Bạn cần đăng nhập để đặt trước.");
       return;
@@ -165,19 +167,23 @@ export default function BoardGameRental() {
     try {
       const res = await productApiRequest.getListByRole(storeSearchBody, user.token);
       console.log("data: ", res);
+
       setBoardgames(res.data);
     } catch (error) {
       console.error("lỗi store: " + error);
+    } finally {
+      setIsLoadingStores(false);
     }
   };
 
 
 
   useEffect(() => {
-    if (selectedStoreId) {
-      fetchBoardGamesByStoreId(selectedStoreId);
-    }
-  }, [selectedStoreId]);
+
+    fetchBoardGames();
+
+  }, []);
+
   return (
     <div>
 
@@ -209,29 +215,30 @@ export default function BoardGameRental() {
               <CategoryFilter />
             </Drawer>
             {/* Product Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {isLoadingStores && (
+              <div className="col-span-4 flex justify-center items-center h-64">
 
-              {(boardgames.map((boardgame, index) => (
-                <CardProductRent
-                  key={index}
-                  id={boardgame.id}
-                  idGroup={boardgame.product_group_ref_id}
-                  storeId={selectedStoreId ?? null}
-                  quantity={boardgame.quantity}
-                  image={boardgame.image}
-                  price={boardgame.price}
-                  title={boardgame.product_name}
-                  isRented={boardgame.status}
-                  rent_price={boardgame.rent_price}
-                  rent_price_per_hour={boardgame.rent_price_per_hour}
-                  complexity={boardgame.complexity}
-                  age={boardgame.age}
-                  time={boardgame.time}
-                  player={boardgame.player}
-                />
-              )))}
+                <Empty description="Đang tải sản phẩm..." />
+              </div>
+            )}
+            {/* .filter((boardgame) => (boardgame.rent_quantity ?? 0) > 0) */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {(boardgames
+                .map((boardgame, index) => (
+                  <CardRentProductTemplate
+                    key={index}
+                    productTemplate={boardgame}
+                  />
+                ))
+              )}
+
 
             </div>
+            {boardgames.length === 0 && !isLoadingStores && (
+              <div className="col-span-4 flex justify-center items-center h-64">
+                <Empty description="Không có sản phẩm nào" />
+              </div>
+            )}
           </div>
           {/* Pagination */}
           <div className="m-5">

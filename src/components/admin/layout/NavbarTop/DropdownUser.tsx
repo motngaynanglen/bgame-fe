@@ -1,4 +1,4 @@
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "../../ClickOutside";
@@ -61,12 +61,19 @@ interface ProfileType {
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useAppContext();
-
-  const profile: ProfileType = {
-    name: user?.name ?? "",
-    role: user?.role ?? "Nhân viên",
+  const [profile, setProfile] = useState<ProfileType>({
+    name: "Nhân viên",
+    role: "Nhân viên",
     avatar: undefined,
-  };
+  });
+  useEffect(() => {
+    setProfile({
+      name: user?.name ?? "",
+      role: user?.role ?? "Nhân viên",
+      avatar: undefined,
+    });
+  }, [user]);
+
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link

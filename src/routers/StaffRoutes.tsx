@@ -91,10 +91,10 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
     key: "group-1-2",
     label: (
       <Link
-        href={"/staff/sale/detail-online"}
+        href={"/staff/timetable/add"}
         className={clsx("font-medium text-base")}
       >
-        Chi tiết đơn hàng online  
+        Thuê tại cửa hàng  
       </Link>
     ),
     icon: <MdAddChart />,
