@@ -5,7 +5,7 @@ import Breadcrumb, { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import ProductGroupFrom from "./ProductGroupForm";
 import ProductGroupRefForm from "./ProductGroupRefForm";
 import { useState } from "react";
-import ProductFrom from "./ProductForm";
+import ProductForm from "./ProductForm";
 
 
 const url = {
@@ -70,7 +70,7 @@ export default function ManagerAddFull() {
                             <ProductGroupRefForm groupId={groupId} onGroupRefCreated={handleGroupRefCreated} />
                         </Col>
                         <Col span={24} className="mb-4">
-                            <ProductFrom productGroupRefId={groupRefId} />
+                            <ProductForm productGroupRefId={groupRefId} />
                         </Col>
                     </Row>
 
