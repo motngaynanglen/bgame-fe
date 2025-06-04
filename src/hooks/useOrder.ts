@@ -18,7 +18,7 @@ interface CreateOrderRequest {
 export const useOrder = () => {
   const { data, isError, error } = useMutation({
     mutationFn: async (orderData: CreateOrderRequest) => {
-      const res = await orderApiRequest.createOrder({
+      const res = await orderApiRequest.createOrderByCustomer({
         ...orderData,
       });
       return res;

@@ -135,7 +135,7 @@ export default function CheckOut() {
         console.error("Lỗi khác:", error);
         notifyError(
           "Đặt trước thất bại",
-          "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+          error?.message || "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
         );
       }
     }
@@ -239,7 +239,7 @@ export default function CheckOut() {
                 placeholder="Khách nhập địa chỉ bằng tiếng anh tại đây (tùy chọn)"
                 className="w-full p-2 border border-gray-300 rounded"
               ></textarea> */}
-              <div className=" font-semibold text-xl mb-4">
+              {/* <div className=" font-semibold text-xl mb-4">
                 <span>Vận chuyển</span>
               </div>
               <List
@@ -256,7 +256,7 @@ export default function CheckOut() {
                     />
                   </List.Item>
                 )}
-              />
+              /> */}
               <div className="flex justify-between items-center">
                 <a href="/cart" className="text-blue-500">
                   Quay về giỏ hàng
@@ -364,7 +364,7 @@ export default function CheckOut() {
             <span>{clientOnlyTotal}</span>
           </div>
 
-          <div className="my-6">
+          {/* <div className="my-6">
             <h2 className="text-xl font-semibold mb-4">Thanh toán</h2>
             <div className="space-y-4">
               <div className="flex items-center">
@@ -392,7 +392,7 @@ export default function CheckOut() {
                 <i className="fas fa-money-bill-wave ml-2"></i>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 

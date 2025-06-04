@@ -62,13 +62,14 @@ export default function Home() {
       <main className="">
         {/* <Banner /> */}
         <div className="container min-h-screen mx-auto max-w-screen-2xl">
-          <Space />
-          <AboutComponent />
-          <Space />
           <div className="pb-2 ">
             <HotDeal category="Sản phẩm nổi bật" />
           </div>
-          <div>
+          <Space />
+          <AboutComponent />
+          <Space />
+
+          <div className="py-8">
             {" "}
             <AboutRental />
           </div>

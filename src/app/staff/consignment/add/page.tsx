@@ -5,10 +5,22 @@ import {
   notifyError,
   notifySuccess,
 } from "@/src/components/Notification/Notification";
+import { useImageUploader } from "@/src/hooks/useImageUploader";
 import { HttpError } from "@/src/lib/httpAxios";
-import { HomeOutlined, UserOutlined } from "@ant-design/icons";
-import { Breadcrumb } from "antd";
+import { HomeOutlined, InboxOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  Breadcrumb,
+  Card,
+  Form,
+  message,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
+import { RcFile } from "antd/es/upload";
+import Dragger from "antd/es/upload/Dragger";
+import { useState } from "react";
 
 import { useForm } from "react-hook-form";
 
@@ -46,8 +58,34 @@ interface IFormInput {
   missing: string;
   expectedPrice: number;
   salePrice: number;
-  image: [];
+  images: [];
 }
+
+const beforeUpload = (file: File) => {
+  const isImage = file.type.startsWith("image/");
+  const isLt20MB = file.size / 1024 / 1024 <= 20;
+  if (!isImage) {
+    message.error("Chỉ cho phép ảnh!");
+    return Upload.LIST_IGNORE;
+  }
+  if (!isLt20MB) {
+    message.error("Dung lượng ảnh phải ≤ 20MB!");
+    return Upload.LIST_IGNORE;
+  }
+  return true;
+};
+
+const uploadProps: UploadProps = {
+  accept: "image/*",
+  beforeUpload: beforeUpload,
+  multiple: true,
+  maxCount: 10,
+  listType: "picture",
+  showUploadList: {
+    showPreviewIcon: true,
+    showRemoveIcon: true,
+  },
+};
 
 export default function Add() {
   const {
@@ -56,9 +94,15 @@ export default function Add() {
     formState: { errors },
   } = useForm<IFormInput>();
   const { user } = useAppContext();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const { uploadImages, uploading } = useImageUploader();
 
   const onSubmit = async (data: IFormInput) => {
     const customerID = null;
+    const imageFiles = fileList
+      .map((f) => f.originFileObj)
+      .filter((f): f is RcFile => !!f);
+    const imageList = await uploadImages(imageFiles, "list");
     const body = {
       customerID,
       customerName: data.name,
@@ -70,7 +114,7 @@ export default function Add() {
       missing: data.missing,
       expectedPrice: data.expectedPrice,
       salePrice: data.salePrice,
-      image: data.image,
+      images: imageList,
     };
     console.log("thông tin Sản phẩm :", body);
 
@@ -226,6 +270,22 @@ export default function Add() {
               {...register("description")}
             ></textarea>
           </div>
+          <Card size="small" title="Hình ảnh sản phẩm">
+            <Form.Item label="Hình ảnh">
+              <Dragger
+                {...uploadProps}
+                fileList={fileList}
+                onChange={(info) => setFileList(info.fileList)}
+                disabled={uploading}
+              >
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Kéo và thả hoặc chọn ảnh</p>
+                <p className="ant-upload-hint">Tối đa 10 ảnh, mỗi ảnh ≤ 20MB</p>
+              </Dragger>
+            </Form.Item>
+          </Card>
           {/* <div>
             <label className="font-semibold">Hình ảnh sản phẩm:</label>
             <input
@@ -240,7 +300,7 @@ export default function Add() {
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
             >
-              Tạo đơn 
+              Tạo đơn
             </button>
           </div>
         </form>

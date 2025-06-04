@@ -52,7 +52,7 @@ function CardHotDeal({
   return (
     <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105 card-product w-full min-w-0 ">
       <>{contextHolder}</>
-      <div className="relative w-full h-[400px] perspective-1000">
+      <div className="relative w-full h-[370px] perspective-1000">
         <div className=" w-full h-full transform-3d">
           {/* Mặt sau */}
           <div className="card-back backface-hidden overflow-hidden  absolute rotate-y-180 w-full h-full  rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
@@ -92,7 +92,7 @@ function CardHotDeal({
                 {title}
               </h3>
 
-              <div className="mt-2 flex items-center gap-2">
+              {/* <div className="mt-2 flex items-center gap-2">
                 <div className="flex items-center">
                   <Rate disabled defaultValue={5} />
                 </div>
@@ -103,7 +103,7 @@ function CardHotDeal({
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400 hidden lg:block">
                   (5)
                 </p>
-              </div>
+              </div> */}
 
               <div className="mt-2 flex items-center gap-2">
                 {quantity > 0 ? (

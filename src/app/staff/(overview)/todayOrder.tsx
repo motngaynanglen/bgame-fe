@@ -121,7 +121,7 @@ export default function StaffDashboardToDayOrder() {
                 );
                 if (!response || response.data === undefined || response.data.length === 0) {
                     message.error(response?.message || "Không có dữ liệu đơn hàng.");
-                    response.data?.length && setData([]);
+                     setData([]);
                     setTableLoading(false);
                     return;
                 }

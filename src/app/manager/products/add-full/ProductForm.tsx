@@ -168,7 +168,7 @@ export default function ProductForm({ productGroupRefId, onProductTemplateCreate
       const imageList = await uploadImages(imageFiles, 'list');
 
       if (!imageList) return;
-
+      
       const body: productTemplateBodyType = {
         ...values,
         productGroupRefId: productGroupRefId,
