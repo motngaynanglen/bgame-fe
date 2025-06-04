@@ -46,8 +46,8 @@ export default function ProductDetailView({ product }:{ product: ProductResType 
     };
 
     // Thông tin cơ bản
-    const getConditionTag = (condition: string) => {
-        switch (condition) {
+    const getConditionTag = (product_type: string) => {
+        switch (product_type) {
             case 'SALES_PRODUCT':
                 return { color: 'blue', label: 'Bán' };
             case 'RENT_PRODUCT':
@@ -56,7 +56,7 @@ export default function ProductDetailView({ product }:{ product: ProductResType 
                 return { color: 'orange', label: 'Mẫu' };
         }
     };
-    const conditionTag = getConditionTag(product.condition);
+    const conditionTag = getConditionTag(product.product_type);
 
     const basicInfo = [
         { label: 'Mã sản phẩm', value: product.code, copyable: true },
