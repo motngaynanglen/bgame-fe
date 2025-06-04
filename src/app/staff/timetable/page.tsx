@@ -34,6 +34,7 @@ import { useAppContext } from "../../app-provider";
 import { formatDateTime, formatTimeStringRemoveSeconds } from "@/src/lib/utils";
 import dayjs from "@/src/lib/dayjs ";
 import { CheckboxGroupProps } from "antd/es/checkbox";
+import { useRouter } from "next/navigation";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -59,6 +60,8 @@ const statusName = ["THEO GIỜ", "THEO LƯỢT"];
 const role: string = "manager";
 const baseUrl: string = "/" + role + "/" + "boardgames";
 const createUrl: string = baseUrl + "/" + "create";
+
+
 
 const breadcrumb: BreadcrumbItemType[] = [
   {
@@ -88,6 +91,7 @@ const AddButtons: CollapseProps["items"] = [
   },
 ];
 const options: CheckboxGroupProps<string>["options"] = [
+  { label: <span key="all">Tất cả</span>, value: "all" },
   { label: <span key="days">Thuê theo ngày</span>, value: "days" },
   { label: <span key="hours">Thuê theo giờ</span>, value: "hours" },
 ];
@@ -113,6 +117,7 @@ export default function StaffManageTimeTable({
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
   const [tableLoading, setTableLoading] = useState<boolean>(true);
   const { user } = useAppContext();
+  const router = useRouter();
   const apiBody = {
     from: dateRange ? dateRange[0] : defaultToDay.from,
     to: dateRange ? dateRange[1] : defaultToDay.to,
@@ -442,6 +447,12 @@ export default function StaffManageTimeTable({
         columns={columns}
         dataSource={useData ?? []}
         pagination={false}
+        onRow={(record) => ({
+          onClick: () => {
+            router.push(`/staff/booklist/${record.id}`);
+          },
+          style: { cursor: "pointer" },
+        })}
       />
       <br />
       <AntdCustomPagination totalPages={paging?.pageCount ?? 1} />

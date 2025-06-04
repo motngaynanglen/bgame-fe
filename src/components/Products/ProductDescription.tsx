@@ -90,7 +90,7 @@ function SingleProductDescription({
         ]}
       />
 
-      <div id="review" className="space-y-4">
+      {/* <div id="review" className="space-y-4">
         <h3 className="text-xl font-bold mb-4 text-black-2">Đánh giá (02):</h3>
         <ul className="space-y-6">
           {[
@@ -128,7 +128,7 @@ function SingleProductDescription({
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 }

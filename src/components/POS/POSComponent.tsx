@@ -1,5 +1,7 @@
 "use client";
+import { orderApiRequest } from "@/src/apiRequests/orders";
 import productApiRequest from "@/src/apiRequests/product";
+import { useAppContext } from "@/src/app/app-provider";
 import { usePOSStore } from "@/src/store/posStore";
 import { useMutation } from "@tanstack/react-query";
 import type { TableProps } from "antd";
@@ -32,6 +34,8 @@ interface POSComponentProps {
 }
 
 export default function POSComponent() {
+  const { user } = useAppContext();
+
   const {
     bills,
     activeBillIndex,
@@ -51,6 +55,7 @@ export default function POSComponent() {
   // if (!bill) {
   //   return <div>Không tìm thấy hóa đơn</div>;
   // }
+
   useEffect(() => {
     if (activeBillIndex === null) {
       createBill();
@@ -109,24 +114,29 @@ export default function POSComponent() {
 
   //
   const columns: TableProps<Product>["columns"] = [
-    { title: "STT", dataIndex: "index", width: 50 },
-    { title: "Tên hàng", dataIndex: "product_name" },
     {
-      title: "SL",
-      dataIndex: "quantity",
-      width: 100,
-      render: (value, record) => (
-        <InputNumber
-          min={1}
-          value={value}
-          onChange={(newQuantity) =>
-            handleQuantityChange(record.key, newQuantity)
-          }
-        />
-      ),
+      title: "STT",
+      dataIndex: "index",
+      width: 50,
+      render: (_value, _record, index) => index + 1,
     },
+    { title: "Tên hàng", dataIndex: "product_name" },
+    // {
+    //   title: "SL",
+    //   dataIndex: "quantity",
+    //   width: 100,
+    //   render: (value, record) => (
+    //     <InputNumber
+    //       min={1}
+    //       value={value}
+    //       onChange={(newQuantity) =>
+    //         handleQuantityChange(record.key, newQuantity)
+    //       }
+    //     />
+    //   ),
+    // },
     { title: "Đơn giá", dataIndex: "price", width: 150 },
-    { title: "Thành tiền", dataIndex: "total", width: 150 },
+    { title: "Mã", dataIndex: "code", width: 200 },
     {
       title: "",
       key: "action",
@@ -138,12 +148,45 @@ export default function POSComponent() {
       ),
     },
   ];
+  if (!user) {
+    return <div>Vui lòng đăng nhập để sử dụng tính năng này.</div>;
+  }
 
   const handleQuantityChange = (itemId: string, newQuantity: number | null) => {
     if (newQuantity !== null) {
       updateItemQuantityInActiveBill(itemId, newQuantity);
     }
   };
+
+  const handlePayment = async () => {
+    if (activeBillIndex === null || !bills[activeBillIndex]) {
+      console.error("Không có hóa đơn nào được chọn");
+      return;
+    }
+
+    const currentBill = bills[activeBillIndex];
+    const productIds = currentBill.items.map((item) => item.id);
+    console.log("productIds", productIds);
+    const orders = currentBill.items.map((item) => ({
+      productId: item.id, // Lấy id từ mỗi sản phẩm trong giỏ hàng
+    }));
+    try {
+      const response = await orderApiRequest.createOrderByStaff(
+        {
+          orders,
+          // totalAmount: calculateActiveBillTotal(),
+          // Thêm các thông tin thanh toán khác nếu cần
+        },
+        user.token
+      );
+
+      console.log("Thanh toán thành công:", response);
+    } catch (error) {
+      console.error("Lỗi khi thanh toán:", error);
+    }
+  };
+
+  console.log("bills", activeBillIndex);
   return (
     <div>
       <div className="grid grid-cols-3 gap-4">
@@ -184,9 +227,9 @@ export default function POSComponent() {
           <div className="mb-2 space-y-2">
             <div className="flex justify-between">
               <span className="text-xl">Tổng SL hàng:</span>{" "}
-              <span className="text-xl">{totalAmount}</span>
+              <span className="text-xl">{totalQuantity}</span>
             </div>
-            <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
               <span className="text-xl">Giảm giá:</span>{" "}
               <input
                 type="text"
@@ -195,7 +238,7 @@ export default function POSComponent() {
                 className="basis-1/5 block text-end w-full text-xl text-black bg-transparent border-0 border-b-2 border-green-600 appearance-none dark:text-white dark:border-green-500 dark:focus:border-green-500 focus:outline-none focus:ring-0 focus:border-green-600 peer"
                 placeholder="0"
               />
-            </div>
+            </div> */}
             <div className="flex justify-between">
               <span className="text-xl">Thực thu:</span>{" "}
               <span className="text-xl">{totalAmount}</span>
@@ -216,10 +259,10 @@ export default function POSComponent() {
               </div>
             </div>
           </div>
-          <div className="flex justify-center my-4">
+          {/* <div className="flex justify-center my-4">
             <QRCode value="https://momo.vn/payment" size={128} />
-          </div>
-          <Button type="primary" block size="large">
+          </div> */}
+          <Button onClick={handlePayment} type="primary" block size="large">
             THANH TOÁN
           </Button>
         </div>

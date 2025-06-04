@@ -91,11 +91,11 @@ export default function BoardGameRental() {
 
 
 
-  if (storesError) {
-    return (
-      <div>Error: {storesErrorData?.message || "Failed to load stores."}</div>
-    );
-  }
+  // if (storesError) {
+  //   return (
+  //     <div>Error: {storesErrorData?.message || "Failed to load stores."}</div>
+  //   );
+  // }
 
   if (rentalLoading) {
     return <Loading />;
@@ -175,7 +175,7 @@ export default function BoardGameRental() {
             {/* Product Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {((Array.isArray(data?.data) && data.data.length > 0) || storesLoading) ? (
-                data.data.map((boardgame: BoardGame) => (
+                data?.data.map((boardgame: BoardGame) => (
                   <CardProductRent
                     key={boardgame.id}
                     id={boardgame.id}
@@ -210,7 +210,7 @@ export default function BoardGameRental() {
           />
         </main>
         <aside className="hidden lg:block w-1/4 bg-slate-600 text-white sticky top-[64px] h-[calc(100vh-64px)] border-l-2 border-gray-200">
-          <CartRental />
+          <CartRental  storeId={selectedStoreId ?? null}/>
         </aside>
       </div>
     </div>
