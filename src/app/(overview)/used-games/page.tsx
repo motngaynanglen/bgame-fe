@@ -7,6 +7,7 @@ import { Button, Drawer, Pagination } from "antd";
 import { useState } from "react";
 import consignmentApiRequest from "@/src/apiRequests/consignment";
 import { useQuery } from "@tanstack/react-query";
+import AntdCustomPagination from "@/src/components/admin/table/pagination";
 
 interface BoardGame {
   id: string;
@@ -14,7 +15,7 @@ interface BoardGame {
   product_name: string;
   sale_price: number;
   status: string;
-  image: string;
+  images: string;
   sales_quantity: number;
   rent_quantity: number;
   publisher: string;
@@ -23,7 +24,6 @@ interface BoardGame {
   time: string;
   age: string;
   complexity: number;
-  
 }
 
 interface responseModel {
@@ -106,7 +106,7 @@ export default function UsedGame() {
               </div>
 
               {/* Sắp xếp */}
-              <div className="flex items-center justify-between w-full lg:justify-end">
+              {/* <div className="flex items-center justify-between w-full lg:justify-end">
                 <AppstoreOutlined className="mx-2" />
                 <p className="mr-2 font-bold whitespace-nowrap">Sắp xếp theo</p>
                 <select
@@ -119,7 +119,7 @@ export default function UsedGame() {
                   <option value="popularity">Phổ biến</option>
                   <option value="newest">Mới nhất</option>
                 </select>
-              </div>
+              </div> */}
             </div>
           </div>
           {/* Drawer cho mobile */}
@@ -135,36 +135,40 @@ export default function UsedGame() {
             {/* Product Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
               {data?.data?.map((product) => {
-                  const imageUrls = product.image?.split("||") || [];
-                  const quantity = product.status === "ACTIVE" ? 1 : 0; 
-                  return (
-                    <CardProduct
-                      key={product.id}
-                      id={product.id}
-                      product_group_ref_id={product.product_group_ref_id}
-                      image={imageUrls[0]}
-                      price={product.sale_price}
-                      title={product.product_name}
-                      time={product.time}
-                      player={product.player}
-                      age={product.age}
-                      quantity={quantity}
-                    />
-                  );
-                })}
+                const imageUrls = product.images?.split("||") || [];
+                const quantity = product.status === "ACTIVE" ? 1 : 0;
+                return (
+                  <CardProduct
+                    key={product.id}
+                    id={product.id}
+                    product_group_ref_id={product.product_group_ref_id}
+                    image={imageUrls[0]}
+                    price={product.sale_price}
+                    title={product.product_name}
+                    time={product.time}
+                    player={product.player}
+                    age={product.age}
+                    quantity={quantity}
+                  />
+                );
+              })}
             </div>
           </div>
 
           {/* Pagination */}
-          <Pagination
+          {/* <Pagination
             className="m-5"
             align="center"
             current={currentPage}
-            // total={totalItems}
-            // pageSize={pageSize}
+            total={ (data?.paging?.pageNum ?? 0) * 10 } // Assuming 10 items per page
+            pageSize={ 20 }
             onChange={(page) => setCurrentPage(page)}
+          /> */}
+
+          <AntdCustomPagination
+            pageSize={20}
+            totalPages={data?.paging?.pageCount ?? 1}
           />
-          {/* <AntdCustomPagination totalPages={totalItems}/> */}
         </main>
       </div>
     </div>

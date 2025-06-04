@@ -90,7 +90,7 @@ const RentalHistory = () => {
       ) : (
         Array.isArray(data?.data) &&
         data.data.map((rental, index) => (
-          <section className="relative">
+          <section className="relative" key={rental.id || index}>
             <div className="w-full  mx-auto ">
               <div className="mt-7 border border-gray-300 pt-9">
                 <div className="flex max-md:flex-col items-center justify-between px-3 md:px-11">
@@ -128,7 +128,7 @@ const RentalHistory = () => {
                 </div>
 
                 {rental.items.map((item, itemIndex) => (
-                  <div>
+                  <div key={`${rental.id}-${itemIndex}`} className="mt-8">
                     <svg
                       className="my-9 w-full"
                       xmlns="http://www.w3.org/2000/svg"

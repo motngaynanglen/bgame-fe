@@ -60,7 +60,7 @@ export const useProducts = (currentPage: number = 1, pageSize: number = 15) => {
     error,
     pageCount: data?.paging?.pageCount || 1,
     pageNum: data?.paging?.pageNum || 1,
-    pageSize: data?.paging?.pageSize || 15,
+    pageSize: data?.paging?.pageSize || 20,
   };
 };
 

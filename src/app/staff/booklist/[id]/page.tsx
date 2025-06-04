@@ -23,7 +23,7 @@ interface BooklistDetail {
   }>;
 }
 
-export default function page() {
+export default function Page() {
   const { id } = useParams();
   const { user } = useAppContext();
 

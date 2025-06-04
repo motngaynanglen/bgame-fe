@@ -51,7 +51,7 @@ function CardProduct({
     <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105">
       <>{contextHolder}</>
 
-      <div onClick={() => router.push(`/boardgame/${id}`)}>
+      <div onClick={() => router.push(`/used-games/${id}`)}>
         {/* ảnh sản phẩm */}
         <SpotlightCard spotlightColor="rgba(0, 0, 0, 0.5)">
           <div className="relative h-[200px] w-full overflow-hidden rounded-t-md">
@@ -74,7 +74,7 @@ function CardProduct({
               {title}
             </h3>
 
-            <div className="mt-2 flex items-center gap-2">
+            {/* <div className="mt-2 flex items-center gap-2">
               <div className="flex items-center">
                 <Rate disabled defaultValue={5} />
               </div>
@@ -85,7 +85,7 @@ function CardProduct({
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 hidden lg:block">
                 (5)
               </p>
-            </div>
+            </div> */}
             <div className="mt-2 flex items-center gap-2">
               {quantity > 0 ? (
                 <p className="text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">

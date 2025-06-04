@@ -114,7 +114,6 @@ export default function CheckOut() {
 
     try {
       const res = await orderApiRequest.createOrderByCustomer(body, user?.token);
-
       if (res.statusCode == "200") {
         setOpenResponsive(true);
         setPaymentData({ id: res.data ?? undefined, url: undefined })

@@ -36,10 +36,6 @@ interface POSComponentProps {
 export default function POSComponent() {
   const { user } = useAppContext();
 
-  if (!user) {
-    return <div>Vui lòng đăng nhập để sử dụng tính năng này.</div>;
-  }
-
   const {
     bills,
     activeBillIndex,
@@ -152,6 +148,9 @@ export default function POSComponent() {
       ),
     },
   ];
+  if (!user) {
+    return <div>Vui lòng đăng nhập để sử dụng tính năng này.</div>;
+  }
 
   const handleQuantityChange = (itemId: string, newQuantity: number | null) => {
     if (newQuantity !== null) {

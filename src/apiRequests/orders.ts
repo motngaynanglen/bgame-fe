@@ -15,18 +15,6 @@ export const orderApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
-  createOrderByCustomer: (body: any, sessionToken?: string) =>
-    http.post<CommonResType>("/api/Order/create-order-by-customer", body, {
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-      },
-    }),
-  createOrderByStaff: (body: any, sessionToken?: string) =>
-    http.post<CommonResType>("/api/Order/create-order-by-staff", body, {
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-      },
-    }),
   getOrderHistory: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/Order/get-order-history", body, {
       headers: {

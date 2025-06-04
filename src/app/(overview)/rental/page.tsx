@@ -175,7 +175,7 @@ export default function BoardGameRental() {
             {/* Product Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {((Array.isArray(data?.data) && data.data.length > 0) || storesLoading) ? (
-                data.data.map((boardgame: BoardGame) => (
+                data?.data.map((boardgame: BoardGame) => (
                   <CardProductRent
                     key={boardgame.id}
                     id={boardgame.id}
