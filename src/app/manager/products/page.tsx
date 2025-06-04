@@ -141,9 +141,7 @@ export default function ManagerTableBoardgame({ searchParams }: { searchParams?:
 
     const apiBody = {
         search: searchParams?.query ?? "",
-        filter: [
-            "string"
-        ],
+        filter: null,
         paging: {
             pageNum: searchParams?.page ?? 1,
             pageSize: 10

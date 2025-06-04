@@ -34,6 +34,13 @@ export const useProduct = (options: UseProductOptions) => {
         enabled: options.enabled ?? true,
         staleTime: 5 * 60 * 1000,
         gcTime: 15 * 60 * 1000,
+        retry: (failureCount, error: any) => {
+            if (error?.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        },
+
     });
 
     const getProductById = useCallback((id: string) => {
