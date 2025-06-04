@@ -35,23 +35,54 @@ export class HttpError extends Error {
 }
 
 // Config HTTP ENTITY ERROR
-type EntityErrordata = {
-    message: string
-    errors: EntityErrorField[]
-}
-type EntityErrorField = {
-    field: string
-    message: string
+type EntityErrorShape = string | string[] | Record<string, string[]>
+
+export type EntityErrordata = {
+    errors: EntityErrorShape
 }
 export class EntityError extends HttpError {
     status: 422 | 400
     message: string
     data: EntityErrordata
-    constructor({ status, message, data }: { status: 422; message: string; data: EntityErrordata }) {
-        super({ status, message, data })
+    constructor({ status, message, data }: {
+        status: 422; message: string; data: EntityErrordata
+    }) {
+        super({
+            status,
+            message,
+            data: {
+                errors: EntityError.normalizeErrors(data.errors)
+            }
+        })
+
         this.status = status
         this.message = message
-        this.data = data
+        this.data = {
+            errors: EntityError.normalizeErrors(data.errors)
+        }
+    }
+    static normalizeErrors(errors: EntityErrorShape): EntityErrorShape {
+        if (typeof errors === "string") {
+            return [errors]
+        }
+
+        if (Array.isArray(errors)) {
+            return errors
+        }
+
+        if (typeof errors === "object" && errors !== null) {
+            const normalized: Record<string, string[]> = {}
+            for (const key in errors) {
+                const val = errors[key]
+                normalized[key] = Array.isArray(val)
+                    ? val.map(v => String(v))
+                    : [String(val)]
+            }
+            return normalized
+        }
+
+        // fallback
+        return ["Unknown error"]
     }
 }
 
@@ -75,7 +106,6 @@ const request = async <Response>(
 ) => {
 
     const baseUrl = getBaseUrl(options?.baseUrl);
-    console.log("this is baseurl:" + baseUrl)
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 
     let body: FormData | string | undefined = undefined
@@ -111,21 +141,25 @@ const request = async <Response>(
         return response.data;
 
     } catch (error: unknown) {
+        console.log(error);
         //bởi vì axios sẽ nhảy trycatch nếu bị lỗi nên phải hander ở trong này.
         if (error instanceof AxiosError && error.response) {
-            const { status, data: data } = error.response;
+            const { status, data } = error.response;
 
             if (status === STATUS_CODES.ENTITY_ERROR) {
                 throw new EntityError({
                     status: STATUS_CODES.ENTITY_ERROR,
                     message: data.message || 'Validation error',
-                    data: data as EntityErrordata,
+                    data: {
+                        errors: EntityError.normalizeErrors(data.data)
+                    }, // Chuyển đổi data về kiểu EntityErrordata
+                    // data: data as EntityErrordata,
                 });
             } else if (status === STATUS_CODES.SERVER_ERROR) {
                 throw new HttpError({
                     status: STATUS_CODES.SERVER_ERROR,
                     message: 'Server error',
-                    data: data,
+                    data: data.data,
                 });
             } else if (status === STATUS_CODES.AUTHENTICATION_ERROR) {
                 setStoredUser(null); // Xóa thông tin người dùng khỏi localStorage
@@ -136,7 +170,7 @@ const request = async <Response>(
                 throw new HttpError({
                     status: STATUS_CODES.AUTHENTICATION_ERROR,
                     message: 'Authentication error',
-                    data: data,
+                    data: data.data,
                 });
             } else if (status === STATUS_CODES.NOT_FOUND) {
                 throw new HttpError({
@@ -144,17 +178,17 @@ const request = async <Response>(
                     message: 'Resource not found',
                     data: data,
                 });
-            }else if (status === STATUS_CODES.ENTITY_ERROR) {
+            } else if (status === STATUS_CODES.ENTITY_ERROR) {
                 throw new HttpError({
                     status: STATUS_CODES.ENTITY_ERROR,
                     message: 'Lỗi logic khi tạo dữ liệu',
-                    data: data,
+                    data: data.data,
                 });
-            }else if (status === STATUS_CODES.BAD_REQUEST) {
+            } else if (status === STATUS_CODES.BAD_REQUEST) {
                 throw new HttpError({
                     status: STATUS_CODES.BAD_REQUEST,
                     message: 'Lỗi logic khi tạo dữ liệu',
-                    data: data,
+                    data: data.data,
                 });
             }
         }
