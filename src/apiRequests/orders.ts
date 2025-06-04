@@ -3,8 +3,14 @@ import { CommonResType } from "../schemaValidations/common.schema";
 
 export const orderApiRequest = {
   getList: (body: any) => http.post<CommonResType>("/api/Order/search", body),
-  createOrder: (body: any, sessionToken?: string) =>
-    http.post<CommonResType>("/api/Order/create-order", body, {
+  createOrderByCustomer: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/create-order-by-customer", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  createOrderByStaff: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/create-order-by-staff", body, {
       headers: {
         Authorization: `Bearer ${sessionToken}`,
       },

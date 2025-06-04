@@ -1,10 +1,9 @@
 "use client";
-import { useEffect } from "react";
-import CustomTabs from "@/src/components/Tabs/CustomTabs";
 import POSComponent from "@/src/components/POS/POSComponent";
+import CustomTabs from "@/src/components/Tabs/CustomTabs";
 import { usePOSStore } from "@/src/store/posStore";
-import { Button, notification } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { notification } from "antd";
+import { useEffect } from "react";
 
 export default function POSPage() {
   const { bills, createBill, deleteBill, setActiveBill, activeBillIndex } = usePOSStore();
@@ -54,14 +53,14 @@ export default function POSPage() {
     <div className="pos-page-container">
       <div className="pos-header">
         <h1>Quản lý bán hàng</h1>
-        <Button 
+        {/* <Button 
           type="primary" 
           icon={<PlusOutlined />} 
           onClick={handleAddTab}
           disabled={bills.length >= 10}
         >
           Thêm hóa đơn
-        </Button>
+        </Button> */}
       </div>
 
       <CustomTabs

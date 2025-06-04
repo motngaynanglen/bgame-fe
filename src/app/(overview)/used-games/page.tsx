@@ -5,13 +5,15 @@ import { useProducts } from "@/src/hooks/useProduct";
 import { AppstoreOutlined, FilterOutlined } from "@ant-design/icons";
 import { Button, Drawer, Pagination } from "antd";
 import { useState } from "react";
+import consignmentApiRequest from "@/src/apiRequests/consignment";
+import { useQuery } from "@tanstack/react-query";
 
 interface BoardGame {
   id: string;
   product_group_ref_id: string;
   product_name: string;
-  sell_price: number;
-  status: boolean;
+  sale_price: number;
+  status: string;
   image: string;
   sales_quantity: number;
   rent_quantity: number;
@@ -19,11 +21,21 @@ interface BoardGame {
   category: string;
   player: string;
   time: string;
-  age: number;
+  age: string;
   complexity: number;
+  
 }
 
-
+interface responseModel {
+  data: BoardGame[];
+  message: string;
+  statusCode: number;
+  paging: {
+    pageNum: number; // Thay đổi kiểu dữ liệu
+    pageSize: number; // Thay đổi kiểu dữ liệu
+    pageCount: number;
+  };
+}
 
 export default function UsedGame() {
   const [open, setOpen] = useState(false);
@@ -37,23 +49,21 @@ export default function UsedGame() {
     setOpen(false);
   };
 
-  const { products, isLoading, isError, error, pageCount, pageSize } =
-    useProducts(currentPage);
-  // const { data, isLoading, isError, error } = useQuery<responseModel>({
-  //   queryKey: ["boardGames", currentPage],
-  //   queryFn: async () => {
-  //     const res = await productApiRequest.getList({
-  //       search: "",
-  //       filter: [],
-  //       paging: {
-  //         pageNum: currentPage,
-  //         pageSize: 10,
-  //       },
-  //     });
-  //     return res;
-  //   },
-  //   placeholderData: keepPreviousData,
-  // });
+  // const { products, isLoading, isError, error, pageCount, pageSize } =
+  //   useProducts(currentPage);
+  const { data, isLoading, isError, error } = useQuery<responseModel>({
+    queryKey: ["boardGames", currentPage],
+    queryFn: async (): Promise<responseModel> => {
+      const res = await consignmentApiRequest.getConsignmentList({
+        paging: {
+          pageNum: currentPage,
+          pageSize: 10,
+        },
+      });
+      return res;
+    },
+    // placeholderData: keepPreviousData,
+  });
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -63,10 +73,10 @@ export default function UsedGame() {
     return <div>Error: {error?.message || "Failed to load products."}</div>;
   }
 
-  const totalItems = pageCount * pageSize;
-  console.log("pageCount", pageCount);
-  console.log("pageSize", pageSize);
-  console.log("totalItems", totalItems);
+  // const totalItems = pageCount * pageSize;
+  // console.log("pageCount", pageCount);
+  // console.log("pageSize", pageSize);
+  // console.log("totalItems", totalItems);
 
   return (
     <div className="container min-h-screen mx-auto max-w-screen-3xl">
@@ -77,7 +87,9 @@ export default function UsedGame() {
         <main className="w-full md:w-3/4 p-4">
           <div className="mb-4 flex flex-col lg:flex-row justify-between items-start lg:items-center border-2 border-gray-900 p-4 rounded-lg bg-gray-800 text-white space-y-4 lg:space-y-0">
             <div className="flex items-center">
-              <h1 className="text-xl md:text-2xl font-bold pr-2">Sản phẩm ký gửi</h1>
+              <h1 className="text-xl md:text-2xl font-bold pr-2">
+                Sản phẩm ký gửi
+              </h1>
             </div>
 
             <div className="flex flex-col-reverse lg:flex-row lg:items-center w-full lg:w-auto">
@@ -122,22 +134,21 @@ export default function UsedGame() {
           <div className="flex flex-col lg:flex-row">
             {/* Product Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
-              {products
-                // .filter((boardgame) => boardgame.sales_quantity > 0)
-                .map((product) => {
+              {data?.data?.map((product) => {
                   const imageUrls = product.image?.split("||") || [];
+                  const quantity = product.status === "ACTIVE" ? 1 : 0; 
                   return (
                     <CardProduct
                       key={product.id}
                       id={product.id}
                       product_group_ref_id={product.product_group_ref_id}
                       image={imageUrls[0]}
-                      price={product.sell_price}
+                      price={product.sale_price}
                       title={product.product_name}
                       time={product.time}
                       player={product.player}
                       age={product.age}
-                      quantity={product.sales_quantity}
+                      quantity={quantity}
                     />
                   );
                 })}
@@ -149,8 +160,8 @@ export default function UsedGame() {
             className="m-5"
             align="center"
             current={currentPage}
-            total={totalItems}
-            pageSize={pageSize}
+            // total={totalItems}
+            // pageSize={pageSize}
             onChange={(page) => setCurrentPage(page)}
           />
           {/* <AntdCustomPagination totalPages={totalItems}/> */}

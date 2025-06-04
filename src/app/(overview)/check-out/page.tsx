@@ -76,7 +76,7 @@ export default function CheckOut() {
     };
 
     try {
-      const res = await orderApiRequest.createOrder(body, user?.token);
+      const res = await orderApiRequest.createOrderByCustomer(body, user?.token);
       console.log("Đơn hàng đã được tạo:", body);
       if (res.statusCode == "200") {
         setOpenResponsive(true);
