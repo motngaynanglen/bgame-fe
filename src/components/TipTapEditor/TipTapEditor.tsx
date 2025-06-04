@@ -20,16 +20,21 @@ interface TipTapEditorProps {
     value?: string;
     onChange?: (content: string) => void;
     isReadonly?: boolean;
+    resetKey?: any;
 }
 
 
-const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = "", onChange, isReadonly }, ref) => {
+const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = "", onChange, isReadonly, resetKey }, ref) => {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
-
+    useEffect(() => {
+        if (editor && isMounted) {
+            editor.commands.setContent(value ?? "", false); // reset lại nội dung
+        }
+    }, [resetKey]);
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -52,16 +57,26 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
                 spellcheck: 'false',
             },
         },
+        // editable: !(isReadonly ?? false) && isMounted,
         injectCSS: false,
         immediatelyRender: false,
     });
 
+    // useEffect(() => {
+    //     if (editor && value !== editor.getHTML()) {
+    //         editor.commands.setContent(value);
+    //     }
+    // }, [value, editor]);
     useEffect(() => {
-        if (editor && value !== editor.getHTML()) {
-            editor.commands.setContent(value);
-        }
-    }, [value, editor]);
+        if (!editor || !isMounted) return;
 
+        const currentHTML = editor.getHTML();
+        const incomingHTML = value || "";
+
+        if (incomingHTML && currentHTML !== incomingHTML) {
+            editor.commands.setContent(incomingHTML, false);
+        }
+    }, [value, editor, isMounted]);
     if (!isMounted || !editor) return null;
 
     return (
@@ -128,15 +143,15 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
 
             {/* Editor Content */}
             <div className="tiptap-editor-wrapper">
-                <EditorContent editor={editor} className="border p-2 min-h-[150px] rounded-md" />
+                <EditorContent editor={editor} className="border px-2 min-h-[150px] rounded-md" />
                 <style>
                     {`
-        .tiptap-editor-wrapper .ProseMirror,
-        .tiptap-editor-wrapper .ProseMirror * {
-          all: revert;
-          box-sizing: border-box;
-        }
-      `}
+                        .tiptap-editor-wrapper .ProseMirror,
+                        .tiptap-editor-wrapper .ProseMirror * {
+                        all: revert;
+                        box-sizing: border-box;
+                        }
+                    `}
                 </style>
             </div>
         </div>

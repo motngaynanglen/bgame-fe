@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Select, message, Card, Tabs, Space, Upload, Row, Col, InputNumber, ConfigProvider, Image } from 'antd';
-import { SearchOutlined, PlusOutlined, InboxOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Select, message, Card, Tabs, Space, Upload, Row, Col, InputNumber, ConfigProvider, Image, Typography } from 'antd';
+import { SearchOutlined, PlusOutlined, InboxOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { TabsProps, UploadFile, UploadProps } from 'antd';
 import axios from 'axios';
 import { ProductResType, productTemplateBodyType, productTemplateSchema } from '@/src/schemaValidations/product.schema';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppContext } from '@/src/app/app-provider';
 import { useImageUploader } from '@/src/hooks/useImageUploader';
@@ -14,7 +14,8 @@ import TipTapEditor from '@/src/components/TipTapEditor/TipTapEditor';
 import { FormItem } from 'react-hook-form-antd';
 import Dragger from 'antd/es/upload/Dragger';
 import { on } from 'events';
-
+import { formatVND } from '@/src/lib/utils';
+const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 type Mode = 'select' | 'create'
 const defaultValues: productTemplateBodyType = {
@@ -25,7 +26,7 @@ const defaultValues: productTemplateBodyType = {
   price: 0,
   rentPrice: 0,
   rentPricePerHour: 0,
-  hardRank: 0,
+  difficulty: 0,
   age: 0,
   numberOfPlayerMin: 0,
   numberOfPlayerMax: 0,
@@ -59,7 +60,22 @@ type ProductTemplateFormProps = {
   productGroupRefId: string;
   onProductTemplateCreated?: (groupRefId: string) => void;
 };
-export default function ProductFrom({ productGroupRefId, onProductTemplateCreated }: ProductTemplateFormProps) {
+
+// Format giá tiền và xử lý trường null
+const formatField = (value: any, enable: boolean) => {
+  if ((value === null || value === undefined || value === '') && enable) {
+    return (
+      <Text type="warning">
+        <ExclamationCircleOutlined /> Cần bổ sung
+      </Text>
+    );
+  }
+  // return typeof value === 'number'
+  //   ? formatVND(value)
+  //   : value;
+};
+
+export default function ProductForm({ productGroupRefId, onProductTemplateCreated }: ProductTemplateFormProps) {
   const { user } = useAppContext();
   const [mode, setMode] = useState<Mode>('select')
   const [imageList, setImageList] = useState<string[] | string>([]);
@@ -68,7 +84,7 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
 
   const [productList, setProductList] = useState<ProductResType[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-
+  const [enableFieldChecker, setEnableFieldChecker] = useState<boolean>(false);
 
   const form = useForm<productTemplateBodyType>({
     resolver: zodResolver(productTemplateSchema),
@@ -77,16 +93,17 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
       productGroupRefId: productGroupRefId || undefined,
     },
   });
-  const { control, handleSubmit, reset, formState: { errors, isSubmitting, isValid } } = form;
+  const { control, watch, getValues, handleSubmit, reset, formState: { errors, isSubmitting, isValid } } = form;
 
 
   const fetchProductList = async () => {
     if (!productGroupRefId) return;
     try {
       const res = await productApiRequest.getListByGroupRefId({ productGroupRefId: productGroupRefId });
+      console.log(res);
       setProductList(res.data || []);
-    } catch {
-      message.error("Không thể lấy danh sách sản phẩm");
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : "Lỗi khi lấy danh sách sản phẩm");
     }
   };
 
@@ -99,6 +116,7 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
   const handleSelectProduct = (id: string) => {
     const selected = productList.find((p) => p.id === id);
     if (!selected) return;
+    setEnableFieldChecker(true);
     setSelectedProductId(id);
     setFileList(selected.image ? selected.image.split("||").map((url) => ({
       uid: url,
@@ -116,7 +134,7 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
       price: selected.price || 0,
       rentPrice: selected.rent_price || 0,
       rentPricePerHour: selected.rent_price_per_hour || 0,
-      hardRank: selected.hard_rank || 0,
+      difficulty: selected.difficulty || 0,
       age: selected.age || 0,
       numberOfPlayerMin: selected.number_of_player_min || 0,
       numberOfPlayerMax: selected.number_of_player_max || 0,
@@ -169,8 +187,12 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
   const handleModeChange = (value: Mode) => {
     setMode(value);
     if (value === "create") {
+      setSelectedProductId(null);
+      setFileList([]);
+      setEnableFieldChecker(false);
       reset(defaultValues);
     } else {
+      setEnableFieldChecker(false);
       reset(defaultValues);
     }
   };
@@ -201,8 +223,16 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
           >
             {productList.map((p) => (
               <Option key={p.id} value={p.id}>
-                <Image src={p.image ?? undefined} alt={p.product_name ?? undefined} />
-                {p.product_name}
+                <span className='flex items-center gap-2 h-10'>
+                  <Image style={{
+                    maxHeight: '1.5em',
+                    width: 'auto',
+                    marginRight: 8,
+                    objectFit: 'contain',
+                    borderRadius: 4,
+                  }} src={p.image ?? undefined} alt={p.product_name ?? undefined} />
+                  <span className='text'>{p.product_name}</span>
+                </span>
               </Option>
             ))}
           </Select>
@@ -255,7 +285,7 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
               <Card size="small" title="Thông số kỹ thuật">
                 <Row gutter={16}>
                   <Col span={6}>
-                    <FormItem control={control} name="hardRank" label="Độ khó (1–10)">
+                    <FormItem control={control} name="difficulty" label="Độ khó (1–10)">
                       <InputNumber min={1} max={10} style={{ width: "100%" }} />
                     </FormItem>
                   </Col>
@@ -276,9 +306,22 @@ export default function ProductFrom({ productGroupRefId, onProductTemplateCreate
             {/* --- MÔ TẢ --- */}
             <Col span={24}>
               <Card size="small" title="Mô tả chi tiết">
-                <FormItem control={control} name="description" label="Mô tả">
-                  <TipTapEditor />
-                </FormItem>
+                {/* <FormItem control={control} name="description" label="Mô tả">
+                  <TipTapEditor value={getValues("description")} />
+                </FormItem> */}
+                <Controller
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <Form.Item label={(formatField(field.value, enableFieldChecker))} validateStatus={errors.description ? 'error' : ''} help={errors.description?.message}>
+                      <TipTapEditor
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        resetKey={mode}
+                      />
+                    </Form.Item>
+                  )}
+                />
               </Card>
             </Col>
 
