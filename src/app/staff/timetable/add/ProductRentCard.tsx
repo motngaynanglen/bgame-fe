@@ -1,19 +1,17 @@
 "use client";
-import { useCartStore } from "@/src/store/cartStore";
-import { Button, Divider, message, Modal, notification, Radio, Rate } from "antd";
-import { useRouter } from "next/navigation";
-import { notifyError, notifySuccess } from "@/src/components/Notification/Notification";
-import { CheckboxGroupProps } from "antd/es/checkbox";
-import { useAppContext } from "@/src/app/app-provider";
-import { useRentalStore } from "@/src/store/rentalStore";
-import { useState } from "react";
-import dayjs from "@/src/lib/dayjs ";
 import bookListApiRequest from "@/src/apiRequests/bookList";
-import { HttpError } from "@/src/lib/httpAxios";
-import exp from "constants";
+import { useAppContext } from "@/src/app/app-provider";
 import StarBorder from "@/src/components/Bits/StarBorder ";
-import CustomRangePicker from "@/src/components/DateRantalPicker/HourRental";
 import CustomDatePicker from "@/src/components/DateRantalPicker/DateRental";
+import CustomRangePicker from "@/src/components/DateRantalPicker/HourRental";
+import { notifyError, notifySuccess } from "@/src/components/Notification/Notification";
+import dayjs from "@/src/lib/dayjs ";
+import { HttpError } from "@/src/lib/httpAxios";
+import { useRentalStore } from "@/src/store/rentalStore";
+import { Button, Divider, message, Modal, notification, Radio } from "antd";
+import { CheckboxGroupProps } from "antd/es/checkbox";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const options: CheckboxGroupProps<string>["options"] = [
     { label: "Thuê theo ngày", value: "days" },

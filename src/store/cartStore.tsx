@@ -13,8 +13,8 @@ export interface CartItem {
   image: string;
   price: number;
   quantity: number;
-  storeId?: string | null; // Id store được chọn
-  storeList?: StoreItem[] | null ; // Danh sách store tương ứng với sản phẩm
+  storeId?: string | null; 
+  storeList?: StoreItem[] | null ; 
 }
 
 
@@ -70,7 +70,7 @@ export const useCartStore = create<CartStore>()(
 
       updateQuantity: (
         productId,
-        quantity // Thêm hàm này
+        quantity 
       ) =>
         set((state) => ({
           cart: state.cart.map((item) =>

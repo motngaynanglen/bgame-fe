@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import SpotlightCard from "../Bits/SpotlightCard";
 import { notifySuccess } from "../Notification/Notification";
 
-function CardProduct({
+function CardUsedProduct({
   id,
   image,
   title,
@@ -51,7 +51,7 @@ function CardProduct({
     <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105">
       <>{contextHolder}</>
 
-      <div onClick={() => router.push(`/boardgame/${id}`)}>
+      <div onClick={() => router.push(`/used-games/${id}`)}>
         {/* ảnh sản phẩm */}
         <SpotlightCard spotlightColor="rgba(0, 0, 0, 0.5)">
           <div className="relative h-[200px] w-full overflow-hidden rounded-t-md">
@@ -107,7 +107,7 @@ function CardProduct({
               </p>
 
               {/* Nút Thêm vào giỏ hàng (đè lên giá) */}
-              {quantity > 0 && (
+              {/* {quantity > 0 && (
                 <button
                   className="absolute inset-0 w-full bg-gradient-to-b from-black to-gray-900 border border-gray-800 text-white  rounded-md 
                   opacity-0 group-hover:opacity-100 translate-y-[-100%] group-hover:translate-y-0
@@ -116,7 +116,7 @@ function CardProduct({
                 >
                   Thêm vào giỏ hàng
                 </button>
-              )}
+              )} */}
             </div>
           </div>
         </SpotlightCard>
@@ -125,4 +125,4 @@ function CardProduct({
   );
 }
 
-export default CardProduct;
+export default CardUsedProduct;

@@ -1,13 +1,12 @@
 "use client";
-import CategoryFilter from "@/src/components/Filter/CategoryFilter";
-import CardProduct from "@/src/components/Card/CardProduct";
-import { useProducts } from "@/src/hooks/useProduct";
-import { AppstoreOutlined, FilterOutlined } from "@ant-design/icons";
-import { Button, Drawer, Pagination } from "antd";
-import { useState } from "react";
 import consignmentApiRequest from "@/src/apiRequests/consignment";
-import { useQuery } from "@tanstack/react-query";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
+import CardUsedProduct from "@/src/components/Card/CardUsedProduct";
+import CategoryFilter from "@/src/components/Filter/CategoryFilter";
+import { FilterOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Drawer } from "antd";
+import { useState } from "react";
 
 interface BoardGame {
   id: string;
@@ -138,7 +137,7 @@ export default function UsedGame() {
                 const imageUrls = product.images?.split("||") || [];
                 const quantity = product.status === "ACTIVE" ? 1 : 0;
                 return (
-                  <CardProduct
+                  <CardUsedProduct
                     key={product.id}
                     id={product.id}
                     product_group_ref_id={product.product_group_ref_id}

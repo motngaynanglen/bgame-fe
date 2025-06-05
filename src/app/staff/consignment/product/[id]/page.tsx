@@ -5,8 +5,9 @@ import { useProduct } from "@/src/hooks/api/product/useProduct";
 import { Breadcrumb } from "antd";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
-import ProductListCard from "./ProductsWrapper";
 import ProductDetailView from "./ProductTemplateForm";
+import { useQuery } from "@tanstack/react-query";
+import consignmentApiRequest from "@/src/apiRequests/consignment";
 
 const breadcrumb: BreadcrumbItemType[] = [
   {
@@ -24,7 +25,13 @@ const breadcrumb: BreadcrumbItemType[] = [
   },
 ];
 
-export default function Page({ params, searchParams }: { params: { id: string }, searchParams?: { query?: string; page?: string; }; }) {
+export default function Page({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams?: { query?: string; page?: string };
+}) {
   const user = useAppContext().user;
   console.log(params.id);
   // const productTemplate = useProduct({
@@ -40,12 +47,21 @@ export default function Page({ params, searchParams }: { params: { id: string },
   //   },
   //   authToken: user?.token,
   // });
+  const { data } = useQuery({
+    queryKey: ["consignmentProduct", params.id],
+    queryFn: async () => {
+      const res = await consignmentApiRequest.getConsignmentById({
+        consignmentOrderId: params.id,
+      });
+      return res.data;
+    },
+  });
 
   return (
     <>
       <Breadcrumb items={breadcrumb} className="pb-4" />
-      consignment product {params.id}
 
+      <ProductDetailView product={data} />
       {/* <ProductDetailView product={productTemplate.products[0]} />
       <h1>Product List</h1>
       <ProductListCard

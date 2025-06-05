@@ -12,6 +12,12 @@ export const bookListApiRequest = {
         },
       }
     ),
+  createBookListByStaff: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/BookList/create-booklist-by-staff", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
   endBookList: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/BookList/end-booklist", body, {
       headers: {

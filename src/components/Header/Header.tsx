@@ -21,18 +21,18 @@ const items: MenuItem[] = [
         label: <Link href={"/products"}>Tất cả</Link>,
         key: "all",
       },
-      {
-        label: "Hàng mới về",
-        key: "newarrival",
-      },
-      {
-        label: "Giảm giá",
-        key: "discount",
-      },
-      {
-        label: "Phụ kiện",
-        key: "accessory",
-      },
+      // {
+      //   label: "Hàng mới về",
+      //   key: "newarrival",
+      // },
+      // {
+      //   label: "Giảm giá",
+      //   key: "discount",
+      // },
+      // {
+      //   label: "Phụ kiện",
+      //   key: "accessory",
+      // },
       {
         label: <Link href={"/used-games"}>Hàng đã qua sử dụng</Link>,
         key: "used",
@@ -49,18 +49,18 @@ const items: MenuItem[] = [
   },
 
   {
-    label: "Tin Tức",
+    label: <Link href={"/news"}>Tin Tức</Link>,
     key: "news",
-    children: [
-      {
-        label: "Giải đấu",
-        key: "tournament",
-      },
-      {
-        label: "Board Game",
-        key: "boardGameNews",
-      },
-    ],
+    // children: [
+    //   {
+    //     label: "Giải đấu",
+    //     key: "tournament",
+    //   },
+    //   {
+    //     label: "Board Game",
+    //     key: "boardGameNews",
+    //   },
+    // ],
   },
   {
     label: <Link href={"/consignment"}>Ký gửi</Link>,

@@ -138,7 +138,12 @@ export default function TemplateForm() {
                 />
                 <div>
                   <div className="font-semibold">{item.name}</div>
-                  <div>{item.price.toLocaleString()}₫</div>
+                  <div>
+                    {typeof item.price === "number"
+                      ? item.price.toLocaleString()
+                      : 0}
+                    ₫
+                  </div>
                   <InputNumber
                     min={1}
                     max={item.storeList

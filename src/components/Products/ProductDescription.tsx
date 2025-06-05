@@ -8,7 +8,7 @@ interface BoardGameInfo {
   id: string;
   product_group_ref_id: string;
   product_name: string;
-  sell_price: number;
+  price: number;
   code: string;
   image: string;
   publisher: string;
@@ -29,7 +29,7 @@ function SingleProductDescription({
   productData: BoardGameInfo | undefined;
 }) {
   console.log("productData at 1 ", productData);
-  
+
   const items: DescriptionsProps["items"] = useMemo(
     () => [
       {
@@ -41,7 +41,12 @@ function SingleProductDescription({
       {
         key: "2",
         label: <h1 className="text-xl">Số người chơi</h1>,
-        children: <p className="text-xl">{productData?.number_of_players_min} - {productData?.number_of_players_max}</p>,
+        children: (
+          <p className="text-xl">
+            {productData?.number_of_players_min} -{" "}
+            {productData?.number_of_players_max}
+          </p>
+        ),
       },
       {
         key: "3",
@@ -51,17 +56,7 @@ function SingleProductDescription({
       {
         key: "4",
         label: <h1 className="text-xl">Độ tuổi đề xuất</h1>,
-        children: <p className="text-xl">{productData?.age}</p>,
-      },
-      {
-        key: "5",
-        label: <h1 className="text-xl">Bản mở rộng</h1>,
-        children: (
-          <p className="text-xl">
-            Bản mở rộng số 1 <br />
-            Bản mở rộng số 2
-          </p>
-        ),
+        children: <p className="text-xl">{productData?.age}+  </p>,
       },
     ],
     []

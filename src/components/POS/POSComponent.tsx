@@ -30,7 +30,7 @@ interface Product {
   id: string;
   key: string;
   product_name: string;
-  code: string; // Added the missing 'code' property
+  code: string;
   quantity: number;
   price: number;
   total: string;
@@ -104,7 +104,7 @@ export default function POSComponent() {
 
   const searchProducts = useMutation({
     mutationFn: async (code: string) => {
-      const res = await productApiRequest.getByCode({ code }); // Trả về 1 sản phẩm
+      const res = await productApiRequest.getByCode({ code }); 
       return res.data;
     },
     onSuccess: (products) => {
@@ -290,16 +290,6 @@ export default function POSComponent() {
               <span className="text-xl">Tổng SL hàng:</span>{" "}
               <span className="text-xl">{totalQuantity}</span>
             </div>
-            {/* <div className="flex justify-between items-center">
-              <span className="text-xl">Giảm giá:</span>{" "}
-              <input
-                type="text"
-                id="standard_success"
-                aria-describedby="standard_success_help"
-                className="basis-1/5 block text-end w-full text-xl text-black bg-transparent border-0 border-b-2 border-green-600 appearance-none dark:text-white dark:border-green-500 dark:focus:border-green-500 focus:outline-none focus:ring-0 focus:border-green-600 peer"
-                placeholder="0"
-              />
-            </div> */}
             <div className="flex justify-between">
               <span className="text-xl">Thực thu:</span>{" "}
               <span className="text-xl">{totalAmount}</span>
