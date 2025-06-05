@@ -1,5 +1,5 @@
 import productApiRequest from "@/src/apiRequests/product";
-import { ProductResType } from "@/src/schemaValidations/product.schema";
+import { ProductResPagingType, ProductResType } from "@/src/schemaValidations/product.schema";
 import { useQuery } from "@tanstack/react-query";
 import { message } from "antd";
 import { useCallback } from "react";
@@ -27,22 +27,29 @@ export const useProduct = (options: UseProductOptions) => {
                 throw new Error("Lỗi không tìm thấy phương thức đúng");
         }
     }
-    const { data, isLoading, isError, error, refetch, isRefetching, ...queryResult } = useQuery<ProductResType[]>({
-
+    const { data, isLoading, isError, error, refetch, isRefetching, ...queryResult } = useQuery<ProductResPagingType>({
         queryKey: ["products", options.query.type, options.query.params],
         queryFn: () => queryFnCustom(),
         enabled: options.enabled ?? true,
         staleTime: 5 * 60 * 1000,
         gcTime: 15 * 60 * 1000,
+        retry: (failureCount, error: any) => {
+            if (error?.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        },
+
     });
 
     const getProductById = useCallback((id: string) => {
-        return data?.find((product) => product.id === id);
+        return data?.products.find((product) => product.id === id);
     }, [data]
     );
 
     return {
-        products: data || [],
+        products: data?.products || [],
+        paging: data?.paging || null,
         isLoading,
         isError,
         error,

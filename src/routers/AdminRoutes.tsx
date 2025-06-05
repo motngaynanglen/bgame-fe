@@ -4,6 +4,8 @@ import { DashboardRouter } from './route.schema';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { ReconciliationOutlined, UserOutlined } from '@ant-design/icons';
+import { AiFillFileAdd, AiFillFolderAdd, AiOutlineBook, AiOutlineUnorderedList } from 'react-icons/ai';
+import { GrTableAdd } from 'react-icons/gr';
 /**
  *  All Dashboard Routes
  *
@@ -203,91 +205,39 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 		label: (<Link href={"/admin/users"} className={clsx("font-medium text-lg")}>Quản lý người dùng</Link>),
 		icon: (<UserOutlined />),
 	},
-	
-	// {
-	// 	key: '12',
-	// 	title: 'Quản lý người dùng',
-	// 	icon: (
-	// 		<svg
-	// 		  className="fill-current"
-	// 		  width="18"
-	// 		  height="18"
-	// 		  viewBox="0 0 18 18"
-	// 		  fill="none"
-	// 		  xmlns="http://www.w3.org/2000/svg"
-	// 		>
-	// 		  <path
-	// 			d="M9.0002 7.79065C11.0814 7.79065 12.7689 6.1594 12.7689 4.1344C12.7689 2.1094 11.0814 0.478149 9.0002 0.478149C6.91895 0.478149 5.23145 2.1094 5.23145 4.1344C5.23145 6.1594 6.91895 7.79065 9.0002 7.79065ZM9.0002 1.7719C10.3783 1.7719 11.5033 2.84065 11.5033 4.16252C11.5033 5.4844 10.3783 6.55315 9.0002 6.55315C7.62207 6.55315 6.49707 5.4844 6.49707 4.16252C6.49707 2.84065 7.62207 1.7719 9.0002 1.7719Z"
-	// 			fill=""
-	// 		  />
-	// 		  <path
-	// 			d="M10.8283 9.05627H7.17207C4.16269 9.05627 1.71582 11.5313 1.71582 14.5406V16.875C1.71582 17.2125 1.99707 17.5219 2.3627 17.5219C2.72832 17.5219 3.00957 17.2407 3.00957 16.875V14.5406C3.00957 12.2344 4.89394 10.3219 7.22832 10.3219H10.8564C13.1627 10.3219 15.0752 12.2063 15.0752 14.5406V16.875C15.0752 17.2125 15.3564 17.5219 15.7221 17.5219C16.0877 17.5219 16.3689 17.2407 16.3689 16.875V14.5406C16.2846 11.5313 13.8377 9.05627 10.8283 9.05627Z"
-	// 			fill=""
-	// 		  />
-	// 		</svg>
-	// 	  ),
-	// 	children: [
-	// 		{ key: '123', link: '/admin/users', title: 'Danh sách người dùng' },
 
-	// 	]
-	// },
-	// {
-	// 	key: '2',
-	// 	title: 'Quản lý đối tác',
-	// 	icon: (
-	// 		<svg
-	// 		  className="fill-current"
-	// 		  width="18"
-	// 		  height="18"
-	// 		  viewBox="0 0 18 18"
-	// 		  fill="none"
-	// 		  xmlns="http://www.w3.org/2000/svg"
-	// 		>
-	// 		  <path
-	// 			d="M9.0002 7.79065C11.0814 7.79065 12.7689 6.1594 12.7689 4.1344C12.7689 2.1094 11.0814 0.478149 9.0002 0.478149C6.91895 0.478149 5.23145 2.1094 5.23145 4.1344C5.23145 6.1594 6.91895 7.79065 9.0002 7.79065ZM9.0002 1.7719C10.3783 1.7719 11.5033 2.84065 11.5033 4.16252C11.5033 5.4844 10.3783 6.55315 9.0002 6.55315C7.62207 6.55315 6.49707 5.4844 6.49707 4.16252C6.49707 2.84065 7.62207 1.7719 9.0002 1.7719Z"
-	// 			fill=""
-	// 		  />
-	// 		  <path
-	// 			d="M10.8283 9.05627H7.17207C4.16269 9.05627 1.71582 11.5313 1.71582 14.5406V16.875C1.71582 17.2125 1.99707 17.5219 2.3627 17.5219C2.72832 17.5219 3.00957 17.2407 3.00957 16.875V14.5406C3.00957 12.2344 4.89394 10.3219 7.22832 10.3219H10.8564C13.1627 10.3219 15.0752 12.2063 15.0752 14.5406V16.875C15.0752 17.2125 15.3564 17.5219 15.7221 17.5219C16.0877 17.5219 16.3689 17.2407 16.3689 16.875V14.5406C16.2846 11.5313 13.8377 9.05627 10.8283 9.05627Z"
-	// 			fill=""
-	// 		  />
-	// 		</svg>
-	// 	  ),
-	// 	children: [
-	// 		{ key: '22', link: '/admin/partners', title: 'Danh sách đối tác' },
-	// 		{ key: '23', link: '/admin/partners/pending-partners', title: 'Danh sách chờ duyệt' },
+	{
+		key: 'group-category',
+		label: (<span
+			className={clsx("font-medium ")}>Quản lý thẻ sản phẩm</span>),
+		icon: (
+			<AiOutlineBook />
+		),
+		children: [
+			{
+				key: 'group-category-1', label: (<Link href={"/admin/categories"}
+					className={clsx("font-medium")}>Danh sách</Link>),
+				icon: (<AiOutlineUnorderedList />),
+			},
+			{
+				key: 'group-category-2', label: (<Link href={"/admin/products/addGroup"}
+					className={clsx("font-medium")}>Bổ xung đầu mục</Link>),
+				icon: (<AiFillFolderAdd />),
+			},
+			{
+				key: 'group-category-3', label: (<Link href={"/admin/products/addRef"}
+					className={clsx("font-medium")}>Bổ xung nhóm</Link>),
+				icon: (<AiFillFileAdd />),
+			},
+			{
+				key: 'group-category-4', label: (<Link href={"/admin/products/add"}
+					className={clsx("font-medium")}>Bổ xung sản phẩm</Link>),
+				icon: (<GrTableAdd />),
+			},
 
 
-	// 	]
-	// },
-	// {
-	// 	key: '3',
-	// 	title: 'Quản lý trung tâm',
-	// 	icon: (
-	// 		<svg
-	// 		  className="fill-current"
-	// 		  width="18"
-	// 		  height="18"
-	// 		  viewBox="0 0 18 18"
-	// 		  fill="none"
-	// 		  xmlns="http://www.w3.org/2000/svg"
-	// 		>
-	// 		  <path
-	// 			d="M9.0002 7.79065C11.0814 7.79065 12.7689 6.1594 12.7689 4.1344C12.7689 2.1094 11.0814 0.478149 9.0002 0.478149C6.91895 0.478149 5.23145 2.1094 5.23145 4.1344C5.23145 6.1594 6.91895 7.79065 9.0002 7.79065ZM9.0002 1.7719C10.3783 1.7719 11.5033 2.84065 11.5033 4.16252C11.5033 5.4844 10.3783 6.55315 9.0002 6.55315C7.62207 6.55315 6.49707 5.4844 6.49707 4.16252C6.49707 2.84065 7.62207 1.7719 9.0002 1.7719Z"
-	// 			fill=""
-	// 		  />
-	// 		  <path
-	// 			d="M10.8283 9.05627H7.17207C4.16269 9.05627 1.71582 11.5313 1.71582 14.5406V16.875C1.71582 17.2125 1.99707 17.5219 2.3627 17.5219C2.72832 17.5219 3.00957 17.2407 3.00957 16.875V14.5406C3.00957 12.2344 4.89394 10.3219 7.22832 10.3219H10.8564C13.1627 10.3219 15.0752 12.2063 15.0752 14.5406V16.875C15.0752 17.2125 15.3564 17.5219 15.7221 17.5219C16.0877 17.5219 16.3689 17.2407 16.3689 16.875V14.5406C16.2846 11.5313 13.8377 9.05627 10.8283 9.05627Z"
-	// 			fill=""
-	// 		  />
-	// 		</svg>
-	// 	  ),
-	// 	children: [
-	// 		{ key: '34', link: '/admin/care-centers', title: 'Danh sách trung tâm' },
-	// 		{ key: '35', link: '/admin/care-centers/pending-centers', title: 'Danh sách chờ duyệt' },
-
-	// 	]
-	// },
+		]
+	},
 ]
 export const AdminRouter: DashboardRouter = {
 	role: "admin",

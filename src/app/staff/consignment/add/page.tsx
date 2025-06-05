@@ -109,6 +109,7 @@ export default function Add() {
       customerPhone: data.phone,
       customerEmail: data.email,
       productName: data.productName,
+      email: data.email,
       description: data.description,
       condition: data.condition,
       missing: data.missing,

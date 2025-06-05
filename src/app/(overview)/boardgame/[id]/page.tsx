@@ -8,7 +8,7 @@ interface BoardGameInfo {
   id: string;
   product_group_ref_id: string;
   product_name: string;
-  sell_price: number;
+  price: number;
   code: string;
   image: string;
   publisher: string;

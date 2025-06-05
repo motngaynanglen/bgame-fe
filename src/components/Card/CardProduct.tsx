@@ -1,9 +1,9 @@
 "use client";
 import { useCartStore } from "@/src/store/cartStore";
-import { Button, notification, Rate } from "antd";
+import { notification } from "antd";
 import { useRouter } from "next/navigation";
-import { notifySuccess } from "../Notification/Notification";
 import SpotlightCard from "../Bits/SpotlightCard";
+import { notifySuccess } from "../Notification/Notification";
 
 function CardProduct({
   id,
@@ -51,7 +51,7 @@ function CardProduct({
     <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105">
       <>{contextHolder}</>
 
-      <div onClick={() => router.push(`/used-games/${id}`)}>
+      <div onClick={() => router.push(`/boardgame/${id}`)}>
         {/* ảnh sản phẩm */}
         <SpotlightCard spotlightColor="rgba(0, 0, 0, 0.5)">
           <div className="relative h-[200px] w-full overflow-hidden rounded-t-md">

@@ -15,6 +15,30 @@ export const orderApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+  cancelOrderByCustomer: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/cancel-order-by-customer", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  updateOrderToSent: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/update-order-to-sent", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  updateOrderToPrepared: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/update-order-to-prepared", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  updateOrderDeliveryInfo: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/update-order-delivery-info", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
   getOrderHistory: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/Order/get-order-history", body, {
       headers: {

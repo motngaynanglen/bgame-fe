@@ -25,6 +25,7 @@ import { formatDateTime, formatTimeStringRemoveSeconds, formatVND } from "@/src/
 import dayjs from "@/src/lib/dayjs ";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import { orderApiRequest } from "@/src/apiRequests/orders";
+import { HttpError } from "@/src/lib/httpAxios";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -89,7 +90,7 @@ export default function StaffManageOnGoingOrders({
 }: {
     searchParams?: { query?: string; page?: string };
 }) {
- 
+
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
     const [paging, setPaging] = useState<PagingType | undefined>(undefined);
     const [mode, setMode] = useState<number>(0);
@@ -110,19 +111,31 @@ export default function StaffManageOnGoingOrders({
             setTableLoading(false);
             return;
         }
-        const response = await orderApiRequest.getOrderHistory(
-            apiBody,
-            user.token
-        );
-        const data: DataType[] | undefined = response.data?.map(
-            (item: DataType) => ({
-                ...item,
-                key: item.id, // Gán id vào key
-            })
-        );
-        setPaging(response.paging);
-        setTableLoading(false);
-        return data;
+        try {
+            const response = await orderApiRequest.getOrderHistory(
+                apiBody,
+                user.token
+            );
+            const data: DataType[] | undefined = response.data?.map(
+                (item: DataType) => ({
+                    ...item,
+                    key: item.id, // Gán id vào key
+                })
+            );
+            setPaging(response.paging);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpError) {
+                if (error.status === 404) {
+                    message.error("Không tìm thấy dữ liệu đơn hàng.");
+                    setData([]);
+                    setTableLoading(false);
+                    return [];
+                }
+            }
+        } finally {
+            setTableLoading(false);
+        }
     };
     useEffect(() => {
         fetchTableData().then((result) => {

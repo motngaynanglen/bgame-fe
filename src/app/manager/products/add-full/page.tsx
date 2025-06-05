@@ -6,6 +6,7 @@ import ProductGroupFrom from "./ProductGroupForm";
 import ProductGroupRefForm from "./ProductGroupRefForm";
 import { useState } from "react";
 import ProductForm from "./ProductForm";
+import ProductAddFrom from "./ProducAddFrom";
 
 
 const url = {
@@ -36,11 +37,15 @@ const breadcrumb: BreadcrumbItemType[] =
 export default function ManagerAddFull() {
     const [groupId, setGroupId] = useState<string>("");
     const [groupRefId, setGroupRefId] = useState<string>("");
+    const [productTemplateId, setProductTemplateId] = useState<string>("");
     const handleGroupCreated = (newId: string) => {
         setGroupId(newId);
     };
     const handleGroupRefCreated = (newId: string) => {
         setGroupRefId(newId);
+    }
+    const handleProductTemplateCreated = (newId: string) => {
+        setProductTemplateId(newId);
     }
     const pageTitle = () => {
         return (
@@ -62,7 +67,7 @@ export default function ManagerAddFull() {
 
 
                 <Card title={pageTitle()}>
-                    <Row>
+                    <Row gutter={[12, 12]} className="mb-4">
                         <Col span={12} className="mb-4">
                             <ProductGroupFrom onGroupCreated={handleGroupCreated} />
                         </Col>
@@ -70,7 +75,10 @@ export default function ManagerAddFull() {
                             <ProductGroupRefForm groupId={groupId} onGroupRefCreated={handleGroupRefCreated} />
                         </Col>
                         <Col span={24} className="mb-4">
-                            <ProductForm productGroupRefId={groupRefId} />
+                            <ProductForm productGroupRefId={groupRefId} onProductTemplateCreated={handleProductTemplateCreated} />
+                        </Col>
+                        <Col span={24} className="mb-4">
+                            <ProductAddFrom productTemplateId={productTemplateId} />
                         </Col>
                     </Row>
 

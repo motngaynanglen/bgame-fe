@@ -20,6 +20,7 @@ import {
 } from '@ant-design/icons';
 import type { ProductResType } from '@/src/schemaValidations/product.schema';
 import { formatVND } from '@/src/lib/utils';
+import TipTapEditor from '@/src/components/TipTapEditor/TipTapEditor';
 
 const { Title, Text, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -32,7 +33,7 @@ export default function ProductDetailView({ product }: { product: ProductResType
     const images = product.image?.split('||').filter(Boolean) || [];
 
     // Format giá tiền và xử lý trường null
-    const formatField = (value: any) => {
+    const formatField = (value: any, currency: boolean = false) => {
         if (value === null || value === undefined || value === '') {
             return (
                 <Text type="warning">
@@ -40,14 +41,18 @@ export default function ProductDetailView({ product }: { product: ProductResType
                 </Text>
             );
         }
-        return typeof value === 'number'
-            ? formatVND(value)
-            : value;
+        if (currency) {
+            return typeof value === 'number'
+                ? formatVND(value)
+                : <Text type="secondary">{value}</Text>;
+        }
+        return value.toString();
+
     };
 
     // Thông tin cơ bản
-    const getConditionTag = (condition: string) => {
-        switch (condition) {
+    const getProductTypeTag = (product_type: string) => {
+        switch (product_type) {
             case 'SALES_PRODUCT':
                 return { color: 'blue', label: 'Bán' };
             case 'RENT_PRODUCT':
@@ -56,7 +61,7 @@ export default function ProductDetailView({ product }: { product: ProductResType
                 return { color: 'orange', label: 'Mẫu' };
         }
     };
-    const conditionTag = getConditionTag(product.condition);
+    const productTypeTag = getProductTypeTag(product.product_type);
 
     const basicInfo = [
         { label: 'Mã sản phẩm', value: product.code, copyable: true },
@@ -64,7 +69,7 @@ export default function ProductDetailView({ product }: { product: ProductResType
         {
             label: 'Loại sản phẩm',
             value: (
-                <Tag color={conditionTag.color}> {conditionTag.label}</Tag>
+                <Tag color={productTypeTag.color}> {productTypeTag.label}</Tag>
             )
         },
         {
@@ -79,9 +84,9 @@ export default function ProductDetailView({ product }: { product: ProductResType
 
     // Thông tin giá
     const priceInfo = [
-        { label: 'Giá bán', value: formatField(product.price) },
-        { label: 'Giá thuê', value: formatField(product.rent_price) },
-        { label: 'Giá thuê theo giờ', value: formatField(product.rent_price_per_hour) },
+        { label: 'Giá bán', value: formatField(product.price, true) },
+        { label: 'Giá thuê', value: formatField(product.rent_price, true) },
+        { label: 'Giá thuê theo giờ', value: formatField(product.rent_price_per_hour, true) },
     ];
 
     // Thông tin bổ sung
@@ -177,20 +182,11 @@ export default function ProductDetailView({ product }: { product: ProductResType
                                     <div>
                                         <Title level={5} style={{ marginBottom: 16 }}>Mô tả sản phẩm </Title>
                                         {product.description ? (
-                                            <Card
-                                                title="Mô tả sản phẩm"
-                                                style={{ marginTop: 24 }}
-                                            >
-                                                <div
-                                                    dangerouslySetInnerHTML={{ __html: product.description }}
-                                                    style={{
-                                                        lineHeight: 1.8,
-                                                        wordBreak: 'break-word'
-                                                    }}
+                                            <TipTapEditor
+                                                value={product.description}
+                                                isReadonly={true}
 
-                                                />
-
-                                            </Card>
+                                            />
                                         ) : (formatField(product.description))}
                                     </div>
 

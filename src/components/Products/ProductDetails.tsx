@@ -16,7 +16,7 @@ interface BoardGameInfo {
   id: string;
   product_group_ref_id: string;
   product_name: string;
-  sell_price: number;
+  price: number;
   code: string;
   image: string;
   publisher: string;
@@ -65,7 +65,7 @@ function ProductDetails({
         id: data.data.id,
         product_group_ref_id: data.data.product_group_ref_id,
         name: data.data.product_name,
-        price: data.data.sell_price,
+        price: data.data.price,
         quantity: quantity,
         image: data.data.image,
         storeId: undefined,
@@ -91,7 +91,7 @@ function ProductDetails({
         id: data.data.id,
         product_group_ref_id: data.data.product_group_ref_id,
         name: data.data.product_name,
-        price: data.data.sell_price,
+        price: data.data.price,
         quantity: quantity,
         image: data.data.image,
         storeId: undefined,
@@ -235,7 +235,7 @@ function ProductDetails({
           </div>
 
           <div className="text-2xl font-semibold">
-            {formatPrice(data?.data.sell_price ?? "Giá liên hệ")}{" "}
+            {formatPrice(data?.data.price ?? "Giá liên hệ")}{" "}
             {/* gia tien o day */}
             {/* <span className="line-through text-gray-400">$80.00</span> */}
           </div>
@@ -295,7 +295,7 @@ function ProductDetails({
               Thêm vào giỏ hàng
             </button>
             {/* btn mua ngay */}
-            <Magnet padding={10} disabled={false} magnetStrength={2}>
+            {/* <Magnet padding={10} disabled={false} magnetStrength={2}>
               <button
                 disabled={data.data.sales_quantity <= 0}
                 className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary ${
@@ -307,11 +307,11 @@ function ProductDetails({
               >
                 Mua ngay
               </button>
-            </Magnet>
+            </Magnet> */}
           </div>
 
           {/* btn them wishlist */}
-          <ul className="flex space-x-6">
+          {/* <ul className="flex space-x-6">
             <li>
               <button
                 // onClick={handleAddWishlist}
@@ -320,7 +320,7 @@ function ProductDetails({
                 Thêm vào danh sách yêu thích
               </button>
             </li>
-          </ul>
+          </ul> */}
           {/* <div>
             <h6 className="font-semibold">Phương thức thanh toán</h6>
             <div className="flex space-x-4">

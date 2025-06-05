@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense, useState } from 'react';
-import { Card, Row, Col, Button, Tag, Space, Typography, message, Table } from 'antd';
+import { Card, Row, Col, Button, Tag, Space, Typography, message, Table, Select } from 'antd';
 import {
     SwapOutlined,
     StopOutlined,
@@ -22,9 +22,10 @@ interface ProductListCardProps {
     products: ProductResType[];
     totalPages: number;
     currentPage: number;
+    onFilterChange?: (conditionFilter: number) => void;
 }
-const getConditionTag = (condition: string) => {
-    switch (condition) {
+const getProductTypeTag = (product_type: string) => {
+    switch (product_type) {
         case 'SALES_PRODUCT':
             return { color: 'blue', label: 'Cho Bán', icon: <ShoppingOutlined /> };
         case 'RENT_PRODUCT':
@@ -34,7 +35,7 @@ const getConditionTag = (condition: string) => {
     }
 };
 
-const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages, currentPage }) => {
+export default function ProductListCard({ products, totalPages, currentPage, onFilterChange }: ProductListCardProps) {
     const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
 
     const handleConvertToRent = (productId: string) => {
@@ -44,14 +45,18 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
     const handleDeactivate = (productId: string) => {
         message.warning(`Deactivating product ${productId}`);
     };
-
+    const handleSelectChange = (value: number) => {
+        if (onFilterChange) {
+            onFilterChange(value);
+        }
+    }
     const rows: ProductResType[][] = [];
     for (let i = 0; i < Math.min(products.length, 24); i += 4) {
         rows.push(products.slice(i, i + 4));
     }
 
     const ProductCardView = ({ product }: { product: ProductResType }) => {
-        const productCondition = getConditionTag(product.condition);
+        const productType = getProductTypeTag(product.product_type);
         return (
             <Card
                 size="small"
@@ -69,12 +74,12 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
 
 
                     <div className='flex justify-between items-center'>
-                        {/* Condition Tag */}
+                        {/* Product Type Tag */}
                         <Tag
-                            icon={productCondition.icon}
-                            color={productCondition.color}
+                            icon={productType.icon}
+                            color={productType.color}
                         >
-                            {productCondition.label}
+                            {productType.label}
                         </Tag>
                         {/* Status Tag */}
                         <Tag
@@ -93,7 +98,7 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
                         size="small"
                         style={{ marginTop: 'auto', justifyContent: 'space-between', width: '100%' }}
                     >
-                        {product.condition === 'SALES_PRODUCT' && (
+                        {product.product_type === 'SALES_PRODUCT' && (
                             <Button
                                 size="small"
                                 icon={<SwapOutlined />}
@@ -137,14 +142,14 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
         },
         {
             title: 'Loại',
-            dataIndex: 'condition',
-            key: 'condition',
-            render: (condition: string) => (
+            dataIndex: 'product_type',
+            key: 'product_type',
+            render: (product_type: string) => (
                 <Tag
-                    icon={getConditionTag(condition).icon}
-                    color={getConditionTag(condition).color}
+                    icon={getProductTypeTag(product_type).icon}
+                    color={getProductTypeTag(product_type).color}
                 >
-                    {getConditionTag(condition).label}
+                    {getProductTypeTag(product_type).label}
                 </Tag>
             ),
         },
@@ -153,7 +158,7 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
             key: 'actions',
             render: (_: any, record: ProductResType) => (
                 <Space>
-                    {record.condition === 'SALES_PRODUCT' && (
+                    {record.product_type === 'SALES_PRODUCT' && (
                         <Button
                             size="small"
                             icon={<SwapOutlined />}
@@ -222,7 +227,14 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
                     <Button onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}>
                         Switch to {viewMode === 'table' ? 'Card View' : 'Table View'}
                     </Button>
-
+                    <Select
+                        defaultValue={0}
+                        onChange={(value) => handleSelectChange(value)}
+                    >
+                        <Select.Option value={0}>Tất cả</Select.Option>
+                        <Select.Option value={1}>Bán</Select.Option>
+                        <Select.Option value={2}>Cho thuê</Select.Option>
+                    </Select>
                 </Col>
             </Row>
             {viewMode === 'table' ? (
@@ -234,4 +246,3 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
     );
 };
 
-export default ProductListCard;

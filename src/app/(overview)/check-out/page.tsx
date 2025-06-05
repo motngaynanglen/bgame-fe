@@ -36,22 +36,29 @@ const data = [
 
 interface PaymentData {
   id?: string;
-  url?: string;
+  checkoutUrl?: string;
+  qrCode?: string;
 }
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
   const { cart, calculateTotal, clearCart, buyNowItem } = useCartStore();
-  const [paymentData, setPaymentData] = useState<PaymentData | undefined>(undefined);
+  const [paymentData, setPaymentData] = useState<PaymentData | undefined>(
+    undefined
+  );
   const { user } = useAppContext();
   const [value, setValue] = useState(1);
   const productsToCheckout = buyNowItem ? [buyNowItem] : cart;
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-
-  const totalProductCount = productsToCheckout.reduce((sum, item) => sum + item.quantity, 0);
+  const totalProductCount = productsToCheckout.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
 
   // Tính số cửa hàng duy nhất (dựa vào item.storeID hoặc item.shopID)
-  const uniqueStoreIDs = new Set(productsToCheckout.map(item => item.storeId));
+  const uniqueStoreIDs = new Set(
+    productsToCheckout.map((item) => item.storeId)
+  );
   const totalStores = uniqueStoreIDs.size;
 
   const onChange = (e: RadioChangeEvent) => {
@@ -80,7 +87,8 @@ export default function CheckOut() {
         user?.token
       );
       if (res.statusCode === "200") {
-        setPaymentData({ id: id, url: res.data });
+        setPaymentData({ id: id, checkoutUrl: res.data.checkoutUrl, qrCode: res.data.qrCode });
+        clearCart();
         handleRedirectToPayment();
       } else {
         notifyError("Lỗi thanh toán", res.message || "Vui lòng thử lại sau.");
@@ -89,17 +97,16 @@ export default function CheckOut() {
       notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
       return;
     }
-  }
+  };
   const handleRedirectToPayment = () => {
     if (paymentData && paymentData.url) {
-      window.open(paymentData.url, '_blank');
+      window.open(paymentData.url, "_blank");
     } else {
       notifyError("Lỗi thanh toán", "Không có URL thanh toán để chuyển hướng.");
     }
-  }
+  };
 
   const handleCreateOrder = async (formData: FormData) => {
-
     const body = {
       orders: cart.map((item) => ({
         storeId: item.storeId, // Sử dụng storeId từ item
@@ -113,29 +120,43 @@ export default function CheckOut() {
     };
 
     try {
-      const res = await orderApiRequest.createOrderByCustomer(body, user?.token);
+      const res = await orderApiRequest.createOrderByCustomer(
+        body,
+        user?.token
+      );
       if (res.statusCode == "200") {
         setOpenResponsive(true);
-        setPaymentData({ id: res.data ?? undefined, url: undefined })
+        setPaymentData({ id: res.data ?? undefined, url: undefined });
+        // clearCart();
+      }
+      if (res.statusCode == "404") {
+        notifyError(
+          "Đặt mua thất bại!",
+          res.message || "Vui lòng thử lại sau."
+        );
         // clearCart();
       } else
         notifyError(
-          "Đặt trước thất bại!",
+          "Đặt mua thất bại!",
           res.message || "Vui lòng thử lại sau."
         );
     } catch (error: any) {
       if (error instanceof HttpError && error.status === 422) {
-
       }
       if (error instanceof HttpError && error.status === 401) {
-        notifyError("Đặt trước thất bại!", "bạn cần đăng nhập để tiếp tục");
+        notifyError("Đặt mua thất bại!", "bạn cần đăng nhập để tiếp tục");
+        // router.push("/login");
+      }
+      if (error instanceof HttpError && error.status === 404) {
+        notifyError("Đặt mua thất bại!", "Bạn cần thanh toán sản phẩm đã mua trước đó .");
         // router.push("/login");
       } else {
         // Xử lý lỗi khác nếu có
         console.error("Lỗi khác:", error);
         notifyError(
-          "Đặt trước thất bại",
-          error?.message || "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+          "Đặt mua thất bại",
+          error?.message ||
+            "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
         );
       }
     }
@@ -146,9 +167,7 @@ export default function CheckOut() {
   useEffect(() => {
     setClientOnlyTotal(formatVND(calculateTotal()));
   }, [cart]);
-  useEffect(() => {
-
-  }, [paymentData]);
+  useEffect(() => {}, [paymentData]);
 
   return (
     <div className="container mx-auto p-4 bg-sky-50 min-h-screen ">
@@ -177,7 +196,6 @@ export default function CheckOut() {
             </div>
 
             <form
-
               className="space-y-4"
               onSubmit={handleSubmit(handleCreateOrder)}
             >
@@ -286,12 +304,11 @@ export default function CheckOut() {
 
         {/* ds sản phẩm, chọn phương thúc thanh toán  */}
         <div className="w-full ps-4 lg:w-1/3 mt-6 lg:mt-0">
-
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold mb-2">
-              Đơn hàng:
-            </h2>
-            <span>Gồm {totalProductCount} sản phẩm, từ {totalStores} cửa hàng</span>
+            <h2 className="text-xl font-semibold mb-2">Đơn hàng:</h2>
+            <span>
+              Gồm {totalProductCount} sản phẩm, từ {totalStores} cửa hàng
+            </span>
           </div>
 
           {productsToCheckout.map((item, index) => {
@@ -299,7 +316,10 @@ export default function CheckOut() {
             return (
               <div
                 key={item.id || index}
-                className={"flex items-center mb-4 pb-2" + (index === productsToCheckout.length - 1 ? "" : " border-b-2")}
+                className={
+                  "flex items-center mb-4 pb-2" +
+                  (index === productsToCheckout.length - 1 ? "" : " border-b-2")
+                }
               >
                 <img
                   src={imageUrls[0]}
@@ -313,7 +333,6 @@ export default function CheckOut() {
                     Giá: {formatVND(item.price)}
                   </p>
                   <p>Số lượng: {item.quantity}</p>
-
                 </div>
               </div>
             );
@@ -406,6 +425,14 @@ export default function CheckOut() {
         closable={true}
       >
         <CheckOutSuccess id={paymentData?.id} />
+        <Button
+          disabled={paymentData?.id === undefined ? true : false}
+          onClick={() => handlePaymentAction(paymentData?.id || "")}
+          // loading={isSubmitting}
+          color="green"
+        >
+          THỰC HIỆN THANH TOÁN
+        </Button>
       </Modal>
     </div>
   );

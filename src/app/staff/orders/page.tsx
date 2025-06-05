@@ -12,7 +12,9 @@ import {
   Col,
   DatePicker,
   message,
+  notification,
   Row,
+  Select,
   Space,
   Table,
   Tag,
@@ -21,6 +23,8 @@ import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
+import { HttpError } from "@/src/lib/httpAxios";
+import { notifyError } from "@/src/components/Notification/Notification";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -37,6 +41,7 @@ interface DataType {
   total_item: number;
   total_price: string;
   status: string;
+  is_delivery: boolean;
   created_at: string;
 }
 
@@ -46,7 +51,15 @@ interface PagingType {
   pageCount: number;
 }
 const statusName = ["THEO GIỜ", "THEO LƯỢT"];
-
+const orderStatusOptions = [
+  { value: "0", label: "Tất cả" }, // Option to show all statuses
+  { value: "1", label: "Chưa thanh toán" },
+  { value: "2", label: "Đã thanh toán" },
+  { value: "3", label: "Đang chuẩn bị hàng" },
+  { value: "4", label: "Đang giao" },
+  { value: "5", label: "Đã gửi" },
+  { value: "6", label: "Đã hủy" },
+];
 const role: string = "manager";
 const baseUrl: string = "/" + role + "/" + "boardgames";
 const createUrl: string = baseUrl + "/" + "create";
@@ -90,9 +103,12 @@ export default function StaffManageOrder({
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
   const [tableLoading, setTableLoading] = useState<boolean>(true);
   const [hasMounted, setHasMounted] = useState(false);
-
+  const [statusFilter, setStatusFilter] = useState<string>("0");
   const { user } = useAppContext();
   const apiBody = {
+    filter: {
+      status: statusFilter === "0" ? null : statusFilter,
+    },
     paging: {
       pageNum: searchParams?.page ?? 1,
       pageSize: 10,
@@ -136,14 +152,19 @@ export default function StaffManageOrder({
 
       setPaging(response.paging);
       return data;
-    } catch (error: any) {
+    } catch (error) {
       // Kiểm tra nếu lỗi là 401 (token hết hạn)
-      if (error.response?.status === 401) {
-        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-        router.push("/login"); // Chuyển hướng về login
-      } else {
-        message.error("Đã xảy ra lỗi khi tải dữ liệu.");
-        console.error(error);
+      if (error instanceof HttpError) {
+        if (error.status === 404) {
+          message.error("Không tìm thấy dữ liệu đơn hàng.");
+          setData([]);
+          setTableLoading(false);
+          return [];
+        }
+        if (error.status === 401) {
+          message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          router.push("/login"); // Chuyển hướng về login
+        }
       }
       return;
     } finally {
@@ -154,7 +175,7 @@ export default function StaffManageOrder({
     fetchTableData().then((result) => {
       setData(result);
     });
-  }, [dateRange, searchParams]);
+  }, [dateRange, searchParams, statusFilter, hasMounted]);
   const onClickEnd = async (id: string) => {
     const body = {
       bookListId: id,
@@ -211,6 +232,31 @@ export default function StaffManageOrder({
       message.error("Kết toán hành động thất bại");
     }
   };
+  const handleReciveOrder = async (orderId: string) => {
+    try {
+      // Gọi API để nhận đơn hàng
+      const res = await orderApiRequest.updateOrderToSent({
+        orderID: orderId,
+      }, user?.token);
+
+      notification.success({
+        message: res.message || "Đã nhận đơn sản phẩm",
+        description: "Cảm ơn bạn đã mua sản phẩm.",
+      });
+      router.refresh();
+
+    } catch (error) {
+      notifyError("Lỗi nhận đơn", "Có lỗi xảy ra khi xử lý yêu cầu nhận đơn.");
+    }
+  }
+
+  const viewOrderDetails = (record: DataType) => {
+    router.push(`/staff/orders/${record.id}`);
+  };
+  const handleUpdateDeliveryInfo = (record: DataType) => {
+    router.push(`/staff/orders/${record.id}/update-delivery-info`);
+  };
+
   const columns: TableProps<DataType>["columns"] = [
     {
       title: "Mã sản phẩm",
@@ -259,6 +305,17 @@ export default function StaffManageOrder({
         <>
           <Row gutter={[12, 12]}>
             <Col span={12} className="flex justify-center">
+              <Space className="flex justify-between">
+                <Button
+                  color="blue"
+                  variant="filled"
+                  onClick={() => viewOrderDetails(record)}
+                >
+                  Xem chi tiết
+                </Button>
+              </Space>
+            </Col>
+            <Col span={12} className="flex justify-center">
               {(() => {
                 switch (record.status) {
                   case "CREATED":
@@ -270,6 +327,44 @@ export default function StaffManageOrder({
                           onClick={() => onClickEnd(record.id)}
                         >
                           Nhận đơn
+                        </Button>
+                      </Space>
+                    );
+                  case "PAID":
+                    return (
+                      <>
+                        {(record.is_delivery)
+                          ? (<Space className="flex justify-between">
+                            <Button
+                              color="cyan"
+                              variant="filled"
+                              onClick={() => viewOrderDetails(record)}
+                            >
+                              Chuẩn bị sản phẩm
+                            </Button>
+                          </Space>)
+                          : (<Space className="flex justify-between">
+                            <Button
+                              color="orange"
+                              variant="filled"
+                              onClick={() => handleReciveOrder(record.id)}
+                            >
+                              Kết toán
+                            </Button>
+                          </Space>)
+                        }
+
+                      </>
+                    );
+                  case "PREPARED":
+                    return (
+                      <Space className="flex justify-between">
+                        <Button
+                          color="cyan"
+                          variant="filled"
+                          onClick={() => handleUpdateDeliveryInfo(record)}
+                        >
+                          Bắt đầu giao hàng
                         </Button>
                       </Space>
                     );
@@ -300,6 +395,15 @@ export default function StaffManageOrder({
             <SearchBar placeholder={"Tìm kiếm theo tên khách hàng..."} />
           </Suspense>
         </Col>
+        <Col span={6} className="flex items-center">
+          <Select
+            defaultValue="0"
+            style={{ width: "100%" }}
+            onChange={(value) => setStatusFilter(value)}
+            options={orderStatusOptions}
+            placeholder="Lọc theo trạng thái"
+          />
+        </Col>
       </Row>
 
       <br />
@@ -308,12 +412,7 @@ export default function StaffManageOrder({
         columns={columns}
         dataSource={useData ?? []}
         pagination={false}
-        onRow={(record) => ({
-          onClick: () => {
-            router.push(`/staff/orders/${record.id}`);
-          },
-          style: { cursor: "pointer" },
-        })}
+       
       />
       <br />
       <AntdCustomPagination totalPages={paging?.pageCount ?? 1} />

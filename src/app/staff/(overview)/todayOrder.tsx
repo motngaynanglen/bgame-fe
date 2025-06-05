@@ -10,6 +10,7 @@ import { LuSettings2 } from "react-icons/lu";
 import { useAppContext } from "../../app-provider";
 import dayjs from "@/src/lib/dayjs ";
 import bookListApiRequest from "@/src/apiRequests/bookList";
+import { AxiosError } from "axios";
 
 interface DataType {
     key: string;
@@ -44,7 +45,7 @@ const columns: TableProps<DataType>['columns'] = [
         key: 'time',
         render: (_, record) => (
             <>
-                {record.time }
+                {record.time}
             </>
         ),
         onFilter: (value, record) => record.name.indexOf(value as string) === 0,
@@ -90,8 +91,8 @@ const columns: TableProps<DataType>['columns'] = [
 ];
 
 const defaultToDay = {
-    from: dayjs().hour(1).minute(0).second(0).toISOString(),
-    to: dayjs().hour(23).minute(0).second(0).toISOString(),
+    from: dayjs().hour(1).minute(0).second(0).local().toISOString(),
+    to: dayjs().hour(23).minute(0).second(0).local().toISOString(),
 };
 export default function StaffDashboardToDayOrder() {
     const [useData, setData] = useState<DataType[] | undefined>(undefined);
@@ -121,7 +122,7 @@ export default function StaffDashboardToDayOrder() {
                 );
                 if (!response || response.data === undefined || response.data.length === 0) {
                     message.error(response?.message || "Không có dữ liệu đơn hàng.");
-                     setData([]);
+                    setData([]);
                     setTableLoading(false);
                     return;
                 }
@@ -134,11 +135,19 @@ export default function StaffDashboardToDayOrder() {
                         time: formatDateTime(item.from, "TIME") // Gán id vào key
                     })
                 );
+                if (!data || data.length === 0) {
+                    message.error(response?.message || "Không có dữ liệu đơn hàng.");
+                    setData([]);
+                    setTableLoading(false);
+                    return;
+                }
                 return data;
+
             }
             catch (error) {
-                console.error("Error fetching order history:", error);
+
                 message.error("Lỗi khi tải dữ liệu đơn hàng.");
+
             } finally {
                 setTableLoading(false);
             }
@@ -153,7 +162,7 @@ export default function StaffDashboardToDayOrder() {
             <>
                 <div className="flex justify-between max-h-150">
                     <div className="text-center">
-                        <h4 >Lịch thuê hôm nay <span>: 14 đơn</span> </h4>
+                        <h4 >Lịch thuê hôm nay <span>{useData?.length || 0}</span> </h4>
 
                     </div>
                     <Row gutter={12}>

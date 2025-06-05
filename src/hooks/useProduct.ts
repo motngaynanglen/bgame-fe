@@ -71,7 +71,6 @@ export const useProduct = (id: string) => {
       const res = await productApiRequest.getById({ productId: id });
       return res;
     },
-   
   });
 
   return {

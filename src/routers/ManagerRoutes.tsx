@@ -218,7 +218,7 @@ export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 				icon: (<AiFillFileAdd />),
 			},
 			{
-				key: '34', label: (<Link href={"/manager/products/add"}
+				key: '34', label: (<Link href={"/manager/products/add-full"}
 					className={clsx("font-medium")}>Bổ xung sản phẩm</Link>),
 				icon: (<GrTableAdd />),
 			},

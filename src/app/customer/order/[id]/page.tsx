@@ -3,8 +3,7 @@ import { orderApiRequest } from "@/src/apiRequests/orders";
 import { useQuery } from "@tanstack/react-query";
 import { Divider } from "antd";
 import { useParams } from "next/navigation";
-import React, { useMemo } from "react";
-import { Divide } from "react-feather";
+import { useMemo } from "react";
 
 interface OrderItem {
   order_item_id: string;
