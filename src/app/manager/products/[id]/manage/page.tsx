@@ -36,7 +36,7 @@ export default function ManageProductTemplate({ params, searchParams }: { params
         templateID: params.id,
         conditionFilter: 0
     });
-    const handleFilterChange = (value : number) => {
+    const handleFilterChange = (value: number) => {
         setFilterParams((prev) => ({ ...prev, conditionFilter: value }));
     }
     const productTemplate = useProduct({
@@ -48,7 +48,14 @@ export default function ManageProductTemplate({ params, searchParams }: { params
     const products = useProduct({
         query: {
             type: "GET_LIST_BY_TEMPLATE_ID",
-            params: { templateID: params.id, conditionFilter: filterParams.conditionFilter },
+            params: {
+                templateID: params.id,
+                conditionFilter: filterParams.conditionFilter,
+                paging: {
+                    pagenum: searchParams?.page ? parseInt(searchParams.page) : 1,
+                    pageSize: 20, 
+                }
+            },
         },
         authToken: user?.token,
     });
@@ -60,7 +67,8 @@ export default function ManageProductTemplate({ params, searchParams }: { params
 
             <ProductDetailUI product={productTemplate.products[0]} />
             <h1>Product List</h1>
-            <ProductListCard products={products.products.sort((a, b) => a.code.localeCompare(b.code))} totalPages={10} currentPage={10} onFilterChange={handleFilterChange} />
+            <ProductListCard products={products.products.sort((a, b) => a.code.localeCompare(b.code))}
+                totalPages={products.paging?.paging?.pageCount ?? 1} currentPage={products.paging?.paging?.pageNum ?? 1} onFilterChange={handleFilterChange} />
         </>
     )
 }

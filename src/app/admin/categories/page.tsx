@@ -30,9 +30,6 @@ export default function CategoriesPage() {
     // useWarnOnRouteChange(shouldWarn);
     return (
         <>
-            <p>
-                {shouldWarn + " wtf đâu mất r"}
-            </p>
             <Row>
 
                 <Col span={16}>

@@ -5,7 +5,14 @@ export interface GetByIdQuery {
 
 export interface GetListByTemplateQuery {
     type: "GET_LIST_BY_TEMPLATE_ID";
-    params: { templateID: string; conditionFilter: number };
+    params: { 
+        templateID: string; 
+        conditionFilter: number;
+        paging: {
+            pagenum: number ;
+            pageSize?: number;
+        }
+     };
 }
 
 // Thêm query mới

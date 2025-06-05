@@ -26,6 +26,7 @@ import dayjs from "@/src/lib/dayjs ";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { PagingResType } from "@/src/schemaValidations/common.schema";
+import { IoFastFood } from "react-icons/io5";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -112,19 +113,28 @@ export default function StaffManagePendingOrders({
             setTableLoading(false);
             return;
         }
-        const response = await orderApiRequest.getOrderHistory(
-            apiBody,
-            user.token
-        );
-        const data: DataType[] | undefined = response.data?.map(
-            (item: DataType) => ({
-                ...item,
-                key: item.id, // Gán id vào key
-            })
-        );
-        setPaging(response.paging);
-        setTableLoading(false);
-        return data;
+        try {
+
+            const response = await orderApiRequest.getOrderHistory(
+                apiBody,
+                user.token
+            );
+            const data: DataType[] | undefined = response.data?.map(
+                (item: DataType) => ({
+                    ...item,
+                    key: item.id, // Gán id vào key
+                })
+            );
+            setPaging(response.paging);
+            return data;
+        } catch (error) {
+            if (error instanceof Error) {
+                message.error(error.message || "Lỗi khi tải dữ liệu đơn hàng.");
+            }
+            return [];
+        } finally {
+            setTableLoading(false);
+        }
     };
     useEffect(() => {
         fetchTableData().then((result) => {

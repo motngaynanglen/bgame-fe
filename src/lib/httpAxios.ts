@@ -182,8 +182,8 @@ const request = async <Response>(
             } else if (status === STATUS_CODES.NOT_FOUND) {
                 throw new HttpError({
                     status: STATUS_CODES.NOT_FOUND,
-                    message: 'Không tìm thấy tài nguyên',
-                    data: data,
+                    message: data.message || 'Không tìm thấy tài nguyên',
+                    data: data.data,
                 });
             } else if (status === STATUS_CODES.ENTITY_ERROR) {
                 throw new HttpError({

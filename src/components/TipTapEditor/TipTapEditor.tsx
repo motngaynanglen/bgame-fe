@@ -57,10 +57,10 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
                 spellcheck: 'false',
             },
         },
-        editable: (isReadonly === undefined ? false : !isReadonly) && isMounted,
+        editable: !(isReadonly ?? true) && isMounted,
         injectCSS: false,
         immediatelyRender: false,
-    });
+    }, [isMounted, isReadonly]);
 
     // useEffect(() => {
     //     if (editor && value !== editor.getHTML()) {

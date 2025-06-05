@@ -40,14 +40,21 @@ export default function CategoriesTable() {
         fetchCategories();
     }, [searchText]);
 
-    const handleToggleStatus = (id: string) => {
-        const updated = categories.map((cat) =>
-            cat.id == id
-                ? { ...cat, status: cat.status === 'ACTIVE' ? 'DEACTIVE' : 'ACTIVE' }
-                : cat
-        )
-        // setCategories(updated);
-        message.success('Cập nhật trạng thái thành công')
+    const handleDeactiveStatus = async (id: string) => {
+        try {
+            const res = await categoryApiRequest.deactiveCategory({ categoryId: id }, user?.token);
+            if (res.success) {
+                message.success('Danh mục đã được vô hiệu hóa thành công');
+                fetchCategories(); // Tải lại danh sách sau khi cập nhật
+            } else {
+                message.error('Không thể vô hiệu hóa danh mục');
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                message.error(`Lỗi: ${error.message}`);
+            }
+        }
+
     }
     const filteredCategories = useMemo(() => {
         return categories.filter((cat) =>
@@ -82,9 +89,9 @@ export default function CategoriesTable() {
             key: 'action',
             render: (_: any, record: Category) => (
                 <Button
-                    type="link"
+                    type="primary"
                     danger={record.status === 'ACTIVE'}
-                    // onClick={() => handleToggleStatus(record.id)}
+                    onClick={() => handleDeactiveStatus(record.id)}
                 >
                     {record.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
                 </Button>

@@ -15,6 +15,7 @@ export interface productModel {
     rent_quantity?: number
 }
 import { z } from "zod";
+import { PagingRes } from "./common.schema";
 
 export const productFullFormSchema = z.object({
     id: z.string().optional(), // Hoặc z.undefined() nếu bạn muốn bắt buộc không có giá trị
@@ -61,6 +62,12 @@ export const productResSchema = z.object({
 });
 
 export type ProductResType = z.infer<typeof productResSchema>;
+
+export const productResPagingSchema = z.object({
+    products: z.array(productResSchema),
+    paging: PagingRes.nullable().optional(),
+});
+export type ProductResPagingType = z.infer<typeof productResPagingSchema>;
 
 export const productTemplateSchema = z.object({
     id: z.string().optional().nullable(),
