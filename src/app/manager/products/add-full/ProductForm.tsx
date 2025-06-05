@@ -317,6 +317,7 @@ export default function ProductForm({ productGroupRefId, onProductTemplateCreate
                       <TipTapEditor
                         value={field.value ?? ""}
                         onChange={field.onChange}
+                        isReadonly={mode === "select"}
                         resetKey={mode + selectedProductId}
                       />
                     </Form.Item>

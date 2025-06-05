@@ -1,17 +1,16 @@
 "use client";
-import React, { Suspense, useState } from 'react';
-import { Card, Row, Col, Button, Tag, Space, Typography, message, Table, Select } from 'antd';
-import {
-    SwapOutlined,
-    StopOutlined,
-    ShoppingOutlined,
-    ShopOutlined
-} from '@ant-design/icons';
-import type { ProductResType } from '@/src/schemaValidations/product.schema';
-import { Grid } from 'antd';
-import { LuLayoutTemplate } from 'react-icons/lu';
 import AntdCustomPagination from '@/src/components/admin/table/pagination';
 import SearchBar from "@/src/components/admin/table/search";
+import type { ProductResType } from '@/src/schemaValidations/product.schema';
+import {
+    ShopOutlined,
+    ShoppingOutlined,
+    StopOutlined,
+    SwapOutlined
+} from '@ant-design/icons';
+import { Button, Card, Col, Grid, message, Row, Space, Table, Tag, Typography } from 'antd';
+import React, { Suspense, useState } from 'react';
+import { LuLayoutTemplate } from 'react-icons/lu';
 
 const { useBreakpoint } = Grid;
 
@@ -22,9 +21,8 @@ interface ProductListCardProps {
     products: ProductResType[];
     totalPages: number;
     currentPage: number;
-    onFilterChange?: (conditionFilter: number) => void;
 }
-const getProductTypeTag = (product_type: string) => {
+const getConditionTag = (product_type: string) => {
     switch (product_type) {
         case 'SALES_PRODUCT':
             return { color: 'blue', label: 'Cho Bán', icon: <ShoppingOutlined /> };
@@ -35,7 +33,7 @@ const getProductTypeTag = (product_type: string) => {
     }
 };
 
-export default function ProductListCard({ products, totalPages, currentPage, onFilterChange }: ProductListCardProps) {
+const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages, currentPage }) => {
     const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
 
     const handleConvertToRent = (productId: string) => {
@@ -45,18 +43,15 @@ export default function ProductListCard({ products, totalPages, currentPage, onF
     const handleDeactivate = (productId: string) => {
         message.warning(`Deactivating product ${productId}`);
     };
-    const handleSelectChange = (value: number) => {
-        if (onFilterChange) {
-            onFilterChange(value);
-        }
-    }
+
     const rows: ProductResType[][] = [];
     for (let i = 0; i < Math.min(products.length, 24); i += 4) {
         rows.push(products.slice(i, i + 4));
     }
 
     const ProductCardView = ({ product }: { product: ProductResType }) => {
-        const productType = getProductTypeTag(product.product_type);
+        const productCondition = getConditionTag(product.product_type);
+        
         return (
             <Card
                 size="small"
@@ -74,12 +69,12 @@ export default function ProductListCard({ products, totalPages, currentPage, onF
 
 
                     <div className='flex justify-between items-center'>
-                        {/* Product Type Tag */}
+                        {/* product_type Tag */}
                         <Tag
-                            icon={productType.icon}
-                            color={productType.color}
+                            icon={productCondition.icon}
+                            color={productCondition.color}
                         >
-                            {productType.label}
+                            {productCondition.label}
                         </Tag>
                         {/* Status Tag */}
                         <Tag
@@ -146,10 +141,10 @@ export default function ProductListCard({ products, totalPages, currentPage, onF
             key: 'product_type',
             render: (product_type: string) => (
                 <Tag
-                    icon={getProductTypeTag(product_type).icon}
-                    color={getProductTypeTag(product_type).color}
+                    icon={getConditionTag(product_type).icon}
+                    color={getConditionTag(product_type).color}
                 >
-                    {getProductTypeTag(product_type).label}
+                    {getConditionTag(product_type).label}
                 </Tag>
             ),
         },
@@ -227,14 +222,7 @@ export default function ProductListCard({ products, totalPages, currentPage, onF
                     <Button onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}>
                         Switch to {viewMode === 'table' ? 'Card View' : 'Table View'}
                     </Button>
-                    <Select
-                        defaultValue={0}
-                        onChange={(value) => handleSelectChange(value)}
-                    >
-                        <Select.Option value={0}>Tất cả</Select.Option>
-                        <Select.Option value={1}>Bán</Select.Option>
-                        <Select.Option value={2}>Cho thuê</Select.Option>
-                    </Select>
+
                 </Col>
             </Row>
             {viewMode === 'table' ? (
@@ -246,3 +234,4 @@ export default function ProductListCard({ products, totalPages, currentPage, onF
     );
 };
 
+export default ProductListCard;

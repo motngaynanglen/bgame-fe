@@ -57,5 +57,12 @@ const userApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+  getByPhoneOrEmail: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Account/search-customer-by-phone-and-email", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+
 };
 export default userApiRequest;

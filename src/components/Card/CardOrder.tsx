@@ -1,6 +1,9 @@
+import transactionApiRequest from "@/src/apiRequests/transaction";
+import { Button, message, Modal, notification } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { notifyError } from "../Notification/Notification";
 
 type OrderStatus =
   | "DELIVERING"
@@ -24,6 +27,10 @@ interface Order {
   is_delivery: number;
   delivery_brand: string;
   delivery_code: string;
+  transaction: {
+    qrCode: string;
+    checkoutUrl: string;
+  };
 }
 
 interface OrderCardProps {
@@ -53,7 +60,45 @@ export default function OrderCard({ order }: OrderCardProps) {
         return "text-gray-400";
     }
   };
+  function setPaymentData(trans: { id: string; checkoutUrl: any; qrCode: any; }) {
+    order.transaction = {
+      qrCode: trans.qrCode,
+      checkoutUrl: trans.checkoutUrl,
+    };
+    window.open(trans.checkoutUrl, '_blank');
+  }
+  const handlePerformTransaction = async (orderId: string) => {
+    if (orderId === "") {
+      notifyError("Lỗi thanh toán", "Không có dữ liệu thanh toán.");
+      return;
+    }
+    Modal.confirm({
+      title: "Xác nhận thanh toán",
+      content: `Bạn có chắc chắn muốn thanh toán hóa đơn này không?`,
+      onOk: async () => {
+        try {
+          // Gọi API để lấy URL thanh toán
+          const res = await transactionApiRequest.performTransaction(
+            {
+              referenceID: orderId,
+              type: 1, // 1: Thanh toán đơn hàng
+            },
 
+          );
+
+          setPaymentData({ id: orderId, checkoutUrl: res.data.checkoutUrl, qrCode: res.data.qrCode });
+          // handleRedirectToPayment();
+          notification.success({
+            message: "Thanh toán thành công",
+            description: "Đã tạo đơn hàng và lấy thông tin thanh toán.",
+          });
+        } catch (error) {
+          notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
+          return;
+        }
+      }
+    });
+  };
   return (
     <section className="bg-white antialiased hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg shadow-md  m-2">
       <div className="mt-6 flow-root sm:mt-8 ">
@@ -98,10 +143,10 @@ export default function OrderCard({ order }: OrderCardProps) {
                     {order.status === "DELIVERING"
                       ? "Đang giao hàng"
                       : order.status === "SENT"
-                      ? "Đã giao hàng"
-                      : order.status === "CANCELLED"
-                      ? "Đã hủy"
-                      : "Chờ xác nhận"}
+                        ? "Đã giao hàng"
+                        : order.status === "CANCELLED"
+                          ? "Đã hủy"
+                          : "Chờ xác nhận"}
                   </span>
                 </dd>
               </dl>
@@ -115,18 +160,23 @@ export default function OrderCard({ order }: OrderCardProps) {
                     Mua lại
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    className="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
-                  >
-                    Hủy đơn
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-2 justify-between items-center">
+                    <Button onClick={() => handlePerformTransaction(order.id)}>
+                      Thanh toán
+                    </Button>
+                    <button
+                      type="button"
+                      className="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
+                    >
+                      Hủy đơn
+                    </button>
+                  </div>
                 )}
                 <button
                   onClick={() => router.push(`order/${order.id}`)}
                   className="w-full inline-flex justify-center rounded-lg  border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700 lg:w-auto"
                 >
-                  Chi tiết 
+                  Chi tiết
                 </button>
               </div>
             </div>

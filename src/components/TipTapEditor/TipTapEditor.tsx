@@ -57,10 +57,10 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
                 spellcheck: 'false',
             },
         },
-        // editable: !(isReadonly ?? false) && isMounted,
+        editable: !(isReadonly ?? true) && isMounted,
         injectCSS: false,
         immediatelyRender: false,
-    });
+    }, [isMounted, isReadonly]);
 
     // useEffect(() => {
     //     if (editor && value !== editor.getHTML()) {
@@ -78,7 +78,21 @@ const TipTapEditor = forwardRef<HTMLDivElement, TipTapEditorProps>(({ value = ""
         }
     }, [value, editor, isMounted]);
     if (!isMounted || !editor) return null;
-
+    if (isReadonly) {
+        return (
+            <div ref={ref} className="px-2 tiptap-editor-wrapper">
+                <EditorContent editor={editor} className="px-2 min-h-[150px]" />
+                <style>
+                    {`
+                        .tiptap-editor-wrapper .ProseMirror,
+                        .tiptap-editor-wrapper .ProseMirror * {
+                        all: revert !important;
+                        }
+                    `}
+                </style>
+            </div>
+        );
+    }
     return (
         <div ref={ref} className="border rounded-md p-2">
             {/* Toolbar */}

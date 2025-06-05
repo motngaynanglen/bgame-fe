@@ -2,11 +2,14 @@
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { formatDateTime, formatVND } from "@/src/lib/utils";
 import { PagingResType } from "@/src/schemaValidations/common.schema";
-import { Button, Empty, message, Tag } from "antd";
+import { Button, Empty, message, Modal, notification, Tag } from "antd";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
 import OrderCard from "@/src/components/Card/CardOrder";
+import transactionApiRequest from "@/src/apiRequests/transaction";
+import { notifyError } from "@/src/components/Notification/Notification";
+import { set } from "zod";
 
 type OrderStatus = "DELIVERING" | "CREATED" | "PAID" | "CANCELLED" | "SENT" | "PREPARED";
 
@@ -28,6 +31,10 @@ interface DataType {
   is_delivery: number;
   delivery_brand: string;
   delivery_code: string;
+  transaction: {
+    qrCode: string;
+    checkoutUrl: string;
+  }
 }
 
 export default function HistoryOrders({
@@ -69,8 +76,10 @@ export default function HistoryOrders({
       setOrders(result);
     });
   }, [searchParams]);
+
+ 
   return (
-    <div className="w-full flex justify-center ">
+    <div className="w-full flex justify-center " >
       <div className=" p-4 w-full  bg-white mt-2 rounded-lg shadow-md">
         <div className="gap-4 sm:flex sm:items-center sm:justify-between">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
@@ -190,6 +199,7 @@ export default function HistoryOrders({
           </tbody>
         </table>
       </div> */}
-    </div>
+    </div >
   );
 }
+

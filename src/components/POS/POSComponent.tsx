@@ -5,8 +5,26 @@ import { useAppContext } from "@/src/app/app-provider";
 import { usePOSStore } from "@/src/store/posStore";
 import { useMutation } from "@tanstack/react-query";
 import type { TableProps } from "antd";
-import { AutoComplete, Button, Empty, Input, Space, Spin, Table } from "antd";
-import React, { useEffect, useState } from "react";
+import {
+  AutoComplete,
+  Button,
+  Empty,
+  Image,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  notification,
+  QRCode,
+  Space,
+  Spin,
+  Table,
+} from "antd";
+import React, { use, useEffect, useState } from "react";
+import { notifyError } from "../Notification/Notification";
+import transactionApiRequest from "@/src/apiRequests/transaction";
+import { AxiosError } from "axios";
+import { EntityError } from "@/src/lib/httpAxios";
 
 interface Product {
   id: string;
@@ -22,7 +40,11 @@ interface Product {
 interface POSComponentProps {
   billIndex: number;
 }
-
+interface PaymentData {
+  id?: string;
+  checkoutUrl?: string;
+  qrCode?: string;
+}
 export default function POSComponent() {
   const { user } = useAppContext();
 
@@ -41,11 +63,37 @@ export default function POSComponent() {
   >([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [invoiceItems, setInvoiceItems] = useState<Product[]>([]);
+  const [paymentData, setPaymentData] = useState<PaymentData | undefined>(undefined);
+  const [errorsItems, setErrorsItems] = useState<string[]>([]);
+  const handlePaymentAction = async (id: string) => {
+    if (id === null || id === undefined || id === "") {
+      notifyError("Lỗi thanh toán", "Không có dữ liệu thanh toán.");
+      return;
+    }
+    try {
+      // Gọi API để lấy URL thanh toán
+      const res = await transactionApiRequest.performTransaction(
+        {
+          referenceID: id,
+          type: 1, // 1: Thanh toán đơn hàng
+        },
+        user?.token
+      );
 
-  // if (!bill) {
-  //   return <div>Không tìm thấy hóa đơn</div>;
-  // }
-
+      setPaymentData({ id: id, checkoutUrl: res.data.checkoutUrl, qrCode: res.data.qrCode });
+      // handleRedirectToPayment();
+      notification.success({
+        message: "Thanh toán thành công",
+        description: "Đã tạo đơn hàng và lấy thông tin thanh toán.",
+      });
+    } catch (error) {
+      notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
+      return;
+    }
+  }
+  useEffect(() => {
+    setPaymentData(undefined);
+  }, [options]);
   useEffect(() => {
     if (activeBillIndex === null) {
       createBill();
@@ -63,9 +111,8 @@ export default function POSComponent() {
       if (Array.isArray(products) && products.length > 0) {
         const opts = products.map((product: Product) => ({
           value: product.code,
-          label: `${product.code} - ${product.product_name} - ${
-            product.price?.toLocaleString?.() || ""
-          }đ`,
+          label: `${product.code} - ${product.product_name} - ${product.price?.toLocaleString?.() || ""
+            }đ`,
           product,
         }));
         setOptions(opts);
@@ -110,7 +157,26 @@ export default function POSComponent() {
       width: 50,
       render: (_value, _record, index) => index + 1,
     },
-    { title: "Tên hàng", dataIndex: "product_name" },
+    {
+      title: "Ảnh",
+      dataIndex: "image",
+      render: (url) => <Image src={url.split("||")[0]} alt="product" className="w-12 h-12 object-cover" />,
+      width: 80,
+    },
+    {
+      title: "Tên hàng",
+      dataIndex: "product_name",
+      render: (text, record) => (
+        <div className="flex items-between">
+          <span className="font-medium">{text}</span>
+          {/* Hiển thị mã lỗi nếu có */}
+          {/* {text} */}
+          {errorsItems.includes(record.id) && (
+            <span className="text-red-500 ml-2" title="Sản phẩm không hợp lệ">Mã lỗi</span>
+          )}
+        </div>
+      ),
+    },
     // {
     //   title: "SL",
     //   dataIndex: "quantity",
@@ -153,29 +219,35 @@ export default function POSComponent() {
       console.error("Không có hóa đơn nào được chọn");
       return;
     }
+    Modal.confirm({
+      title: "Xác nhận thanh toán",
+      content: `Bạn có chắc chắn muốn thanh toán hóa đơn này với tổng tiền ${totalAmount} ₫ không?`,
+      onOk: async () => {
+        try {
+          const currentBill = bills[activeBillIndex!];
+          const orders = currentBill.items.map((item) => ({ productId: item.id }));
+          if (orders.length === 0) {
+            notification.error({ message: "Không có sản phẩm nào trong hóa đơn" });
+            return;
+          }
+          const response = await orderApiRequest.createOrderByStaff({ orders }, user.token);
+          handlePaymentAction(response.data);
+          notification.success({ message: "Tạo đơn hàng thành công" });
+        } catch (error) {
+          if (error instanceof EntityError) {
+            // Xử lý lỗi 400
+            notification.error({ message: error.message || "Lỗi khi tạo đơn hàng" });
+            const list = error.data?.errors as string[] || [];
+            setErrorsItems(list);
+          }
+          // notification.error({ message: error.response?.data?.message || "Lỗi khi tạo đơn hàng" });
 
-    const currentBill = bills[activeBillIndex];
-    const productIds = currentBill.items.map((item) => item.id);
-    console.log("productIds", productIds);
-    const orders = currentBill.items.map((item) => ({
-      productId: item.id, // Lấy id từ mỗi sản phẩm trong giỏ hàng
-    }));
-    try {
-      const response = await orderApiRequest.createOrderByStaff(
-        {
-          orders,
-          // totalAmount: calculateActiveBillTotal(),
-        },
-        user.token
-      );
+        }
+      }
+    });
 
-      console.log("Thanh toán thành công:", response);
-    } catch (error) {
-      console.error("Lỗi khi thanh toán:", error);
-    }
   };
 
-  console.log("bills", activeBillIndex);
   return (
     <div>
       <div className="grid grid-cols-3 gap-4">
@@ -238,7 +310,17 @@ export default function POSComponent() {
               </div>
             </div>
           </div>
-
+          {paymentData?.qrCode && (
+            <div className="mb-4 ">
+              <h2 className="text-xl font-semibold mb-2">QR Code thanh toán</h2>
+              <div className="flex justify-center my-4">
+                <QRCode value={paymentData.qrCode} size={128} />
+              </div>
+              <Button className="" type="link" onClick={() => window.open(paymentData.checkoutUrl, '_blank')}>
+                Đường dẫn thanh toán
+              </Button>
+            </div>
+          )}
           <Button onClick={handlePayment} type="primary" block size="large">
             THANH TOÁN
           </Button>

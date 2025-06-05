@@ -15,6 +15,7 @@ export interface productModel {
     rent_quantity?: number
 }
 import { z } from "zod";
+import { PagingRes } from "./common.schema";
 
 export const productFullFormSchema = z.object({
     id: z.string().optional(), // Hoặc z.undefined() nếu bạn muốn bắt buộc không có giá trị
@@ -52,7 +53,7 @@ export const productResSchema = z.object({
     number_of_player_max: z.number().optional().nullable(),
     difficulty: z.number().optional().nullable(),
     description: z.string().optional().nullable(),
-    condition: z.enum(["SALES_PRODUCT", "RENTAL_PRODUCT"]),
+    product_type: z.enum(["SALES_PRODUCT", "RENTAL_PRODUCT"]),
     status: z.enum(["ACTIVE", "INACTIVE"]),
     created_at: z.string(),
     created_by: z.string(),
@@ -61,6 +62,12 @@ export const productResSchema = z.object({
 });
 
 export type ProductResType = z.infer<typeof productResSchema>;
+
+export const productResPagingSchema = z.object({
+    products: z.array(productResSchema),
+    paging: PagingRes.nullable().optional(),
+});
+export type ProductResPagingType = z.infer<typeof productResPagingSchema>;
 
 export const productTemplateSchema = z.object({
     id: z.string().optional().nullable(),
@@ -82,3 +89,12 @@ export const productTemplateSchema = z.object({
     description: z.string().min(10, "Mô tả phải có ít nhất 10 ký tự").max(10000, "Mô tả quá dài"),
 });
 export type productTemplateBodyType = z.infer<typeof productTemplateSchema>;
+
+export const addProductsSchema = z.object({
+  productTemplateId: z.string().min(1, "Thiếu mã sản phẩm"),
+  number: z
+    .number({ invalid_type_error: "Phải là số" })
+    .min(1, "Số lượng phải lớn hơn 0")
+    .max(1000, "Số lượng tối đa là 1000"),
+});
+export type AddProductsType = z.infer<typeof addProductsSchema>;
