@@ -99,8 +99,8 @@ export default function CheckOut() {
     }
   };
   const handleRedirectToPayment = () => {
-    if (paymentData && paymentData.url) {
-      window.open(paymentData.url, "_blank");
+    if (paymentData && paymentData.checkoutUrl) {
+      window.open(paymentData.checkoutUrl, "_blank");
     } else {
       notifyError("Lỗi thanh toán", "Không có URL thanh toán để chuyển hướng.");
     }
@@ -126,7 +126,7 @@ export default function CheckOut() {
       );
       if (res.statusCode == "200") {
         setOpenResponsive(true);
-        setPaymentData({ id: res.data ?? undefined, url: undefined });
+        setPaymentData({ id: res.data ?? undefined, checkoutUrl: undefined });
         // clearCart();
       }
       if (res.statusCode == "404") {
