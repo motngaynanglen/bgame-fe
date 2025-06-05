@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { notifyError } from "../Notification/Notification";
+import { orderApiRequest } from "@/src/apiRequests/orders";
+import { useAppContext } from "@/src/app/app-provider";
 
 type OrderStatus =
   | "DELIVERING"
@@ -41,6 +43,7 @@ interface OrderCardProps {
 }
 
 export default function OrderCard({ order, isItem = false }: OrderCardProps) {
+  const { user } = useAppContext();
   const formatDate = (date: string) =>
     new Date(date).toLocaleString("vi-VN", {
       dateStyle: "medium",
@@ -81,6 +84,63 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
         return "Chuẩn bị gửi hàng";
     }
   };
+  const handleReciveOrder = async (orderId: string) => {
+    if (orderId === "") {
+      notifyError("Lỗi nhận đơn", "Không có dữ liệu đơn hàng.");
+      return;
+    }
+    Modal.confirm({
+      title: "Xác nhận đã nhận hàng",
+      content: `Bạn có chắn muốn nhận đơn hàng này không? 
+      Một khi nhận đơn đồng nghĩa với việc bạn đã nhận được đơn hàng này.`,
+      onOk: async () => {
+        try {
+          // Gọi API để nhận đơn hàng
+          const res = await orderApiRequest.updateOrderToSent({
+            orderID: orderId,
+          }, user?.token);
+          if (res.data.success) {
+            notification.success({
+              message: "Đã xác thực nhận đơn thành công",
+              description: "Cảm ơn bạn đã mua sản phẩm.",
+            });
+            router.refresh();
+          } else {
+            notifyError("Lỗi nhận đơn", res.data.message || "Có lỗi xảy ra khi nhận đơn hàng.");
+          }
+        } catch (error) {
+          notifyError("Lỗi nhận đơn", "Có lỗi xảy ra khi xử lý yêu cầu nhận đơn.");
+        }
+      },
+    });
+  }
+  const handleCancelOrder = async (orderId: string) => {
+    if (orderId === "") {
+      notifyError("Lỗi hủy đơn", "Không có dữ liệu đơn hàng.");
+      return;
+    }
+    Modal.confirm({
+      title: "Xác nhận hủy đơn",
+      content: `Bạn có chắc chắn muốn hủy đơn hàng này không?`,
+      onOk: async () => {
+        try {
+          // Gọi API để hủy đơn hàng
+          const res = await orderApiRequest.cancelOrderByCustomer(orderId);
+          if (res.data.success) {
+            notification.success({
+              message: "Hủy đơn thành công",
+              description: "Đơn hàng đã được hủy thành công.",
+            });
+            router.refresh();
+          } else {
+            notifyError("Lỗi hủy đơn", res.data.message || "Có lỗi xảy ra khi hủy đơn hàng.");
+          }
+        } catch (error) {
+          notifyError("Lỗi hủy đơn", "Có lỗi xảy ra khi xử lý yêu cầu hủy đơn.");
+        }
+      },
+    });
+  }
   function setPaymentData(trans: { id: string; checkoutUrl: any; qrCode: any; }) {
     order.transaction = {
       qrCode: trans.qrCode,
@@ -184,9 +244,20 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
                     <button
                       type="button"
                       className="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
+                      onClick={() => handleCancelOrder(order.id)}
                     >
                       Hủy đơn
                     </button>
+                  </div>
+                )
+              ) : null}
+              {order.status === "DELIVERING" ? (
+                (
+                  <div className={!isItem ? "flex flex-col sm:flex-row gap-2 justify-between items-center" : "hidden"}>
+                    <Button onClick={() => handleReciveOrder(order.id)}>
+                      Xác thực đã nhận hàng
+                    </Button>
+                    
                   </div>
                 )
               ) : null}

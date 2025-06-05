@@ -58,7 +58,7 @@ export default function HistoryOrders({
 
     paging: {
       pageNum: searchParams?.page ?? 1,
-      pageSize: 10,
+      pageSize: 20,
     },
   };
   const fetchTableData = async () => {
