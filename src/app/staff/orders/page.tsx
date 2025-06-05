@@ -12,6 +12,7 @@ import {
   Col,
   DatePicker,
   message,
+  notification,
   Row,
   Select,
   Space,
@@ -23,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
 import { HttpError } from "@/src/lib/httpAxios";
+import { notifyError } from "@/src/components/Notification/Notification";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -39,6 +41,7 @@ interface DataType {
   total_item: number;
   total_price: string;
   status: string;
+  is_delivery: boolean;
   created_at: string;
 }
 
@@ -229,6 +232,31 @@ export default function StaffManageOrder({
       message.error("Kết toán hành động thất bại");
     }
   };
+  const handleReciveOrder = async (orderId: string) => {
+    try {
+      // Gọi API để nhận đơn hàng
+      const res = await orderApiRequest.updateOrderToSent({
+        orderID: orderId,
+      }, user?.token);
+
+      notification.success({
+        message: res.message || "Đã nhận đơn sản phẩm",
+        description: "Cảm ơn bạn đã mua sản phẩm.",
+      });
+      router.refresh();
+
+    } catch (error) {
+      notifyError("Lỗi nhận đơn", "Có lỗi xảy ra khi xử lý yêu cầu nhận đơn.");
+    }
+  }
+
+  const viewOrderDetails = (record: DataType) => {
+    router.push(`/staff/orders/${record.id}`);
+  };
+  const handleUpdateDeliveryInfo = (record: DataType) => {
+    router.push(`/staff/orders/${record.id}/update-delivery-info`);
+  };
+
   const columns: TableProps<DataType>["columns"] = [
     {
       title: "Mã sản phẩm",
@@ -277,6 +305,17 @@ export default function StaffManageOrder({
         <>
           <Row gutter={[12, 12]}>
             <Col span={12} className="flex justify-center">
+              <Space className="flex justify-between">
+                <Button
+                  color="blue"
+                  variant="filled"
+                  onClick={() => viewOrderDetails(record)}
+                >
+                  Xem chi tiết
+                </Button>
+              </Space>
+            </Col>
+            <Col span={12} className="flex justify-center">
               {(() => {
                 switch (record.status) {
                   case "CREATED":
@@ -288,6 +327,44 @@ export default function StaffManageOrder({
                           onClick={() => onClickEnd(record.id)}
                         >
                           Nhận đơn
+                        </Button>
+                      </Space>
+                    );
+                  case "PAID":
+                    return (
+                      <>
+                        {(record.is_delivery)
+                          ? (<Space className="flex justify-between">
+                            <Button
+                              color="cyan"
+                              variant="filled"
+                              onClick={() => viewOrderDetails(record)}
+                            >
+                              Chuẩn bị sản phẩm
+                            </Button>
+                          </Space>)
+                          : (<Space className="flex justify-between">
+                            <Button
+                              color="orange"
+                              variant="filled"
+                              onClick={() => handleReciveOrder(record.id)}
+                            >
+                              Kết toán
+                            </Button>
+                          </Space>)
+                        }
+
+                      </>
+                    );
+                  case "PREPARED":
+                    return (
+                      <Space className="flex justify-between">
+                        <Button
+                          color="cyan"
+                          variant="filled"
+                          onClick={() => handleUpdateDeliveryInfo(record)}
+                        >
+                          Bắt đầu giao hàng
                         </Button>
                       </Space>
                     );
@@ -335,12 +412,7 @@ export default function StaffManageOrder({
         columns={columns}
         dataSource={useData ?? []}
         pagination={false}
-        onRow={(record) => ({
-          onClick: () => {
-            router.push(`/staff/orders/${record.id}`);
-          },
-          style: { cursor: "pointer" },
-        })}
+       
       />
       <br />
       <AntdCustomPagination totalPages={paging?.pageCount ?? 1} />

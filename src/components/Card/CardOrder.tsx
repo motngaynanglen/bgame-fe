@@ -99,15 +99,13 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
           const res = await orderApiRequest.updateOrderToSent({
             orderID: orderId,
           }, user?.token);
-          if (res.data.success) {
-            notification.success({
-              message: "Đã xác thực nhận đơn thành công",
-              description: "Cảm ơn bạn đã mua sản phẩm.",
-            });
-            router.refresh();
-          } else {
-            notifyError("Lỗi nhận đơn", res.data.message || "Có lỗi xảy ra khi nhận đơn hàng.");
-          }
+
+          notification.success({
+            message: res.message || "Đã nhận đơn sản phẩm",
+            description: "Cảm ơn bạn đã mua sản phẩm.",
+          });
+          router.refresh();
+
         } catch (error) {
           notifyError("Lỗi nhận đơn", "Có lỗi xảy ra khi xử lý yêu cầu nhận đơn.");
         }
@@ -125,16 +123,19 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
       onOk: async () => {
         try {
           // Gọi API để hủy đơn hàng
-          const res = await orderApiRequest.cancelOrderByCustomer(orderId);
-          if (res.data.success) {
-            notification.success({
-              message: "Hủy đơn thành công",
-              description: "Đơn hàng đã được hủy thành công.",
-            });
-            router.refresh();
-          } else {
-            notifyError("Lỗi hủy đơn", res.data.message || "Có lỗi xảy ra khi hủy đơn hàng.");
-          }
+          const res = await orderApiRequest.cancelOrderByCustomer(
+            {
+              orderID: orderId,
+            },
+            user?.token
+          );
+
+          notification.success({
+            message: res.message || "Đã hủy đơn hàng",
+            description: "Đơn hàng đã được hủy thành công.",
+          });
+          router.refresh();
+
         } catch (error) {
           notifyError("Lỗi hủy đơn", "Có lỗi xảy ra khi xử lý yêu cầu hủy đơn.");
         }
@@ -257,7 +258,7 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
                     <Button onClick={() => handleReciveOrder(order.id)}>
                       Xác thực đã nhận hàng
                     </Button>
-                    
+
                   </div>
                 )
               ) : null}
