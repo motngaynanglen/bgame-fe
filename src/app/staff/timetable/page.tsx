@@ -96,8 +96,8 @@ const options: CheckboxGroupProps<string>["options"] = [
   { label: <span key="hours">Thuê theo giờ</span>, value: "hours" },
 ];
 const defaultToDay = {
-  from: dayjs().hour(1).minute(0).second(0).toISOString(),
-  to: dayjs().hour(23).minute(0).second(0).toISOString(),
+  from: dayjs().hour(1).minute(0).second(0).local().toISOString(),
+  to: dayjs().hour(23).minute(0).second(0).local().toISOString(),
 };
 export default function StaffManageTimeTable({
   searchParams,
@@ -190,6 +190,7 @@ export default function StaffManageTimeTable({
         .set("hour", 1)
         .set("minute", 0)
         .set("second", 0)
+        .local()
         .toISOString();
       const to = date
         .set("hour", 23)
@@ -209,11 +210,13 @@ export default function StaffManageTimeTable({
         .set("hour", 1)
         .set("minute", 0)
         .set("second", 0)
+        .local()
         .toISOString();
       const to = dates[1]
         .set("hour", 23)
         .set("minute", 0)
         .set("second", 0)
+        .local()
         .toISOString();
       setDateRange([from, to]);
     } else {

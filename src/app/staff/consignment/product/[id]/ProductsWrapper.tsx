@@ -22,8 +22,8 @@ interface ProductListCardProps {
     totalPages: number;
     currentPage: number;
 }
-const getConditionTag = (condition: string) => {
-    switch (condition) {
+const getConditionTag = (product_type: string) => {
+    switch (product_type) {
         case 'SALES_PRODUCT':
             return { color: 'blue', label: 'Cho Bán', icon: <ShoppingOutlined /> };
         case 'RENT_PRODUCT':
@@ -50,7 +50,7 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
     }
 
     const ProductCardView = ({ product }: { product: ProductResType }) => {
-        const productCondition = getConditionTag(product.condition);
+        const productCondition = getConditionTag(product.product_type);
         
         return (
             <Card
@@ -69,7 +69,7 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
 
 
                     <div className='flex justify-between items-center'>
-                        {/* Condition Tag */}
+                        {/* product_type Tag */}
                         <Tag
                             icon={productCondition.icon}
                             color={productCondition.color}
@@ -93,7 +93,7 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
                         size="small"
                         style={{ marginTop: 'auto', justifyContent: 'space-between', width: '100%' }}
                     >
-                        {product.condition === 'SALES_PRODUCT' && (
+                        {product.product_type === 'SALES_PRODUCT' && (
                             <Button
                                 size="small"
                                 icon={<SwapOutlined />}
@@ -137,14 +137,14 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
         },
         {
             title: 'Loại',
-            dataIndex: 'condition',
-            key: 'condition',
-            render: (condition: string) => (
+            dataIndex: 'product_type',
+            key: 'product_type',
+            render: (product_type: string) => (
                 <Tag
-                    icon={getConditionTag(condition).icon}
-                    color={getConditionTag(condition).color}
+                    icon={getConditionTag(product_type).icon}
+                    color={getConditionTag(product_type).color}
                 >
-                    {getConditionTag(condition).label}
+                    {getConditionTag(product_type).label}
                 </Tag>
             ),
         },
@@ -153,7 +153,7 @@ const ProductListCard: React.FC<ProductListCardProps> = ({ products, totalPages,
             key: 'actions',
             render: (_: any, record: ProductResType) => (
                 <Space>
-                    {record.condition === 'SALES_PRODUCT' && (
+                    {record.product_type === 'SALES_PRODUCT' && (
                         <Button
                             size="small"
                             icon={<SwapOutlined />}

@@ -330,7 +330,7 @@ export default function TemplateForm() {
               <span>Savings</span>
               <span>-$299.00</span>
             </div> */}
-          <div className="flex justify-between">
+          {/* <div className="flex justify-between">
             <span className="basis-2/3">Mã giảm giá</span>
             <input
               type="text"
@@ -343,7 +343,7 @@ export default function TemplateForm() {
           <div className="flex justify-between">
             <span>Phí giao hàng</span>
             <span>0₫</span>
-          </div>
+          </div> */}
           {/* <div className="flex justify-between">
               <span>Tax</span>
               <span>$799</span>

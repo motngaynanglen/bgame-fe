@@ -13,6 +13,7 @@ import {
   DatePicker,
   message,
   Row,
+  Select,
   Space,
   Table,
   Tag,
@@ -21,6 +22,7 @@ import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
+import { HttpError } from "@/src/lib/httpAxios";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -46,7 +48,15 @@ interface PagingType {
   pageCount: number;
 }
 const statusName = ["THEO GIỜ", "THEO LƯỢT"];
-
+const orderStatusOptions = [
+  { value: "0", label: "Tất cả" }, // Option to show all statuses
+  { value: "1", label: "Chưa thanh toán" },
+  { value: "2", label: "Đã thanh toán" },
+  { value: "3", label: "Đang chuẩn bị hàng" },
+  { value: "4", label: "Đang giao" },
+  { value: "5", label: "Đã gửi" },
+  { value: "6", label: "Đã hủy" },
+];
 const role: string = "manager";
 const baseUrl: string = "/" + role + "/" + "boardgames";
 const createUrl: string = baseUrl + "/" + "create";
@@ -90,9 +100,12 @@ export default function StaffManageOrder({
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
   const [tableLoading, setTableLoading] = useState<boolean>(true);
   const [hasMounted, setHasMounted] = useState(false);
-
+  const [statusFilter, setStatusFilter] = useState<string>("0");
   const { user } = useAppContext();
   const apiBody = {
+    filter: {
+      status: statusFilter === "0" ? null : statusFilter,
+    },
     paging: {
       pageNum: searchParams?.page ?? 1,
       pageSize: 10,
@@ -136,14 +149,19 @@ export default function StaffManageOrder({
 
       setPaging(response.paging);
       return data;
-    } catch (error: any) {
+    } catch (error) {
       // Kiểm tra nếu lỗi là 401 (token hết hạn)
-      if (error.response?.status === 401) {
-        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-        router.push("/login"); // Chuyển hướng về login
-      } else {
-        message.error("Đã xảy ra lỗi khi tải dữ liệu.");
-        console.error(error);
+      if (error instanceof HttpError) {
+        if (error.status === 404) {
+          message.error("Không tìm thấy dữ liệu đơn hàng.");
+          setData([]);
+          setTableLoading(false);
+          return [];
+        }
+        if (error.status === 401) {
+          message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          router.push("/login"); // Chuyển hướng về login
+        }
       }
       return;
     } finally {
@@ -154,7 +172,7 @@ export default function StaffManageOrder({
     fetchTableData().then((result) => {
       setData(result);
     });
-  }, [dateRange, searchParams]);
+  }, [dateRange, searchParams, statusFilter, hasMounted]);
   const onClickEnd = async (id: string) => {
     const body = {
       bookListId: id,
@@ -299,6 +317,15 @@ export default function StaffManageOrder({
           <Suspense>
             <SearchBar placeholder={"Tìm kiếm theo tên khách hàng..."} />
           </Suspense>
+        </Col>
+        <Col span={6} className="flex items-center">
+          <Select
+            defaultValue="0"
+            style={{ width: "100%" }}
+            onChange={(value) => setStatusFilter(value)}
+            options={orderStatusOptions}
+            placeholder="Lọc theo trạng thái"
+          />
         </Col>
       </Row>
 

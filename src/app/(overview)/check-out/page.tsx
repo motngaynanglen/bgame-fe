@@ -36,7 +36,8 @@ const data = [
 
 interface PaymentData {
   id?: string;
-  url?: string;
+  checkoutUrl?: string;
+  qrCode?: string;
 }
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
@@ -80,7 +81,8 @@ export default function CheckOut() {
         user?.token
       );
       if (res.statusCode === "200") {
-        setPaymentData({ id: id, url: res.data });
+        setPaymentData({ id: id, checkoutUrl: res.data.checkoutUrl, qrCode: res.data.qrCode });
+        clearCart();
         handleRedirectToPayment();
       } else {
         notifyError("Lỗi thanh toán", res.message || "Vui lòng thử lại sau.");
@@ -91,8 +93,8 @@ export default function CheckOut() {
     }
   }
   const handleRedirectToPayment = () => {
-    if (paymentData && paymentData.url) {
-      window.open(paymentData.url, '_blank');
+    if (paymentData && paymentData.checkoutUrl) {
+      window.open(paymentData.checkoutUrl, '_blank');
     } else {
       notifyError("Lỗi thanh toán", "Không có URL thanh toán để chuyển hướng.");
     }
@@ -116,7 +118,7 @@ export default function CheckOut() {
       const res = await orderApiRequest.createOrderByCustomer(body, user?.token);
       if (res.statusCode == "200") {
         setOpenResponsive(true);
-        setPaymentData({ id: res.data ?? undefined, url: undefined })
+        setPaymentData({ id: res.data ?? undefined, checkoutUrl: undefined, qrCode: undefined })
         // clearCart();
       } else
         notifyError(
@@ -146,9 +148,6 @@ export default function CheckOut() {
   useEffect(() => {
     setClientOnlyTotal(formatVND(calculateTotal()));
   }, [cart]);
-  useEffect(() => {
-
-  }, [paymentData]);
 
   return (
     <div className="container mx-auto p-4 bg-sky-50 min-h-screen ">
