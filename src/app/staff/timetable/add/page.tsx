@@ -186,67 +186,7 @@ export default function BoardGameRental() {
 
   return (
     <div>
-
-      <div className="flex ">
-        <main className="pt-4">
-          <div className=" mb-4">
-            <div className="flex ">
-              <Space wrap>
-                <Button
-                  type="primary"
-                  icon={<FilterOutlined />}
-                  onClick={showDrawer}
-                >
-                  Bộ Lọc
-                </Button>
-
-              </Space>
-            </div>
-          </div>
-          <div className="flex flex-col lg:flex-row">
-
-            {/* Drawer cho mobile */}
-            <Drawer
-              title="Bộ Lọc"
-              placement="left"
-              onClose={onClose}
-              open={open}
-            >
-              <CategoryFilter />
-            </Drawer>
-            {/* Product Cards */}
-            {isLoadingStores && (
-              <div className="col-span-4 flex justify-center items-center h-64">
-
-                <Empty description="Đang tải sản phẩm..." />
-              </div>
-            )}
-            {/* .filter((boardgame) => (boardgame.rent_quantity ?? 0) > 0) */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {(boardgames
-                .map((boardgame, index) => (
-                  <CardRentProductTemplate
-                    key={index}
-                    productTemplate={boardgame}
-                  />
-                ))
-              )}
-
-
-            </div>
-            {boardgames.length === 0 && !isLoadingStores && (
-              <div className="col-span-4 flex justify-center items-center h-64">
-                <Empty description="Không có sản phẩm nào" />
-              </div>
-            )}
-          </div>
-          {/* Pagination */}
-          <div className="m-5">
-            <AntdCustomPagination totalPages={2} />
-          </div>
-
-        </main>
-      </div>
+      
     </div>
   );
 }

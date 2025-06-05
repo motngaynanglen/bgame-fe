@@ -49,18 +49,18 @@ const items: MenuItem[] = [
   },
 
   {
-    label: "Tin Tức",
+    label: <Link href={"/news"}>Tin Tức</Link>,
     key: "news",
-    children: [
-      {
-        label: "Giải đấu",
-        key: "tournament",
-      },
-      {
-        label: "Board Game",
-        key: "boardGameNews",
-      },
-    ],
+    // children: [
+    //   {
+    //     label: "Giải đấu",
+    //     key: "tournament",
+    //   },
+    //   {
+    //     label: "Board Game",
+    //     key: "boardGameNews",
+    //   },
+    // ],
   },
   {
     label: <Link href={"/consignment"}>Ký gửi</Link>,

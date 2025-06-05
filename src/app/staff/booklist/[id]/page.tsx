@@ -2,8 +2,9 @@
 import bookListApiRequest from "@/src/apiRequests/bookList";
 import { useAppContext } from "@/src/app/app-provider";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { message } from "antd";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 interface BooklistDetail {
   id: string;
@@ -26,6 +27,9 @@ interface BooklistDetail {
 export default function Page() {
   const { id } = useParams();
   const { user } = useAppContext();
+  const [codesByItem, setCodesByItem] = React.useState<Record<string, string>>(
+    {}
+  );
 
   const { data, isLoading } = useQuery<BooklistDetail>({
     queryKey: ["bookListDetail", id],
@@ -58,13 +62,36 @@ export default function Page() {
       const res = await bookListApiRequest.updateBookItemProduct(
         {
           bookItemId,
-          code,
+          productCode: code,
         },
         user?.token
-      );  
+      );
       return res;
     },
   });
+
+  const handleCodeChange = (bookItemId: string, value: string) => {
+    setCodesByItem((prev) => ({
+      ...prev,
+      [bookItemId]: value,
+    }));
+  };
+
+  const handleUpdateItem = (bookItemId: string) => {
+    const code = codesByItem[bookItemId] || "";
+    if (!code) {
+      message.error("Bạn phải nhập mã code trước khi cập nhật.");
+      return;
+    }
+    updateItemMutation.mutate({ bookItemId, code });
+  };
+  console.log("data", data);
+  console.log("data order", data?.book_items);
+  // console.log()
+
+  if (isLoading || !data) {
+    return <div className="text-white">Loading...</div>;
+  }
 
   console.log("data", data);
 
@@ -144,7 +171,6 @@ export default function Page() {
               </p>
               {/* </div> */}
             </div>
-            {/* Chỗ này có thể thêm thông tin bổ sung nếu cần */}
           </div>
 
           {/* Danh sách sản phẩm */}
@@ -175,14 +201,14 @@ export default function Page() {
                       </h3>
                       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
                         <div className="space-y-1">
-                          <p>
+                          {/* <p>
                             <span className="font-medium text-lg">
                               Giá gốc:
                             </span>{" "}
                             <span className="text-gray-800 text-lg">
                               {formatCurrency(item.template_price)}
                             </span>
-                          </p>
+                          </p> */}
                           <p>
                             <span className="font-medium text-lg">
                               Giá thuê:
@@ -233,20 +259,14 @@ export default function Page() {
                           type="text"
                           className="p-2 w-auto"
                           placeholder="Nhập mã code"
-                          // value={codesByItem[item.order_item_id] || ""}
-                          // onChange={(e) =>
-                          //   handleCodeChange(item.order_item_id, e.target.value)
-                          // }
+                          value={codesByItem[item.book_item_id] || ""}
+                          onChange={(e) =>
+                            handleCodeChange(item.book_item_id, e.target.value)
+                          }
                           // onBlur={() => handleUpdateItem(item.order_item_id)}
                         />
                         <button
-                          onClick={() => {
-                            // Xử lý sự kiện khi nhấn nút "Xem chi tiết"
-                            console.log(
-                              "Xem chi tiết sản phẩm",
-                              item.book_item_id
-                            );
-                          }}
+                          onClick={() => handleUpdateItem(item.book_item_id)}
                           className="px-2 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                         >
                           Cập nhật

@@ -42,7 +42,7 @@ export default function CartRental({storeId}: { storeId: string | null }) {
 
   const handleSubmit = async () => {
     if (!user) {
-      message.error("Bạn cần đăng nhập để đặt trước.");
+      notifyError("Bạn cần đăng nhập để đặt trước.");
       return;
     }
     const postData = {
@@ -166,7 +166,7 @@ export default function CartRental({storeId}: { storeId: string | null }) {
         buttonStyle="solid"
         onChange={(e) => setSelectedOption(e.target.value)}
       />
-      <p className="mt-4">Chọn thời gian thuê: </p>
+      <p className="mt-4 text-black-2">Chọn thời gian thuê: </p>
       {selectedOption === "days" && (
         <div>
           <CustomDatePicker
