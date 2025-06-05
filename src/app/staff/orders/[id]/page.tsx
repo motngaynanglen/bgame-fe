@@ -1,9 +1,10 @@
 "use client";
 import { orderApiRequest, orderItemApiRequest } from "@/src/apiRequests/orders";
 import { useAppContext } from "@/src/app/app-provider";
+import { notifyError } from "@/src/components/Notification/Notification";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Divider, message } from "antd";
-import { useParams } from "next/navigation";
+import { Button, Divider, message, Modal, notification } from "antd";
+import { useParams, useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 
 interface OrderItem {
@@ -31,6 +32,7 @@ interface OrderDetail {
 }
 
 export default function OrderDetail() {
+  const router = useRouter();
   const { id } = useParams();
   const { user } = useAppContext();
 
@@ -59,7 +61,7 @@ export default function OrderDetail() {
         {
           orderID: data!.order_id,
           orderItemId,
-          productCode: productCode, 
+          productCode: productCode,
         },
         user?.token
       );
@@ -78,7 +80,30 @@ export default function OrderDetail() {
       [orderItemId]: value,
     }));
   };
+  const handleUpdateToPrepared = () => {
+    Modal.confirm({
+      title: "Xác nhận đã nhận hàng",
+      content: `Bạn có chắn muốn nhận đơn hàng này không? 
+      Một khi nhận đơn đồng nghĩa với việc bạn đã nhận được đơn hàng này.`,
+      onOk: async () => {
+        try {
+          // Gọi API để nhận đơn hàng
+          const res = await orderApiRequest.updateOrderToPrepared({
+            orderID: id,
+          }, user?.token);
 
+          notification.success({
+            message: res.message || "Đã nhận đơn sản phẩm",
+            description: "Cảm ơn bạn đã mua sản phẩm.",
+          });
+          router.refresh();
+
+        } catch (error) {
+          notifyError("Lỗi nhận đơn", "Có lỗi xảy ra khi xử lý yêu cầu nhận đơn.");
+        }
+      }
+    });
+  };
   const handleUpdateItem = (orderItemId: string) => {
     const productCode = codesByItem[orderItemId] || "";
     if (!productCode) {
@@ -96,9 +121,9 @@ export default function OrderDetail() {
   }
   console.log("orderItemData", data);
 
-  
 
-  
+
+
   return (
     <div className="min-h-screen text-white p-4 sm:p-6">
       <div className="w-full mx-auto bg-gray-800 rounded-lg p-6 space-y-6">
@@ -171,8 +196,8 @@ export default function OrderDetail() {
                   <th className="border border-gray-100 p-2">SL</th>
                   <th className="border border-gray-100 p-2">Giá</th>
                   <th className="border border-gray-100 p-2">Thành tiền</th>
-                  <th className="border border-gray-100 p-2">Code </th>
-                  <th className="border border-gray-100 p-2"></th>
+                  <th className="border border-gray-100 p-2" hidden={data.order_status !== "CREATED" && data.order_status !== "PAID"}>Code </th>
+                  <th className="border border-gray-100 p-2" hidden={data.order_status !== "CREATED" && data.order_status !== "PAID"}></th>
                 </tr>
               </thead>
               <tbody>
@@ -191,7 +216,7 @@ export default function OrderDetail() {
                     <td className="border border-gray-100 p-2">
                       {(item.current_price * 1).toLocaleString()} VNĐ
                     </td>
-                    <td className="border border-gray-100 p-2">
+                    <td className="border border-gray-100 p-2" hidden={data.order_status !== "CREATED" && data.order_status !== "PAID"}>
                       <input
                         type="text"
                         className="p-2 w-full bg-gray-800"
@@ -200,14 +225,14 @@ export default function OrderDetail() {
                         onChange={(e) =>
                           handleCodeChange(item.order_item_id, e.target.value)
                         }
-                        // onBlur={() => handleUpdateItem(item.order_item_id)}
+                      // onBlur={() => handleUpdateItem(item.order_item_id)}
                       />
                     </td>
-                    <td className="border border-gray-100 p-2">
+                    <td className="border border-gray-100 p-2" hidden={data.order_status !== "CREATED" && data.order_status !== "PAID"}>
                       <button
                         className="w-full hover:text-green-500"
                         onClick={() => handleUpdateItem(item.order_item_id)}
-                        // disabled={updateItemMutation.isLoading}
+                      // disabled={updateItemMutation.isLoading}
                       >
                         Cập nhật
                       </button>
@@ -285,9 +310,10 @@ export default function OrderDetail() {
           )}
 
           {/* Nút xuất hóa đơn */}
-          {/* <div className="flex justify-end">
-            <Button type="primary">Xuất hóa đơn</Button>
-          </div> */}
+          <div className="flex justify-end">
+            {(data.order_status === "PAID") && <Button type="primary" onClick={() => handleUpdateToPrepared()}>Xác thực đơn hàng</Button>}
+            {(data.order_status === "PREPARED") && <Button type="primary" href={`/staff/orders/${data.order_id}/update-delivery-info`}>Cập nhật thông tin giao hàng</Button>}
+          </div>
         </div>
       </div>
     </div>

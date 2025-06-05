@@ -2,15 +2,15 @@
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { formatDateTime, formatVND } from "@/src/lib/utils";
 import { PagingResType } from "@/src/schemaValidations/common.schema";
-import { Button, Empty, message, Modal, notification, Tag } from "antd";
+import { Button, Card, Collapse, Empty, message, Modal, notification, Tag } from "antd";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppContext } from "../../app-provider";
 import OrderCard from "@/src/components/Card/CardOrder";
 import transactionApiRequest from "@/src/apiRequests/transaction";
 import { notifyError } from "@/src/components/Notification/Notification";
 import { set } from "zod";
-
+const { Panel } = Collapse;
 type OrderStatus = "DELIVERING" | "CREATED" | "PAID" | "CANCELLED" | "SENT" | "PREPARED";
 
 interface DataType {
@@ -31,12 +31,16 @@ interface DataType {
   is_delivery: number;
   delivery_brand: string;
   delivery_code: string;
+  order_type: "SINGLE" | "MULTIPLE" | "MULTIPLE_ITEM";
+  group_id: string | null;
   transaction: {
     qrCode: string;
     checkoutUrl: string;
   }
 }
-
+interface GroupedOrderType extends DataType {
+  subOrders?: DataType[];
+}
 export default function HistoryOrders({
   searchParams,
 }: {
@@ -48,9 +52,13 @@ export default function HistoryOrders({
   const { user } = useAppContext();
   const router = useRouter();
   const apiBody = {
+    filter: {
+      status: null,
+    },
+
     paging: {
       pageNum: searchParams?.page ?? 1,
-      pageSize: 10,
+      pageSize: 20,
     },
   };
   const fetchTableData = async () => {
@@ -77,7 +85,38 @@ export default function HistoryOrders({
     });
   }, [searchParams]);
 
- 
+  const groupedOrders = useMemo(() => {
+    if (!orders) return [];
+
+    const orderMap = new Map<string, GroupedOrderType>();
+    const multipleItems: DataType[] = [];
+
+    // First pass: Populate map with SINGLE and MULTIPLE orders, collect MULTIPLE_ITEM
+    orders.forEach(order => {
+      if (order.order_type === "MULTIPLE_ITEM") {
+        multipleItems.push(order);
+      } else {
+        orderMap.set(order.id, { ...order }); // Clone to add subOrders later
+      }
+    });
+
+    // Second pass: Attach MULTIPLE_ITEM orders to their parent MULTIPLE orders
+    multipleItems.forEach(item => {
+      if (item.group_id) {
+        const parentOrder = orderMap.get(item.group_id);
+        if (parentOrder && parentOrder.order_type === "MULTIPLE") {
+          if (!parentOrder.subOrders) {
+            parentOrder.subOrders = [];
+          }
+          parentOrder.subOrders.push(item);
+        }
+      }
+    });
+
+    // Return only the top-level orders (SINGLE and MULTIPLE parents)
+    // Filter out any MULTIPLE_ITEM orders that might not have a parent (though they should)
+    return Array.from(orderMap.values()).filter(order => order.order_type !== "MULTIPLE_ITEM");
+  }, [orders]);
   return (
     <div className="w-full flex justify-center " >
       <div className=" p-4 w-full  bg-white mt-2 rounded-lg shadow-md">
@@ -139,9 +178,30 @@ export default function HistoryOrders({
           </Empty>
         ) : (
           <div>
-            {orders?.map((order) => (
-              <OrderCard key={order.code} order={order} />
-            ))}
+            {groupedOrders?.map((order) => {
+              const isMultipleOrder = order.order_type === "MULTIPLE";
+              if (!isMultipleOrder && !order.subOrders) {
+                return (
+                  <div key={order.id} className="mb-4 border rounded-lg p-4 bg-gray-50">
+                    <OrderCard key={order.id} order={order} isItem={true} />
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={order.id} className="mb-4 border rounded-lg p-4 bg-gray-50">
+                    <OrderCard order={order} isItem={false} />
+                    <Collapse className="mt-2" bordered={false}>
+                      <Panel key={`panel-${order.id}`} header={"Chi tiết đơn hàng"}>
+                        {order.subOrders?.map((subOrder) => (
+                          <OrderCard key={subOrder.id} order={subOrder} isItem={true} />
+                        ))}
+                      </Panel>
+                    </Collapse>
+                  </div>
+                );
+              }
+
+            })}
           </div>
 
           // <table className="w-full border-collapse border border-gray-300">
