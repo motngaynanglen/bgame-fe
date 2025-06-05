@@ -18,6 +18,7 @@ import {
   Dropdown,
   message,
   Modal,
+  notification,
   Pagination,
   Radio,
   Row,
@@ -35,6 +36,8 @@ import { formatDateTime, formatTimeStringRemoveSeconds } from "@/src/lib/utils";
 import dayjs from "@/src/lib/dayjs ";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import { useRouter } from "next/navigation";
+import { notifyError } from "@/src/components/Notification/Notification";
+import { HttpError } from "@/src/lib/httpAxios";
 const { RangePicker } = DatePicker;
 
 interface DataType {
@@ -258,15 +261,31 @@ export default function StaffManageTimeTable({
       message.error("Bạn cần đăng nhập để đặt trước.");
       return;
     }
-    try {
-      const response = await bookListApiRequest.endBookList(body, user.token);
-      fetchTableData().then((result) => {
-        setData(result);
-      });
-      message.success("Đã kết toán hành động thành công");
-    } catch (error) {
-      message.error("Kết toán hành động thất bại");
-    }
+
+    Modal.confirm({
+      title: "Xác nhận bắt đầu",
+      content: `Một khi nhận đồng nghĩa với không thể hoàn tác.`,
+      onOk: async () => {
+        try {
+          // Gọi API để nhận đơn hàng
+          const response = await bookListApiRequest.endBookList(body, user.token);
+          notification.success({
+            message: response.message || "Đã nhận đơn sản phẩm",
+            description: "",
+          });
+          fetchTableData().then((result) => {
+            setData(result);
+          });
+
+        } catch (error) {
+          if (error instanceof HttpError) {
+            notifyError(error.message, "Có lỗi xảy ra khi xử lý yêu cầu.");
+
+          }
+        }
+      }
+    });
+
   };
   const onClickExtend = async (id: string) => {
     const body = {
@@ -296,15 +315,29 @@ export default function StaffManageTimeTable({
       message.error("Bạn cần đăng nhập để đặt trước.");
       return;
     }
-    try {
-      const response = await bookListApiRequest.startBookList(body, user.token);
-      fetchTableData().then((result) => {
-        setData(result);
-      });
-      message.success("Đã kết toán hành động thành công");
-    } catch (error) {
-      message.error("Kết toán hành động thất bại");
-    }
+    Modal.confirm({
+      title: "Xác nhận bắt đầu",
+      content: `Một khi nhận đồng nghĩa với không thể hoàn tác.`,
+      onOk: async () => {
+        try {
+          // Gọi API để nhận đơn hàng
+          const response = await bookListApiRequest.startBookList(body, user.token);
+          notification.success({
+            message: response.message,
+            description: "",
+          });
+          fetchTableData().then((result) => {
+            setData(result);
+          });
+
+        } catch (error) {
+          if (error instanceof HttpError) {
+            notifyError(error.message, "Có lỗi xảy ra khi xử lý yêu cầu.");
+
+          }
+        }
+      }
+    });
   };
   const columns: TableProps<DataType>["columns"] = [
     {
