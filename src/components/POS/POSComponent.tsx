@@ -104,7 +104,7 @@ export default function POSComponent() {
 
   const searchProducts = useMutation({
     mutationFn: async (code: string) => {
-      const res = await productApiRequest.getByCode({ code }); // Trả về 1 sản phẩm
+      const res = await productApiRequest.getByCode({ code }); 
       return res.data;
     },
     onSuccess: (products) => {

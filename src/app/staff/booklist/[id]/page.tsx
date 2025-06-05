@@ -1,10 +1,15 @@
 "use client";
 import bookListApiRequest from "@/src/apiRequests/bookList";
 import { useAppContext } from "@/src/app/app-provider";
+import { notifySuccess } from "@/src/components/Notification/Notification";
+import TipTapEditor from "@/src/components/TipTapEditor/TipTapEditor";
+import { formatVND } from "@/src/lib/utils";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { message } from "antd";
-import { useParams } from "next/navigation";
+import { message, notification, Typography } from "antd";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
+const { Title, Text, Paragraph } = Typography;
 
 interface BooklistDetail {
   id: string;
@@ -21,6 +26,7 @@ interface BooklistDetail {
     template_description?: string;
     book_item_status: "ACTIVE" | "INACTIVE";
     product_id: string;
+    product_code: string;
   }>;
 }
 
@@ -30,6 +36,8 @@ export default function Page() {
   const [codesByItem, setCodesByItem] = React.useState<Record<string, string>>(
     {}
   );
+  const [api, contextHolder] = notification.useNotification();
+  const router = useRouter();
 
   const { data, isLoading } = useQuery<BooklistDetail>({
     queryKey: ["bookListDetail", id],
@@ -68,6 +76,17 @@ export default function Page() {
       );
       return res;
     },
+
+    onSuccess: () => {
+      notifySuccess("Cập nhật thành công");
+
+    },
+    onError: (error: any) => {
+      notification.error({
+        message: "Có lỗi xảy ra",
+        description: error?.message || "Vui lòng thử lại sau.",
+      });
+    },
   });
 
   const handleCodeChange = (bookItemId: string, value: string) => {
@@ -92,6 +111,16 @@ export default function Page() {
   if (isLoading || !data) {
     return <div className="text-white">Loading...</div>;
   }
+  const formatField = (value: any) => {
+    if (value === null || value === undefined || value === "") {
+      return (
+        <Text type="warning">
+          <ExclamationCircleOutlined /> Cần bổ sung
+        </Text>
+      );
+    }
+    return typeof value === "number" ? formatVND(value) : value;
+  };
 
   console.log("data", data);
 
@@ -126,6 +155,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      {contextHolder}
       <div className="w-full mx-auto">
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           {/* Header */}
@@ -217,6 +247,14 @@ export default function Page() {
                               {formatCurrency(item.template_rent_price)}
                             </span>
                           </p>
+                          <p>
+                            <span className="font-medium text-lg">
+                              Mã sản phẩm:
+                            </span>{" "}
+                            <span className="text-gray-800 text-lg">
+                              {item.product_code}
+                            </span>
+                          </p>
                         </div>
                         <div className="space-y-1">
                           <p className="flex items-center">
@@ -235,24 +273,22 @@ export default function Page() {
                                 : "Ngừng hoạt động"}
                             </span>
                           </p>
-                          <p>
-                            <span className="font-medium text-lg">
-                              ID sản phẩm:
-                            </span>{" "}
-                            <span className="text-gray-800 text-lg">
-                              {item.product_id.slice(0, 8)}
-                            </span>
-                          </p>
                         </div>
                       </div>
                     </div>
 
-                    {item.template_description && (
-                      <div className="mt-4 text-gray-600">
-                        <h4 className="font-medium text-gray-700">Mô tả:</h4>
-                        <p className="mt-1">{item.template_description}</p>
-                      </div>
-                    )}
+                    <div className="mt-4 text-gray-600">
+                      <h4 className="font-medium text-gray-700">Mô tả:</h4>
+                      {item.template_description ? (
+                        <TipTapEditor
+                          value={item.template_description}
+                          isReadonly={true}
+                        />
+                      ) : (
+                        formatField(item.template_description)
+                      )}
+                    </div>
+
                     {data.status !== "ENDED" && (
                       <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <input

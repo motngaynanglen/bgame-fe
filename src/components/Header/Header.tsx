@@ -21,18 +21,18 @@ const items: MenuItem[] = [
         label: <Link href={"/products"}>Tất cả</Link>,
         key: "all",
       },
-      {
-        label: "Hàng mới về",
-        key: "newarrival",
-      },
-      {
-        label: "Giảm giá",
-        key: "discount",
-      },
-      {
-        label: "Phụ kiện",
-        key: "accessory",
-      },
+      // {
+      //   label: "Hàng mới về",
+      //   key: "newarrival",
+      // },
+      // {
+      //   label: "Giảm giá",
+      //   key: "discount",
+      // },
+      // {
+      //   label: "Phụ kiện",
+      //   key: "accessory",
+      // },
       {
         label: <Link href={"/used-games"}>Hàng đã qua sử dụng</Link>,
         key: "used",
