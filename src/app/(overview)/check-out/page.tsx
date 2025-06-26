@@ -1,16 +1,15 @@
 "use client";
 import { orderApiRequest } from "@/src/apiRequests/orders";
+import transactionApiRequest from "@/src/apiRequests/transaction";
 import CheckOutSuccess from "@/src/components/CheckOut/CheckOutSuccess";
 import { notifyError } from "@/src/components/Notification/Notification";
 import { HttpError } from "@/src/lib/httpAxios";
+import { formatVND } from "@/src/lib/utils";
 import { useCartStore } from "@/src/store/cartStore";
-import { Button, List, Modal, Radio, RadioChangeEvent } from "antd";
-import Link from "next/link";
+import { Button, Modal, RadioChangeEvent } from "antd";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAppContext } from "../../app-provider";
-import { formatVND } from "@/src/lib/utils";
-import transactionApiRequest from "@/src/apiRequests/transaction";
 
 interface FormData {
   email: string;
@@ -87,7 +86,11 @@ export default function CheckOut() {
         user?.token
       );
       if (res.statusCode === "200") {
-        setPaymentData({ id: id, checkoutUrl: res.data.checkoutUrl, qrCode: res.data.qrCode });
+        setPaymentData({
+          id: id,
+          checkoutUrl: res.data.checkoutUrl,
+          qrCode: res.data.qrCode,
+        });
         clearCart();
         handleRedirectToPayment();
       } else {
@@ -99,8 +102,8 @@ export default function CheckOut() {
     }
   };
   const handleRedirectToPayment = () => {
-    if (paymentData && paymentData.url) {
-      window.open(paymentData.url, "_blank");
+    if (paymentData && paymentData.checkoutUrl) {
+      window.open(paymentData.checkoutUrl, "_blank");
     } else {
       notifyError("Lỗi thanh toán", "Không có URL thanh toán để chuyển hướng.");
     }
@@ -126,7 +129,12 @@ export default function CheckOut() {
       );
       if (res.statusCode == "200") {
         setOpenResponsive(true);
-        setPaymentData({ id: res.data ?? undefined, url: undefined });
+        setPaymentData({ id: res.data ?? undefined, checkoutUrl: undefined });
+        Modal.success({
+          title: "Đặt hàng thành công!",
+          content:
+            "Đơn hàng của bạn đã được tạo thành công. Vui lòng tiếp tục thanh toán nếu cần.",
+        });
         // clearCart();
       }
       if (res.statusCode == "404") {
@@ -143,21 +151,22 @@ export default function CheckOut() {
     } catch (error: any) {
       if (error instanceof HttpError && error.status === 422) {
       }
-      if (error instanceof HttpError && error.status === 401) {
-        notifyError("Đặt mua thất bại!", "bạn cần đăng nhập để tiếp tục");
-        // router.push("/login");
-      }
+
       if (error instanceof HttpError && error.status === 404) {
-        notifyError("Đặt mua thất bại!", "Bạn cần thanh toán sản phẩm đã mua trước đó .");
+        notifyError(
+          "Đặt mua thất bại!",
+          "Bạn cần thanh toán sản phẩm đã mua trước đó ."
+        );
         // router.push("/login");
       } else {
         // Xử lý lỗi khác nếu có
+        setOpenResponsive(true);
         console.error("Lỗi khác:", error);
-        notifyError(
-          "Đặt mua thất bại",
-          error?.message ||
-            "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
-        );
+        // notifyError(
+        //   "Đặt mua thất bại",
+        //   error?.message ||
+        //     "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+        // );
       }
     }
   };
@@ -189,10 +198,6 @@ export default function CheckOut() {
               <h2 className="text-xl font-semibold mb-4 text-black-2">
                 Thông tin nhận hàng
               </h2>
-              <Link href={"/login"}>
-                {" "}
-                <h2>Đăng nhập</h2>
-              </Link>
             </div>
 
             <form
@@ -337,26 +342,6 @@ export default function CheckOut() {
               </div>
             );
           })}
-          {/* {cart.map((item, index) => {
-            const imageUrls = item.image?.split("||") || [];
-            return (
-              <div key={item.id || index} className="flex items-center mb-4">
-                <img
-                  src={imageUrls[0]}
-                  alt={item.name || "Product image"}
-                  className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
-                />
-                <div>
-                  <p className="text-lg uppercase">{item.name}</p>
-
-                  <p className="font-semibold">
-                    {item.price.toLocaleString()}đ{" "}
-                  </p>
-                  <p>Số lượng: {item.quantity}</p>
-                </div>
-              </div>
-            );
-          })}      */}
 
           <div className="mb-4">
             <input
@@ -382,36 +367,6 @@ export default function CheckOut() {
             <span>Tổng cộng</span>
             <span>{clientOnlyTotal}</span>
           </div>
-
-          {/* <div className="my-6">
-            <h2 className="text-xl font-semibold mb-4">Thanh toán</h2>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  name="payment"
-                  className="mr-2"
-                  value="bank"
-                  checked={paymentMethod === "bank"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                />
-                <label>Chuyển khoản</label>
-                <i className="fas fa-money-bill-wave ml-2"></i>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  name="payment"
-                  className="mr-2"
-                  value="cod"
-                  checked={paymentMethod === "cod"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                />
-                <label>Thu hộ (COD)</label>
-                <i className="fas fa-money-bill-wave ml-2"></i>
-              </div>
-            </div>
-          </div> */}
         </div>
       </div>
 

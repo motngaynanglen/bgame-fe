@@ -22,8 +22,8 @@ interface BoardGameInfo {
   publisher: string;
   category: string;
   age: number;
-  number_of_players_min: number;
-  number_of_players_max: number;
+  number_of_player_min: number;
+  number_of_player_max: number;
   hard_rank: number;
   time: string;
   description: string;
