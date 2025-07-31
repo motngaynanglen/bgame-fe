@@ -1,27 +1,20 @@
 "use client";
-import {
-  Button,
-  Divider,
-  Empty,
-  Image,
-  InputNumber,
-  message,
-  Radio,
-} from "antd";
-import { useState } from "react";
-import { IoIosClose } from "react-icons/io";
-import CustomDatePicker from "../DateRantalPicker/DateRental";
-import CustomRangePicker from "../DateRantalPicker/HourRental";
+import { useAppContext } from "@/src/app/app-provider";
+import { useRentalStore } from "@/src/store/rentalStore";
+import { Button, Divider, Empty } from "antd";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { useRentalStore } from "@/src/store/rentalStore";
-import { notifyError, notifySuccess } from "../Notification/Notification";
-import { HttpError } from "@/src/lib/httpAxios";
-import { useAppContext } from "@/src/app/app-provider";
-import bookListApiRequest from "@/src/apiRequests/bookList";
+import { useEffect, useState } from "react";
+import { IoIosClose } from "react-icons/io";
 
-export default function CartRental({storeId}: { storeId: string | null }) {
+export default function CartRental({
+  storeId,
+  onChooseTable,
+}: {
+  storeId: string | null;
+  onChooseTable?: () => void;
+}) {
   const { cartItems, removeFromCart } = useRentalStore();
   const router = useRouter();
   const { user } = useAppContext();
@@ -40,53 +33,57 @@ export default function CartRental({storeId}: { storeId: string | null }) {
 
   console.log("cartitems", cartItems);
 
-  const handleSubmit = async () => {
-    if (!user) {
-      notifyError("Bạn cần đăng nhập để đặt trước.");
-      return;
-    }
-    const postData = {
-      customerId: null, // Lấy từ context
-      bookListItems: cartItems.map((item) => ({
-        productTemplateID: item.productTemplateID,
-        quantity: item.quantity,
-      })),
-      storeId: storeId, // Store ID (Cập nhật nếu cần)
-      from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
-      to: selectedDate ? selectedDate[1]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
-      bookType: selectedOption === "days" ? 1 : 0, // 1 = theo ngày, 0 = theo giờ
-    };
+  useEffect(() => {}, [onChooseTable]);
 
-    try {
-      const response = await bookListApiRequest.createBookList(
-        postData,
-        user.token
-      );
-      console.log("Tại vì sao", postData);
-      if (response.statusCode == "200") {
-        notifySuccess(
-          "Đặt trước thành công!",
-          "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
-        );
-      } else
-        notifyError(
-          "Đặt trước thất bại!",
-          response.message || "Vui lòng thử lại sau."
-        );
-    } catch (error: any) {
-      console.error("Lỗi API:", error);
-      if (error instanceof HttpError && error.status === 401) {
-        notifyError("Đặt trước thất bại!", "bạn cần đăng nhập để tiếp tục");
-        router.push("/login");
-      } else {
-        // Xử lý lỗi khác nếu có
-        console.error("Lỗi khác:", error);
-        notifyError(
-          "Đặt trước thất bại",
-          "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
-        );
-      }
-    }
+  const handleSubmit = async () => {
+    // if (!user) {
+    //   notifyError("Bạn cần đăng nhập để đặt trước.");
+    //   return;
+    // }
+
+    router.push("/rental/table");
+    // const postData = {
+    //   customerId: null, // Lấy từ context
+    //   bookListItems: cartItems.map((item) => ({
+    //     productTemplateID: item.productTemplateID,
+    //     quantity: item.quantity,
+    //   })),
+    //   storeId: storeId, // Store ID (Cập nhật nếu cần)
+    //   from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
+    //   to: selectedDate ? selectedDate[1]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
+    //   bookType: selectedOption === "days" ? 1 : 0, // 1 = theo ngày, 0 = theo giờ
+    // };
+
+    // try {
+    //   const response = await bookListApiRequest.createBookList(
+    //     postData,
+    //     user.token
+    //   );
+    //   console.log("Tại vì sao", postData);
+    //   if (response.statusCode == "200") {
+    //     notifySuccess(
+    //       "Đặt trước thành công!",
+    //       "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
+    //     );
+    //   } else
+    //     notifyError(
+    //       "Đặt trước thất bại!",
+    //       response.message || "Vui lòng thử lại sau."
+    //     );
+    // } catch (error: any) {
+    //   console.error("Lỗi API:", error);
+    //   if (error instanceof HttpError && error.status === 401) {
+    //     notifyError("Đặt trước thất bại!", "bạn cần đăng nhập để tiếp tục");
+    //     router.push("/login");
+    //   } else {
+    //     // Xử lý lỗi khác nếu có
+    //     console.error("Lỗi khác:", error);
+    //     notifyError(
+    //       "Đặt trước thất bại",
+    //       "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
+    //     );
+    //   }
+    // }
   };
 
   return (
@@ -113,18 +110,23 @@ export default function CartRental({storeId}: { storeId: string | null }) {
               return (
                 <div
                   key={index}
-                  className="bg-gray-800 p-4 rounded-lg mb-4 flex justify-between items-center"
+                  className="bg-gray-800 p-2 rounded-lg mb-4 flex justify-between items-center"
                 >
                   {/* image and name */}
                   <div className="flex flex-row sm:items-start sm:justify-around md:items-center md:justify-start">
-                    <Image
+                    {/* <Image
                       style={{ borderRadius: "0.5rem" }}
                       width={96}
                       height={96}
                       src={imageUrls[0]}
                       // alt={item.name}
                       className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
-                      loading="lazy"
+                      // loading="lazy"
+                    /> */}
+                    <img
+                      src={imageUrls[0]}
+                      alt=""
+                      className="w-24 h-24 object-cover rounded-lg  sm:pr-0"
                     />
                     <Divider type="vertical" className="" />
                     <div className="ml-4 sm:ml-0 mr-4">
@@ -138,9 +140,7 @@ export default function CartRental({storeId}: { storeId: string | null }) {
                     <button
                       className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600 sm:hidden"
                       onClick={() => removeFromCart(item.productTemplateID)}
-                    >
-                      {/* Delete icon */}
-                    </button>
+                    ></button>
                   </div>
 
                   {/* Delete Icon */}
@@ -158,7 +158,7 @@ export default function CartRental({storeId}: { storeId: string | null }) {
           </div>
         )}
       </div>
-      <Divider />
+      {/* <Divider />
       <Radio.Group
         options={options}
         defaultValue="days"
@@ -178,16 +178,25 @@ export default function CartRental({storeId}: { storeId: string | null }) {
         <div>
           <CustomRangePicker onChange={(dates) => setSelectedDate(dates)} />
         </div>
-      )}
+      )} */}
       <Divider />
-      <Button
-        key={"dat truoc"}
-        onClick={handleSubmit}
-        disabled={!selectedDate || cartItems.length === 0}
-      >
-        Đặt trước
-      </Button>
-      ,
+      {onChooseTable ? (
+        <Button
+          key={"select-table"}
+          onClick={onChooseTable}
+          disabled={cartItems.length === 0}
+        >
+          Chọn bàn
+        </Button>
+      ) : (
+        <Button
+          key={"select-table"}
+          onClick={handleSubmit}
+          disabled={cartItems.length === 0}
+        >
+          Đặt trước
+        </Button>
+      )}
     </div>
   );
 }
