@@ -132,6 +132,7 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
       fromSlot,
       toSlot,
       tableIDList: tableID ? [tableID] : [],
+      
     };
     
     mutation.mutate(payload);
