@@ -53,10 +53,10 @@ export default function Page() {
       // }
       return res.data;
     },
-    enabled: !!user?.token && !!id, // Chỉ fetch khi có token và id
+    enabled: !!user?.token && !!id, 
     refetchOnWindowFocus: false,
-    staleTime: Infinity, // Không tự động refetch
-    retry: 1, // Số lần retry khi fail
+    staleTime: Infinity, 
+    retry: 1, 
   });
 
   const updateItemMutation = useMutation({
@@ -76,10 +76,10 @@ export default function Page() {
       );
       return res;
     },
-
+    
     onSuccess: () => {
       notifySuccess("Cập nhật thành công");
-
+      router.refresh();
     },
     onError: (error: any) => {
       notification.error({

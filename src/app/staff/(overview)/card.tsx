@@ -7,45 +7,45 @@ interface dashboardCardType {
     data: {
         today: string,
         title: string,
-        persent: string,
+        // persent: string,
         bnb: "text-green-600" | "text-red-600"
     }
 }
 type iconType = "Sales" | "Clients" | "Orders" | "Users";
 const count: dashboardCardType[] = [
     {
-        field: "Sales",
+        field: "Đơn hàng",
         data: {
             today: "Today’s Sales",
             title: "$53,000",
-            persent: "+30%",
+            // persent: "+30%",
             bnb: "text-green-600",
         },
     },
     {
-        field: "Users",
+        field: "Đơn Thuê",
         data: {
             today: "Today’s Users",
             title: "3,200",
-            persent: "+20%",
+            // persent: "+20%",
             bnb: "text-green-600",
         },
     },
     {
-        field: "Clients",
+        field: "Đơn đang chờ",
         data: {
             today: "New Clients",
             title: "+1,200",
-            persent: "-20%",
+            // persent: "-20%",
             bnb: "text-red-600",
         },
     },
     {
-        field: "Orders",
+        field: "Bàn còn trống",
         data: {
             today: "New Orders",
             title: "$13,200",
-            persent: "10%",
+            // persent: "10%",
             bnb: "text-green-600",
         },
     },
@@ -120,9 +120,9 @@ export function AntdCustomCard({
                     <Row align="middle" gutter={[24, 0]}>
                         <Col xs={18}>
                             <span>{value.field}</span>
-                            <Title level={3}>
+                            {/* <Title level={3}>
                                 {value.data.title} <small className={value.data.bnb}>{value.data.persent}</small>
-                            </Title>
+                            </Title> */}
                         </Col>
                         <Col xs={6}>
                             <div className="icon-box">{Icon}</div>

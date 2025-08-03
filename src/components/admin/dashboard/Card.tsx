@@ -14,7 +14,7 @@ interface dashboardCardType {
 type iconType = "Sales" | "Clients" | "Orders" | "Users";
 const count: dashboardCardType[] = [
     {
-        field: "Sales",
+        field: "Doanh thu",
         data: {
             today: "Today’s Sales",
             title: "$53,000",
@@ -23,7 +23,7 @@ const count: dashboardCardType[] = [
         },
     },
     {
-        field: "Users",
+        field: "Đon mua",
         data: {
             today: "Today’s Users",
             title: "3,200",
@@ -32,7 +32,7 @@ const count: dashboardCardType[] = [
         },
     },
     {
-        field: "Clients",
+        field: "Đơn thuê",
         data: {
             today: "New Clients",
             title: "+1,200",
@@ -41,7 +41,7 @@ const count: dashboardCardType[] = [
         },
     },
     {
-        field: "Orders",
+        field: "Ký gửi",
         data: {
             today: "New Orders",
             title: "$13,200",
@@ -121,7 +121,8 @@ export function AntdCustomCard({
                         <Col xs={18}>
                             <span>{value.field}</span>
                             <Title level={3}>
-                                {value.data.title} <small className={value.data.bnb}>{value.data.persent}</small>
+                                {value.data.title} 
+                                {/* <small className={value.data.bnb}>{value.data.persent}</small> */}
                             </Title>
                         </Col>
                         <Col xs={6}>

@@ -197,7 +197,7 @@ function CardProductRent({
             {title}
           </div>
 
-          <div className="mt-2 flex items-center gap-2">
+          {/* <div className="mt-2 flex items-center gap-2">
             <div className="flex items-center">
               <Rate allowHalf disabled defaultValue={5} />
             </div>
@@ -208,7 +208,7 @@ function CardProductRent({
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
               (5)
             </p>
-          </div>
+          </div> */}
 
           <div className="mt-2">
             {quantity && quantity !== 0 ? (
