@@ -1,16 +1,18 @@
 "use client";
 import bookListApiRequest from "@/src/apiRequests/bookList";
+import bookTableApiRequest from "@/src/apiRequests/bookTable";
 import { useAppContext } from "@/src/app/app-provider";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message } from "antd";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const hours = Array.from({ length: 28 }, (_, i) =>
-  dayjs("08:00", "HH:mm")
+  dayjs("07:00", "HH:mm")
     .add(i * 30, "minute")
     .format("HH:mm")
 );
+const slots = Array.from({ length: 28 }, (_, i) => i + 1); // Slot 1 → 28
 
 // const tables = ["Table 1", "Table 2", "Table 3", "Table 4"];
 
@@ -18,7 +20,7 @@ export type BookingStatus = "available" | "booked" | "locked" | "event";
 
 export interface BookingCell {
   table: string;
-  time: string;
+  slot: number;
   status: BookingStatus;
 }
 
@@ -38,9 +40,15 @@ interface Boards {
   updatedBy: string;
   updatedAt: string;
 }
-
+interface BookingList {
+  TableID: string;
+  TableName: string;
+  Capacity: string;
+  FromSlot: number;
+  ToSlot: number;
+}
 interface responseModel {
-  data: Boards[];
+  data: BookingList[];
   message: string;
   statusCode: number;
   paging: null;
@@ -49,41 +57,41 @@ interface responseModel {
 export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
   const [bookingData, setBookingData] = useState<BookingCell[]>([]);
   const [selectedSlots, setSelectedSlots] = useState<
-    { table: string; time: string }[]
+    { table: string; slot: number }[]
   >([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const { user } = useAppContext();
 
-  const getStatus = (table: string, time: string): BookingStatus => {
-    const found = bookingData?.find(
-      (b) => b.table === table && b.time === time
+  const getStatus = (table: string, slot: number): BookingStatus => {
+    const found = bookingData.find(
+      (b) => b.table === table && b.slot === slot
     );
     return found?.status || "available";
   };
 
   const handleClickSlot = (
     table: string,
-    time: string,
+    slot: number,
     status: BookingStatus
   ) => {
     if (status !== "available") return;
 
     if (selectedSlots.length && selectedSlots[0].table !== table) {
-      setSelectedSlots([{ table, time }]);
+      setSelectedSlots([{ table, slot }]);
     } else {
       const exists = selectedSlots.find(
-        (s) => s.time === time && s.table === table
+        (s) => s.slot === slot && s.table === table
       );
       if (exists) {
         setSelectedSlots(
-          selectedSlots.filter((s) => !(s.time === time && s.table === table))
+          selectedSlots.filter((s) => !(s.slot === slot && s.table === table))
         );
       } else {
         setSelectedSlots(
-          [...selectedSlots, { table, time }].sort(
-            (a, b) => hours.indexOf(a.time) - hours.indexOf(b.time)
+          [...selectedSlots, { table, slot }].sort(
+            (a, b) => a.slot - b.slot
           )
         );
       }
@@ -110,36 +118,23 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
 
   const handleConfirmBooking = () => {
     if (!selectedSlots.length) return;
-    const table = selectedSlots[0].table;
-    const startTime = selectedSlots[0].time;
-    const endTime = dayjs(selectedSlots[selectedSlots.length - 1].time, "HH:mm")
-      .add(30, "minute")
-      .format("HH:mm");
 
-    console.log({
-      table,
-      startTime,
-      endTime,
-      customerName,
-      phone,
-    });
+    const tableName = selectedSlots[0].table;
+    const tableData = data?.data?.find((t) => t.TableName === tableName);
+    const tableID = tableData?.TableID;
+
+    const fromSlot = selectedSlots[0].slot;
+    const toSlot = selectedSlots[selectedSlots.length - 1].slot + 1;
 
     const payload = {
       storeId,
       bookDate: bookDate.toISOString(),
-      fromSlot: startTime,
-      toSlot: endTime,
-      tableIDList: [table],
+      fromSlot,
+      toSlot,
+      tableIDList: tableID ? [tableID] : [],
     };
-
-    // Gọi API đặt bàn ở đây
+    
     mutation.mutate(payload);
-
-    console.log(payload);
-    // setModalOpen(false);
-    // setSelectedSlots([]);
-    // setCustomerName("");
-    // setPhone("");
   };
 
   const {
@@ -147,21 +142,42 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
     isLoading: rentalLoading,
     isError: rentalError,
     error: rentalErrorData,
+    isSuccess: rentalSuccess,
   } = useQuery<responseModel>({
-    queryKey: ["rentalBoardGames", storeId],
+    queryKey: ["rentalTimeTable", storeId, bookDate.toISOString()],
     queryFn: async () => {
-      const res = await bookListApiRequest.getListStoreTable({
+      const res = await bookTableApiRequest.getBookTableTimeTableByDate({
         storeId,
+        bookDate: bookDate.toISOString(),
       });
       return res;
     },
     enabled: !!storeId,
   });
-  const tables = data?.data?.map((item) => item.name) || [];
-  console.log("Selected:", selectedSlots);
-  // console.log("Slot:", `${table}-${hour}`, "Selected:", isSelected);
-  console.log("Booking Data:", bookingData);
 
+  useEffect(() => {
+    if (!data?.data) return;
+
+    const result: BookingCell[] = [];
+
+    data.data.forEach((table) => {
+      if (
+        table.FromSlot != null &&
+        table.ToSlot != null &&
+        typeof table.TableName === "string"
+      ) {
+        for (let s = table.FromSlot; s < table.ToSlot; s++) {
+          result.push({
+            table: table.TableName,
+            slot: s,
+            status: "booked",
+          });
+        }
+      }
+    });
+
+    setBookingData(result);
+  }, [data]);
   return (
     <div className="space-y-4">
       <div className="p-4 bg-white flex gap-6 text-sm items-center">
@@ -178,8 +194,8 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
           <div className="w-4 h-4 bg-purple-400 rounded" /> Sự kiện
         </div>
         {/* <div className="text-green-700 font-semibold underline cursor-pointer">
-          Xem bàn & bảng giá
-        </div> */}
+            Xem bàn & bảng giá
+          </div> */}
       </div>
 
       <div className="overflow-auto border rounded-md">
@@ -202,32 +218,50 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
             </tr>
           </thead>
           <tbody>
-            {tables.map((table) => (
-              <tr key={table}>
-                <td className="bg-green-100 border p-2">{table}</td>
-                {hours.map((hour) => {
-                  const status = getStatus(table, hour);
+            {[...new Map(data?.data?.map(item => [item.TableName, item])).values()].map((table, index) => (
+              <tr key={'table' + index} className="border-b">
+                <td className="bg-green-100 border p-2">{table.TableName}</td>
+                {slots.map((slot) => {
+                  const status = getStatus(table.TableName, slot);
                   const isSelected = selectedSlots.some(
-                    (s) => s.table === table && s.time === hour
+                    (s) => s.table === table.TableName && s.slot === slot
                   );
+                  const bgColor = status === "booked"
+                    ? "bg-red-400 cursor-not-allowed"
+                    : isSelected
+                      ? "bg-green-400"
+                      : "bg-white hover:bg-green-100";
                   return (
                     <td
-                      key={hour}
-                      onClick={() => handleClickSlot(table, hour, status)}
-                      //                     className={`border h-10 cursor-pointer transition-all
-                      //   ${status === "available" ? "bg-white hover:bg-red-100" : ""}
-                      //   ${status === "booked" ? "bg-red-400 cursor-not-allowed" : ""}
-                      //   ${status === "locked" ? "bg-gray-400 cursor-not-allowed" : ""}
-                      //   ${status === "event" ? "bg-purple-300 cursor-not-allowed" : ""}
-                      //   ${isSelected ? "bg-red-500 text-white" : ""}
+                      key={slot}
+                      onClick={() => handleClickSlot(table.TableName, slot, status)}
+                      className={`border-b border-r h-8 cursor-pointer transition-all duration-200 ${bgColor}`}
 
-                      // `}
-                      className={`border-b border-r h-8 cursor-pointer transition-all duration-200 ${
-                        isSelected ? "bg-red-400" : "bg-white hover:bg-red-100"
-                      }`}
                     ></td>
                   );
                 })}
+                {/* {hours.map((hour) => {
+                    const status = getStatus(table, hour);
+                    const isSelected = selectedSlots.some(
+                      (s) => s.table === table && s.time === hour
+                    );
+                    return (
+                      <td
+                        key={hour}
+                        onClick={() => handleClickSlot(table, hour, status)}
+                        //                     className={`border h-10 cursor-pointer transition-all
+                        //   ${status === "available" ? "bg-white hover:bg-red-100" : ""}
+                        //   ${status === "booked" ? "bg-red-400 cursor-not-allowed" : ""}
+                        //   ${status === "locked" ? "bg-gray-400 cursor-not-allowed" : ""}
+                        //   ${status === "event" ? "bg-purple-300 cursor-not-allowed" : ""}
+                        //   ${isSelected ? "bg-red-500 text-white" : ""}
+
+                        // `}
+                        className={`border-b border-r h-8 cursor-pointer transition-all duration-200 ${isSelected ? "bg-red-400" : "bg-white hover:bg-red-100"
+                          }`}
+                      ></td>
+                    );
+                  })} */}
               </tr>
             ))}
           </tbody>
@@ -237,13 +271,16 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
       {selectedSlots.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-green-700">
-            ✅ Đã chọn: <strong>{selectedSlots[0].table}</strong>, từ{" "}
-            <strong>{selectedSlots[0].time}</strong> đến{" "}
-            <strong>
-              {dayjs(selectedSlots[selectedSlots.length - 1].time, "HH:mm")
-                .add(30, "minute")
-                .format("HH:mm")}
-            </strong>
+            {/*  <strong>{selectedSlots[0].table}</strong>, từ{" "}
+              <strong>{selectedSlots[0].slot}</strong> đến{" "}
+              <strong>
+                {dayjs(selectedSlots[selectedSlots.length - 1].slot, "HH:mm")
+                  .add(30, "minute")
+                  .format("HH:mm")}
+              </strong> */}
+            ✅ Đã chọn: <strong>{selectedSlots[0].table}</strong>, từ slot{" "}
+            <strong>{selectedSlots[0].slot}</strong> đến{" "}
+            <strong>{selectedSlots[selectedSlots.length - 1].slot + 1}</strong>
           </div>
           <button
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -255,25 +292,25 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
       )}
 
       {/* <Modal
-        open={modalOpen}
-        title="Xác nhận đặt bàn"
-        onCancel={() => setModalOpen(false)}
-        onOk={handleConfirmBooking}
-        okText="Đặt bàn"
-      >
-        <div className="space-y-4">
-          <Input
-            placeholder="Họ tên khách"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
-          <Input
-            placeholder="Số điện thoại"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </div>
-      </Modal> */}
+          open={modalOpen}
+          title="Xác nhận đặt bàn"
+          onCancel={() => setModalOpen(false)}
+          onOk={handleConfirmBooking}
+          okText="Đặt bàn"
+        >
+          <div className="space-y-4">
+            <Input
+              placeholder="Họ tên khách"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+            />
+            <Input
+              placeholder="Số điện thoại"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+        </Modal> */}
     </div>
   );
 }
