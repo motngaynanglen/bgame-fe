@@ -296,11 +296,12 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
           </button>
         </div>
       )}
-      {payloadData && (
+      {/* //code này để debug payload data
+        {payloadData && (
         <div className="mt-4 p-4 bg-gray-100 rounded">
           <pre>{JSON.stringify(payloadData, null, 2)}</pre>
         </div>
-      )}
+      )} */}
 
       {/* <Modal
           open={modalOpen}
