@@ -3,7 +3,7 @@ import { useStores } from "./useStores"; // Import useStores hook
 
 export const useSelectedStore = () => {
   const { stores } = useStores();
-  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+  const [selectedStoreId, setSelectedStoreId] = useState<string>("");
 
   useEffect(() => {
     if (stores.length > 0 && !selectedStoreId) {

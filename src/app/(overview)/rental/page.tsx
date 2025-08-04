@@ -17,6 +17,8 @@ import { useRentalStore } from "@/src/store/rentalStore";
 import TimeSlotDisplay from "./extend/TimeSlotDisplay";
 import bookListApiRequest from "@/src/apiRequests/bookList";
 import BookingTable from "./table/page";
+import dayjs from "@/src/lib/dayjs ";
+import { date } from "zod";
 
 interface BoardGame {
   id: string;
@@ -122,11 +124,11 @@ export default function BoardGameRental() {
         title="Dịch vụ thuê board game"
         subtitle="Tại BoardGame Impact"
       />
-      <TimeSlotDisplay storeid={selectedStoreId ?? ""} />
+      {/* <TimeSlotDisplay storeid={selectedStoreId ?? ""} /> */}
       <div className="flex container min-h-screen mx-auto max-w-screen-3xl">
         <main className=" lg:w-3/4 p-4">
           {showBookingTable ? (
-            <BookingTable storeId={selectedStoreId ?? null} bookDate={new Date("2025-07-29T14:18:49.930Z")}/>
+            <BookingTable searchParams={{ storeId: selectedStoreId, bookDate: new Date() }} />
           ) : (
             <>
               <div className=" mb-4">
