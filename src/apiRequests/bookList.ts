@@ -67,17 +67,17 @@ export const bookListApiRequest = {
       },
     }),
 
-  //Book table
-  createBookTableByCustomer: (body: any, sessionToken?: string) =>
-    http.post<CommonResType>(
-      "/api/BookTable/create-booktable-by-customer",
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-        },
-      }
-    ),
+  // //Book table
+  // createBookTableByCustomer: (body: any, sessionToken?: string) =>
+  //   http.post<CommonResType>(
+  //     "/api/BookTable/create-booktable-by-customer",
+  //     body,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${sessionToken}`,
+  //       },
+  //     }
+  //   ),
   //   Store Table API Requests
   createStoreTable: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/StoreTableTable/create", body, {

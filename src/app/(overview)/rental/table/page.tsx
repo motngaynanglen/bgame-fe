@@ -2,6 +2,7 @@
 import bookListApiRequest from "@/src/apiRequests/bookList";
 import bookTableApiRequest from "@/src/apiRequests/bookTable";
 import { useAppContext } from "@/src/app/app-provider";
+import { useRentalStore } from "@/src/store/rentalStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message } from "antd";
 import dayjs from "dayjs";
@@ -61,8 +62,9 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
   >([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [payloadData, setPayloadData] = useState();
   const { user } = useAppContext();
+  const { cartItems } = useRentalStore();
 
   const getStatus = (table: string, slot: number): BookingStatus => {
     const found = bookingData.find(
@@ -100,14 +102,14 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      return bookListApiRequest.createBookTableByCustomer(data, user?.token);
+      setPayloadData(data);
+      return bookListApiRequest.createBookList(data, user?.token);
     },
     mutationKey: ["createBookListByStaff"],
     onSuccess: () => {
       message.success("Đặt bàn thành công!");
       setSelectedSlots([]);
       setCustomerName("");
-      setPhone("");
       setModalOpen(false);
     },
     onError: (error: any) => {
@@ -125,16 +127,19 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
 
     const fromSlot = selectedSlots[0].slot;
     const toSlot = selectedSlots[selectedSlots.length - 1].slot + 1;
-
+    
     const payload = {
       storeId,
       bookDate: bookDate.toISOString(),
       fromSlot,
       toSlot,
-      tableIDList: tableID ? [tableID] : [],
-      
+      tableIDs: tableID ? [tableID] : [],
+      bookListItems : cartItems.map((item) => ({
+        productTemplateID: item.productTemplateID,
+        quantity: item.quantity,
+      })),
     };
-    
+  
     mutation.mutate(payload);
   };
 
@@ -289,6 +294,11 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
           >
             Xác nhận đặt bàn
           </button>
+        </div>
+      )}
+      {payloadData && (
+        <div className="mt-4 p-4 bg-gray-100 rounded">
+          <pre>{JSON.stringify(payloadData, null, 2)}</pre>
         </div>
       )}
 
