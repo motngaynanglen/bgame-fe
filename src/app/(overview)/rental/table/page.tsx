@@ -25,9 +25,11 @@ export interface BookingCell {
   status: BookingStatus;
 }
 
-interface BookingTableProps {
-  storeId: string | null;
-  bookDate: Date;
+interface PageProps {
+  searchParams: {
+    storeId?: string;
+    bookDate?: Date;
+  };
 }
 
 interface Boards {
@@ -47,6 +49,7 @@ interface BookingList {
   Capacity: string;
   FromSlot: number;
   ToSlot: number;
+  Owner: string;
 }
 interface responseModel {
   data: BookingList[];
@@ -55,7 +58,7 @@ interface responseModel {
   paging: null;
 }
 
-export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
+export default function BookingTable({ searchParams: { storeId, bookDate } }: PageProps) {
   const [bookingData, setBookingData] = useState<BookingCell[]>([]);
   const [selectedSlots, setSelectedSlots] = useState<
     { table: string; slot: number }[]
@@ -127,19 +130,19 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
 
     const fromSlot = selectedSlots[0].slot;
     const toSlot = selectedSlots[selectedSlots.length - 1].slot + 1;
-    
+
     const payload = {
       storeId,
-      bookDate: bookDate.toISOString(),
+      bookDate: bookDate?.toISOString(),
       fromSlot,
       toSlot,
       tableIDs: tableID ? [tableID] : [],
-      bookListItems : cartItems.map((item) => ({
+      bookListItems: cartItems.map((item) => ({
         productTemplateID: item.productTemplateID,
         quantity: item.quantity,
       })),
     };
-  
+
     mutation.mutate(payload);
   };
 
@@ -150,11 +153,11 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
     error: rentalErrorData,
     isSuccess: rentalSuccess,
   } = useQuery<responseModel>({
-    queryKey: ["rentalTimeTable", storeId, bookDate.toISOString()],
+    queryKey: ["rentalTimeTable", storeId, bookDate?.toISOString()],
     queryFn: async () => {
       const res = await bookTableApiRequest.getBookTableTimeTableByDate({
         storeId,
-        bookDate: bookDate.toISOString(),
+        bookDate: bookDate?.toISOString(),
       });
       return res;
     },
@@ -232,11 +235,14 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
                   const isSelected = selectedSlots.some(
                     (s) => s.table === table.TableName && s.slot === slot
                   );
-                  const bgColor = status === "booked"
-                    ? "bg-red-400 cursor-not-allowed"
-                    : isSelected
-                      ? "bg-green-400"
-                      : "bg-white hover:bg-green-100";
+                  const bgColor =
+                    status === "booked"
+                      ? "bg-red-400 cursor-not-allowed"
+                      : table.Owner != null
+                        ? "bg-yellow-300"
+                        : isSelected
+                          ? "bg-green-400"
+                          : "bg-white hover:bg-green-100";
                   return (
                     <td
                       key={slot}
@@ -296,12 +302,12 @@ export default function BookingTable({ storeId, bookDate }: BookingTableProps) {
           </button>
         </div>
       )}
-      {/* //code này để debug payload data
-        {payloadData && (
+      {/* code này để debug payload data */}
+        {data && (
         <div className="mt-4 p-4 bg-gray-100 rounded">
-          <pre>{JSON.stringify(payloadData, null, 2)}</pre>
+          <pre>{JSON.stringify(data, null, 2)}</pre>
         </div>
-      )} */}
+      )}
 
       {/* <Modal
           open={modalOpen}
