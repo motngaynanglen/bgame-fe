@@ -2,6 +2,7 @@
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { useQuery } from "@tanstack/react-query";
 import { Divider } from "antd";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -174,10 +175,13 @@ export default function DetailOrder() {
                   key={item.product_template_id}
                   className="flex gap-4 items-start"
                 >
-                  <img
+                  <Image
                     src={image}
                     alt={item.template_product_name}
-                    className="w-24 h-24 object-cover rounded"
+
+                    width={96}
+                    height={96}
+                    style={{ objectFit: "cover", borderRadius: "8px" }}
                   />
                   <div className="flex-1">
                     <p className="font-medium text-base text-gray-800">

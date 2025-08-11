@@ -45,7 +45,7 @@ function TimeSlotDisplay({ storeid, date }: { storeid: string; date?: Date }) {
     };
 
     fetchTimeSlots();
-  }, [storeid]);
+  }, [storeid, date]);
 
   const timeSlotStyle = (value: number): CSSProperties => ({
     padding: "12px 0",

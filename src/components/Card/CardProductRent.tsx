@@ -161,8 +161,9 @@ function CardProductRent({
       name: title,
       quantity: quantity,
       image: image,
+      price: price, // Hoặc giá khác nếu cần
     };
-    addToCart(product.productTemplateID, product.name, product.image);
+    addToCart(product.productTemplateID, product.name, product.image, product.price);
     notifySuccess("Thành công!", `${title} đã được thêm vào giỏ.`);
     console.log("Thêm vào giỏ hàng:", id);
   };

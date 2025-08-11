@@ -41,7 +41,7 @@
     "chart.js": "^4.4.8",
     "cloudinary": "^2.6.0",
     "clsx": "^2.1.1",
-    "cookies-next": "^5.1.0",
+    "cookies-next": "^6.1.0",
     "eslint-config-next": "14",
     "framer-motion": "^12.9.2",
     "gsap": "^3.12.7",

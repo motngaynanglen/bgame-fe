@@ -22,7 +22,7 @@ import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../../app-provider";
 import { formatDateTime, formatTimeStringRemoveSeconds, formatVND } from "@/src/lib/utils";
-import dayjs from "@/src/lib/dayjs ";
+import dayjs from "@/src/lib/dayjs";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { HttpError } from "@/src/lib/httpAxios";

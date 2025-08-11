@@ -29,7 +29,10 @@ export default function TemplateForm() {
   const [storeLoading, setStoreLoading] = useState(false);
   const router = useRouter();
   useEffect(() => {
-    setClientOnlyTotal(formatVND(calculateTotal()));
+    const formatMoney = () => {
+      return formatVND(calculateTotal());
+    };
+    setClientOnlyTotal(formatMoney());
   }, [cart]);
   const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>(
     {}
@@ -235,7 +238,7 @@ export default function TemplateForm() {
                   width={96}
                   height={96}
                   src={item.image}
-                  // alt={item.name}
+                  alt={item.name ? item.name : "Hình ảnh sản phẩm"}
                   className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
                   loading="lazy"
                 />
@@ -370,8 +373,8 @@ export default function TemplateForm() {
         </button>
         <button
           className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${cart.length === 0
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-blue-500"
+            ? "opacity-50 cursor-not-allowed"
+            : "hover:bg-blue-500"
             }`}
           disabled={cart.length === 0}
           onClick={() => router.push("/check-out")}

@@ -37,7 +37,7 @@ export default function ProductAddFrom({ productTemplateId }: ProductAddNumberFo
             setValue("productTemplateId", productTemplateId);
             setEnableAdd(true);
         }
-    }, [productTemplateId]);
+    }, [setValue, productTemplateId]);
 
     const onSubmit = async (data: AddProductsType) => {
         if (!user) {

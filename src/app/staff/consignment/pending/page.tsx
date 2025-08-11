@@ -26,7 +26,7 @@ import {
   formatTimeStringRemoveSeconds,
   formatVND,
 } from "@/src/lib/utils";
-import dayjs from "@/src/lib/dayjs ";
+import dayjs from "@/src/lib/dayjs";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { PagingResType } from "@/src/schemaValidations/common.schema";

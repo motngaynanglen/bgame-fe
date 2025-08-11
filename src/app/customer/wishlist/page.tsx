@@ -1,5 +1,6 @@
 "use client";
 import { useWishlistStore } from "@/src/store/wishlistStore";
+import Image from "next/image";
 import React from "react";
 import { FaCartShopping } from "react-icons/fa6";
 
@@ -29,10 +30,13 @@ export default function WishList() {
                 className="bg-gray-50 pb-2 text-black border-dashed border-b border-gray-300"
               >
                 <td className="flex justify-center p-1  ">
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.name}
-                    className="w-24 h-24 object-cover rounded-lg  m-2"
+                    // className="w-24 h-24 object-cover rounded-lg  m-2"
+                    width={96}
+                    height={96}
+                    style={{ objectFit: "cover", borderRadius: "8px" , margin: "8px auto" }}
                   />
                 </td>
 

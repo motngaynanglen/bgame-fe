@@ -1,6 +1,7 @@
 "use client";
 import { isClient } from "@/src/lib/httpAxios";
 import { AccountResType } from "@/src/schemaValidations/account.schema";
+import { getCookie } from "cookies-next";
 import {
   createContext,
   useCallback,
@@ -8,16 +9,17 @@ import {
   useEffect,
   useState,
 } from "react";
+import authApiRequest from "../apiRequests/auth";
 
-type User = AccountResType["data"];
+type User = AccountResType["data"] | null;
 
 const AppContext = createContext<{
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: User;
+  setUser: (user: User) => void;
   isAuthenticated: boolean;
 }>({
   user: null,
-  setUser: () => {},
+  setUser: () => { },
   isAuthenticated: false,
 });
 
@@ -31,16 +33,37 @@ export default function AppProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUserState] = useState<User | null>(() => getStoredUser());
-
+  const [user, setUserState] = useState<User>(() => getStoredUser());
   const isAuthenticated = Boolean(user);
 
-  const setUser = useCallback((user: User | null) => {
+  const setUser = useCallback((user: User) => {
     setUserState(user);
     setStoredUser(user);
   }, []);
 
+   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Gọi endpoint proxy trên Next.js FE
+        const res = await authApiRequest.me();
+        if (res) {
+          console.log("data request", res);
+        } else {
+          // Nếu server proxy trả về lỗi (ví dụ: 401 từ BE), token đã hết hạn
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra token:", error);
+        setUser(null);
+      }
+    };
+    checkAuth();
+  }, [isAuthenticated, setUser]);
   useEffect(() => {
+    // const token = getCookie("sessionToken");
+    // if(!token) {
+    //   setUser(null);
+    // }
     setUserState(getStoredUser());
   }, []);
   // const [user, setUserState] = useState<User | null>(() => {
@@ -50,7 +73,6 @@ export default function AppProvider({
   //   }
   //   return null
   // })
-  // const isAuthenticated = Boolean(user);
   // const setUser = useCallback(
   //   (user: User | null) => {
   //     setUserState(user)
