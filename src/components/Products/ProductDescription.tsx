@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { DescriptionsProps } from "antd";
 import { Collapse, Descriptions, Rate } from "antd";
 import { useEffect, useMemo, useState } from "react";
+import TipTapEditor from "../TipTapEditor/TipTapEditor";
 
 interface BoardGameInfo {
   id: string;
@@ -14,8 +15,8 @@ interface BoardGameInfo {
   publisher: string;
   category: string;
   age: number;
-  number_of_players_min: number;
-  number_of_players_max: number;
+  number_of_player_min: number;
+  number_of_player_max: number;
   hard_rank: number;
   time: string;
   description: string;
@@ -43,8 +44,8 @@ function SingleProductDescription({
         label: <h1 className="text-xl">Số người chơi</h1>,
         children: (
           <p className="text-xl">
-            {productData?.number_of_players_min} -{" "}
-            {productData?.number_of_players_max}
+            {productData?.number_of_player_min} -{" "}
+            {productData?.number_of_player_max}
           </p>
         ),
       },
@@ -56,7 +57,7 @@ function SingleProductDescription({
       {
         key: "4",
         label: <h1 className="text-xl">Độ tuổi đề xuất</h1>,
-        children: <p className="text-xl">{productData?.age}+  </p>,
+        children: <p className="text-xl">{productData?.age}+ </p>,
       },
     ],
     []
@@ -76,8 +77,14 @@ function SingleProductDescription({
             children: (
               <div>
                 <Descriptions bordered items={items} column={1} />
-                <p className="text-gray-600 mt-4 ml-2 text-xl">
-                  {productData?.description || "Boardgame rất hay"}
+                <p className="text-gray-600 mt-4 ml-2 text-lg">
+                  Giới thiệu sản phẩm:
+                  {productData?.description ? (
+                    <TipTapEditor
+                      value={productData.description}
+                      isReadonly={true}
+                    />
+                  ) : "Boardgame rất hay"}
                 </p>
               </div>
             ),

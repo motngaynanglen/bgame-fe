@@ -33,7 +33,7 @@ import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
 import { formatDateTime, formatTimeStringRemoveSeconds } from "@/src/lib/utils";
-import dayjs from "@/src/lib/dayjs ";
+import dayjs from "@/src/lib/dayjs";
 import { CheckboxGroupProps } from "antd/es/checkbox";
 import { useRouter } from "next/navigation";
 import { notifyError } from "@/src/components/Notification/Notification";

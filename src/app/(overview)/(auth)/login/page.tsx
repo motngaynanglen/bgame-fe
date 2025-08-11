@@ -56,20 +56,7 @@ export default function LoginPage() {
       router.push("/");
       router.refresh();
       // KẾT THÚC SAU KHI SET COOKIE
-      // const response = await axios.post(
-      //   "/api/Login/login",
-      //   credentials
-      // );
-      // const { jwt, refreshToken } = response.data;
-
-      // console.log("data nè: ", response.data);
-      // console.log(JSON.stringify(response.data.data));
-      // console.log("token nè: ", jwt);
-      // // Store the tokens in localStorage or secure cookie for later use
-      // localStorage.setItem("token", jwt);
-      // localStorage.setItem("refreshToken", refreshToken);
-
-      // await axios.get("/api/Login/GetUser", {});
+ 
     } catch (error) {
       console.log("lỗi nè: ", error);
     }

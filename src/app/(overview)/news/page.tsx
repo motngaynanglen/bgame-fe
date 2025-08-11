@@ -3,6 +3,7 @@ import { newsApiRequest } from "@/src/apiRequests/news";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../loading";
 import { ArrowRightOutlined } from "@ant-design/icons";
+import Image from "next/image";
 
 interface newsItem {
   id: string;
@@ -79,13 +80,15 @@ export default function NewsPage() {
                 </div>
               </div>
               <div className="relative h-[200px] w-full overflow-hidden rounded-t-md">
-                <img
-                  className={`w-full h-full object-cover transition-opacity rounded-t-md `}
+                <Image
+                  className={`transition-opacity rounded-t-md `}
                   src={item.image || "/assets/images/bg1.jpg"}
-                  alt=""
-                  //   onError={(e) => {
-                  //     (e.target as HTMLImageElement).src = defaultImage;
-                  //   }}
+                  alt={item.title || "Hình ảnh tin tức"}
+                  fill={true}
+                  style={{ objectFit: 'cover' }}
+                //   onError={(e) => {
+                //     (e.target as HTMLImageElement).src = defaultImage;
+                //   }}
                 />
               </div>
             </li>

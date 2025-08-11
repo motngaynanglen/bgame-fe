@@ -33,10 +33,13 @@ export default function AddCategoriesForm({ onChangeItem }: AddCategoriesFormPro
     setItems([...items, { name: trimmed, selected: true }])
     setInputValue('')
   }
-  useEffect(() => {
+  const handleInputChange = () => {
     if (onChangeItem) {
       onChangeItem(items.map((i) => i.name).filter((name) => name.trim() !== ''));
     }
+  }
+  useEffect(() => {
+    handleInputChange();
   }, [items]);
 
   const handleSelectAll = (checked: boolean) => {

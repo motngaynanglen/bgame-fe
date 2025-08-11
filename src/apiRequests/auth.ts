@@ -12,14 +12,11 @@ const authApiRequest = {
     http.post<LoginResType>("/api/Login/login", body),
   register: (body: RegisterBodyType) =>
     http.post<RegisterResType>("/api/Login/create-customer", body),
-  auth: (body: {
-    sessionToken: string;
-    sessionRole: string;
-    expiresAt: string;
-  }) =>
+  auth: (body: {  sessionToken: string; sessionRole: string; expiresAt: string;  }) =>
     http.post("/api/auth", body, {
       baseUrl: "",
     }),
+  me: () => http.get("/api/me", { baseUrl: "" }),
   logoutFromNextClientToNextServer: (
     force?: boolean | undefined,
     signal?: AbortSignal | undefined

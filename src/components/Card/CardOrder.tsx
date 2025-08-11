@@ -1,19 +1,18 @@
+import { orderApiRequest } from "@/src/apiRequests/orders";
 import transactionApiRequest from "@/src/apiRequests/transaction";
-import { Button, message, Modal, notification } from "antd";
+import { useAppContext } from "@/src/app/app-provider";
+import { Button, Modal, notification } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
 import { notifyError } from "../Notification/Notification";
-import { orderApiRequest } from "@/src/apiRequests/orders";
-import { useAppContext } from "@/src/app/app-provider";
 
-type OrderStatus =
-  | "DELIVERING"
-  | "CREATED"
-  | "PAID"
-  | "CANCELLED"
-  | "SENT"
-  | "PREPARED";
+// type OrderStatus =
+//   | "DELIVERING"
+//   | "CREATED"
+//   | "PAID"
+//   | "CANCELLED"
+//   | "SENT"
+//   | "PREPARED";
 
 interface Order {
   id: string;
@@ -24,7 +23,7 @@ interface Order {
   address: string;
   total_item: number;
   total_price: number;
-  status: OrderStatus;
+  status: string;
   created_at: string;
   is_delivery: number;
   delivery_brand: string;
@@ -54,8 +53,8 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
   const formatCurrency = (price: number) =>
     price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
-  const getStatusColor = (status: OrderStatus) => {
-    switch (status as OrderStatus) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
       case "DELIVERING":
         return "text-yellow-500";
       case "SENT":
@@ -69,7 +68,7 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
     }
   };
   const getStatusText = (status: string) => {
-    switch (status as OrderStatus) {
+    switch (status) {
       case "DELIVERING":
         return "Đang giao hàng";
       case "SENT":
@@ -96,22 +95,27 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
       onOk: async () => {
         try {
           // Gọi API để nhận đơn hàng
-          const res = await orderApiRequest.updateOrderToSent({
-            orderID: orderId,
-          }, user?.token);
+          const res = await orderApiRequest.updateOrderToSent(
+            {
+              orderID: orderId,
+            },
+            user?.token
+          );
 
           notification.success({
             message: res.message || "Đã nhận đơn sản phẩm",
             description: "Cảm ơn bạn đã mua sản phẩm.",
           });
           router.refresh();
-
         } catch (error) {
-          notifyError("Lỗi nhận đơn", "Có lỗi xảy ra khi xử lý yêu cầu nhận đơn.");
+          notifyError(
+            "Lỗi nhận đơn",
+            "Có lỗi xảy ra khi xử lý yêu cầu nhận đơn."
+          );
         }
       },
     });
-  }
+  };
   const handleCancelOrder = async (orderId: string) => {
     if (orderId === "") {
       notifyError("Lỗi hủy đơn", "Không có dữ liệu đơn hàng.");
@@ -135,19 +139,26 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
             description: "Đơn hàng đã được hủy thành công.",
           });
           router.refresh();
-
         } catch (error) {
-          notifyError("Lỗi hủy đơn", "Có lỗi xảy ra khi xử lý yêu cầu hủy đơn.");
+          notifyError(
+            "Lỗi hủy đơn",
+            "Có lỗi xảy ra khi xử lý yêu cầu hủy đơn."
+          );
         }
       },
     });
-  }
-  function setPaymentData(trans: { id: string; checkoutUrl: any; qrCode: any; }) {
+  };
+  console.log("status:", order.status, "isItem:", isItem);
+  function setPaymentData(trans: {
+    id: string;
+    checkoutUrl: any;
+    qrCode: any;
+  }) {
     order.transaction = {
       qrCode: trans.qrCode,
       checkoutUrl: trans.checkoutUrl,
     };
-    window.open(trans.checkoutUrl, '_blank');
+    window.open(trans.checkoutUrl, "_blank");
   }
   const handlePerformTransaction = async (orderId: string) => {
     if (orderId === "") {
@@ -160,15 +171,16 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
       onOk: async () => {
         try {
           // Gọi API để lấy URL thanh toán
-          const res = await transactionApiRequest.performTransaction(
-            {
-              referenceID: orderId,
-              type: 1, // 1: Thanh toán đơn hàng
-            },
+          const res = await transactionApiRequest.performTransaction({
+            referenceID: orderId,
+            type: 1, // 1: Thanh toán đơn hàng
+          });
 
-          );
-
-          setPaymentData({ id: orderId, checkoutUrl: res.data.checkoutUrl, qrCode: res.data.qrCode });
+          setPaymentData({
+            id: orderId,
+            checkoutUrl: res.data.checkoutUrl,
+            qrCode: res.data.qrCode,
+          });
           // handleRedirectToPayment();
           notification.success({
             message: "Thanh toán thành công",
@@ -178,132 +190,149 @@ export default function OrderCard({ order, isItem = false }: OrderCardProps) {
           notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
           return;
         }
-      }
+      },
     });
   };
   return (
-    <section className="bg-white antialiased hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg shadow-md  m-2">
-      <div className="mt-6 flow-root sm:mt-8 ">
-        <div className="divide-y divide-gray-700 dark:divide-gray-700">
-
-          <div className="flex flex-wrap items-center gap-y-4 p-6 ">
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1" hidden={order.group_id !== null}>
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400" >
-                Mã đơn:
-              </dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                <a href="#" className="hover:underline">
+    <section className="bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg shadow-md m-2 transition-colors duration-200">
+      <div className="mt-6 flow-root sm:mt-8">
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {/* Phần thông tin đơn hàng */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+            {/* Mã đơn */}
+            {order.group_id === null && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Mã đơn:
+                </p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white hover:underline">
                   {order.code || "(Không có mã)"}
-                </a>
-              </dd>
-            </dl>
+                </p>
+              </div>
+            )}
 
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-                Ngày đặt:
-              </dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
+            {/* Ngày đặt */}
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Ngày đặt:
+              </p>
+              <p className="text-base font-semibold text-gray-900 dark:text-white">
                 {formatDate(order.created_at)}
-              </dd>
-            </dl>
+              </p>
+            </div>
 
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-                Tổng tiền:
-              </dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
+            {/* Tổng tiền */}
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Tổng tiền:
+              </p>
+              <p className="text-base font-semibold text-gray-900 dark:text-white">
                 {formatCurrency(order.total_price)}
-              </dd>
-            </dl>
+              </p>
+            </div>
 
-            <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-                Trạng thái:
-              </dt>
-              <dd className={getStatusColor(order.status)}>
-                <span>
-                  {getStatusText(order.status)}
-                </span>
-              </dd>
-            </dl>
+            {/* Trạng thái */}
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Trạng thái:
+              </p>
+              <div className={getStatusColor(order.status)}>
+                {getStatusText(order.status)}
+              </div>
+            </div>
 
-            <div className="w-full grid sm:grid-cols-2 lg:flex lg:w-64 lg:items-center lg:justify-end gap-4">
-              {order.status === "SENT" ? (
+            {/* Các nút thao tác */}
+            {/* <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-2 justify-end items-start sm:items-center lg:items-end xl:items-center">
+              {order.status === "SENT" && (
                 <button
                   type="button"
-                  className="w-full rounded-lg border border-green-700 px-3 py-2 text-center text-sm font-medium text-green-700 hover:bg-green-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-300 dark:border-green-500 dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white dark:focus:ring-green-900 lg:w-auto"
+                  className="w-full sm:w-auto rounded-lg border border-green-700 px-3 py-2 text-center text-sm font-medium text-green-700 hover:bg-green-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-300 dark:border-green-500 dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white dark:focus:ring-green-900"
                 >
                   Mua lại
                 </button>
-              ) : null}
-              {order.status === "CREATED" ? (
-                (
-                  <div className={!isItem ? "flex flex-col sm:flex-row gap-2 justify-between items-center" : "hidden"}>
-                    <Button onClick={() => handlePerformTransaction(order.id)}>
-                      Thanh toán
-                    </Button>
-                    <button
-                      type="button"
-                      className="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
-                      onClick={() => handleCancelOrder(order.id)}
-                    >
-                      Hủy đơn
-                    </button>
-                  </div>
-                )
-              ) : null}
-              {order.status === "DELIVERING" ? (
-                (
-                  <div className={!isItem ? "flex flex-col sm:flex-row gap-2 justify-between items-center" : "hidden"}>
-                    <Button onClick={() => handleReciveOrder(order.id)}>
-                      Xác thực đã nhận hàng
-                    </Button>
+              )}
 
-                  </div>
-                )
-              ) : null}
-              {isItem ? (
-                <>
-                  <Link href={`/customer/order/${order.id}`}>
-                    <button
-                      // onClick={() => router.push(`order/${order.id}`)}
-                      className="w-full inline-flex justify-center rounded-lg  border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700 lg:w-auto"
-                    >
-                      Chi tiết
-                    </button>
-                  </Link>
-                </>
-              ) : null}
+              {order.status === "CREATED" && isItem && (
+                <div className="flex gap-2">
+                  <Button
+                    size="small"
+                    onClick={() => handlePerformTransaction(order.id)}
+                    className="px-3 py-1.5"
+                  >
+                    Thanh toán
+                  </Button>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-red-700 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900"
+                    onClick={() => handleCancelOrder(order.id)}
+                  >
+                    Hủy đơn
+                  </button>
+                </div>
+              )}
 
-            </div>
+              {order.status === "DELIVERING" && isItem && (
+                <Button
+                  size="small"
+                  onClick={() => handleReciveOrder(order.id)}
+                  className="px-3 py-1.5"
+                >
+                  Xác nhận đã nhận
+                </Button>
+              )}
+
+              {isItem && (
+                <Link href={`/customer/order/${order.id}`}>
+                  <button className="inline-flex justify-center rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700">
+                    Chi tiết
+                  </button>
+                </Link>
+              )}
+            </div> */}
           </div>
+          {/* phần các nút thao tác */}
+          <div className="flex flex-wrap justify-end gap-2 px-6 py-6 mt-2">
+            {order.status === "SENT" && (
+              <button className="w-full sm:w-auto ...">Mua lại</button>
+            )}
 
+            {order.status === "CREATED" && isItem && (
+              <>
+                <button
+                  onClick={() => handlePerformTransaction(order.id)}
+                  className="rounded-lg border border-green-700 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-700 hover:text-white ..."
+                >
+                  Thanh toán
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg border border-red-700 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white ..."
+                  onClick={() => handleCancelOrder(order.id)}
+                >
+                  Hủy đơn
+                </button>
+              </>
+            )}
+
+            {order.status === "DELIVERING" && isItem && (
+              <button
+                onClick={() => handleReciveOrder(order.id)}
+                className="rounded-lg border border-blue-700 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-700 hover:text-white ..."
+              >
+                Xác nhận đã nhận
+              </button>
+            )}
+
+            {isItem && (
+              <Link href={`/customer/order/${order.id}`}>
+                <button className="inline-flex justify-center rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700">
+                  Chi tiết
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </section>
-    // <div className="bg-white mb-4 shadow-md rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-gray-200">
-    //   {/* Thông tin cơ bản */}
-    //   <div className="flex-1 space-y-1">
-    //     <h3 className="text-lg font-semibold">Mã đơn: {order.code || "(Không có mã)"}</h3>
-    //     <p>Người nhận: {order.full_name}</p>
-    //     <p>SĐT: {order.phone_number}</p>
-    //     <p>Địa chỉ: {order.address}</p>
-    //     <p>Email: {order.email}</p>
-    //     <p>Số sản phẩm: {order.total_item}</p>
-    //   </div>
-
-    //   {/* Thông tin phụ & trạng thái */}
-    //   <div className="flex flex-col items-start sm:items-end space-y-1">
-    //     <p className="font-medium">Tổng tiền: {formatCurrency(order.total_price)}</p>
-    //     <p className={getStatusColor(order.status)}>Trạng thái: {order.status}</p>
-    //     <p>Ngày đặt: {formatDate(order.created_at)}</p>
-    //     {order.is_delivery === 1 && (
-    //       <>
-    //         <p>Hãng giao: {order.delivery_brand}</p>
-    //         <p>Mã vận đơn: {order.delivery_code}</p>
-    //       </>
-    //     )}
-    //   </div>
-    // </div>
   );
 }

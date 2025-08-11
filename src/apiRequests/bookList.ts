@@ -1,5 +1,7 @@
 import http from "@/src/lib/httpAxios";
 import { CommonResType } from "../schemaValidations/common.schema";
+import { create } from "domain";
+import { createStore } from "zustand";
 
 export const bookListApiRequest = {
   createBookList: (body: any, sessionToken?: string) =>
@@ -60,6 +62,47 @@ export const bookListApiRequest = {
 
   updateBookItemProduct: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/BookItem/update-bookitem-product", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+
+  // //Book table
+  // createBookTableByCustomer: (body: any, sessionToken?: string) =>
+  //   http.post<CommonResType>(
+  //     "/api/BookTable/create-booktable-by-customer",
+  //     body,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${sessionToken}`,
+  //       },
+  //     }
+  //   ),
+  //   Store Table API Requests
+  createStoreTable: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/StoreTableTable/create", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  getListStoreTable: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>(
+      "/api/StoreTableTable/get-list-by-store-id",
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    ),
+  updateStoreTable: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/StoreTableTable/Update", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  deleteStoreTable: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/StoreTableTable/dissable", body, {
       headers: {
         Authorization: `Bearer ${sessionToken}`,
       },

@@ -1,16 +1,15 @@
 "use client";
 import productApiRequest from "@/src/apiRequests/product";
+import storeApiRequest from "@/src/apiRequests/stores";
 import { useStores } from "@/src/hooks/useStores";
 import { useWishlistStore } from "@/src/store/wishlistStore";
 import { useQuery } from "@tanstack/react-query";
 import { Image, InputNumber, notification, Rate } from "antd";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCartStore } from "../../store/cartStore";
-import Magnet from "../Bits/Magnet ";
 import { notifySuccess } from "../Notification/Notification";
-import { useRouter } from "next/navigation";
-import storeApiRequest from "@/src/apiRequests/stores";
 
 interface BoardGameInfo {
   id: string;
@@ -22,8 +21,8 @@ interface BoardGameInfo {
   publisher: string;
   category: string;
   age: number;
-  number_of_players_min: number;
-  number_of_players_max: number;
+  number_of_player_min: number;
+  number_of_player_max: number;
   hard_rank: number;
   time: string;
   description: string;

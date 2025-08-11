@@ -41,7 +41,7 @@ export const useStores = (options: UseStoresOptions = {}) => {
     queryKey: ["stores", options.search, options.filters],
     queryFn: async () => {
       try {
-        const res = await storeApiRequest.getList({
+        const res = await storeApiRequest.getRentals({
           search: options.search || "",
           filter: options.filters || [""],
         });

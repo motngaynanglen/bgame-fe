@@ -5,6 +5,7 @@ interface CartItem {
   productTemplateID: string;
   quantity: number;
   name?: string;
+  price?: number; // Thêm trường price
   image?: string;
   storeId?: string; 
 }
@@ -13,7 +14,7 @@ interface RentalStore {
   cartItems: CartItem[];
   currentStoreId: string | null;
   setStoreId: (storeId: string) => void;
-  addToCart: (productTemplateID: string, name?: string, image?: string) => void; // Cập nhật addToCart
+  addToCart: (productTemplateID: string, name?: string, image?: string, price?: number) => void; // Cập nhật addToCart
   removeFromCart: (productTemplateID: string) => void;
   updateQuantity: (productTemplateID: string, quantity: number) => void;
   clearCart: () => void;
@@ -43,7 +44,7 @@ export const useRentalStore = create<RentalStore>()(
         set({ currentStoreId: storeId });
       },
 
-      addToCart: (productTemplateID, name, image) =>
+      addToCart: (productTemplateID, name, image, price) =>
         set((state) => {
           const existingItem = state.cartItems.find(
             (item) => item.productTemplateID === productTemplateID
@@ -62,7 +63,7 @@ export const useRentalStore = create<RentalStore>()(
               cartItems: [
                 ...state.cartItems,
 
-                { productTemplateID, quantity: 1, name, image, storeId: state.currentStoreId ?? undefined, }, // Lưu cả name và image
+                { productTemplateID, quantity: 1, name, image, storeId: state.currentStoreId ?? undefined, price }, // Lưu cả name và image
               ],
             };
           }

@@ -1,7 +1,7 @@
 import envConfig from '@/src/config'
 import axios, { AxiosError, AxiosInstance } from 'axios'
 import { redirect } from 'next/navigation'
-import { setStoredUser } from '../app/app-provider'
+import { getCookie, deleteCookie } from 'cookies-next'
 
 type CustomOptions = Omit<RequestInit, 'method'> & {
     baseUrl?: string | undefined
@@ -120,10 +120,38 @@ const request = async <Response>(
         body instanceof FormData ? {} : {
             'Content-Type': 'application/json'
         };
+
     const axiosInstance: AxiosInstance = axios.create({
         timeout: 10000, // Timeout in milliseconds => 10s
         // withCredentials: true
     });
+    // Gắn token từ cookie vào Authorization
+    // axiosInstance.interceptors.request.use((config) => {
+    //     const token = getCookie('sessionToken') as string | undefined
+    //     if (token) {
+    //         config.headers.Authorization = `Bearer ${token}`
+    //     }
+    //     return config
+    // })
+    // Xử lý lỗi 401 tự động logout + redirect
+    // axiosInstance.interceptors.response.use(
+    //     (response) => response,
+    //     (error) => {
+    //         if (error instanceof AxiosError && error.response) {
+    //             const { status } = error.response
+    //             if (status === STATUS_CODES.AUTHENTICATION_ERROR) {
+    //                 if (isClient()) {
+    //                     deleteCookie('sessionToken')
+    //                     window.location.href = '/login'
+    //                 }
+    //             }
+    //         }
+    //         return Promise.reject(error)
+    //     }
+    // )
+
+
+
     const axiosConfig = {
         method,
         url: fullUrl,
@@ -173,7 +201,7 @@ const request = async <Response>(
                     message: 'Bạn cần đăng nhập để thực hiện thao tác này',
                     data: data.data,
                 });
-            }else if (status === STATUS_CODES.PERMISSION_DENIED) {
+            } else if (status === STATUS_CODES.PERMISSION_DENIED) {
                 throw new HttpError({
                     status: STATUS_CODES.PERMISSION_DENIED,
                     message: 'Bạn không có quyền truy cập vào tài nguyên này',
