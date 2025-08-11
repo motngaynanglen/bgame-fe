@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { AiFillEye } from "react-icons/ai";
 import { LuSettings2 } from "react-icons/lu";
 import { useAppContext } from "../../app-provider";
-import dayjs from "@/src/lib/dayjs ";
+import dayjs from "@/src/lib/dayjs";
 import bookListApiRequest from "@/src/apiRequests/bookList";
 import { AxiosError } from "axios";
 

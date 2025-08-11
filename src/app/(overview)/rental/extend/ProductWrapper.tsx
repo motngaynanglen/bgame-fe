@@ -47,7 +47,7 @@ export default function ProductWrapper({ storeid, date }: { storeid: string, dat
         };
 
         fetchTimeSlots();
-    }, [storeid]);
+    }, [storeid, date]);
 
     return (
         <>

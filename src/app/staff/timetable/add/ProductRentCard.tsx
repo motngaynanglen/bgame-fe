@@ -5,7 +5,7 @@ import StarBorder from "@/src/components/Bits/StarBorder ";
 import CustomDatePicker from "@/src/components/DateRantalPicker/DateRental";
 import CustomRangePicker from "@/src/components/DateRantalPicker/HourRental";
 import { notifyError, notifySuccess } from "@/src/components/Notification/Notification";
-import dayjs from "@/src/lib/dayjs ";
+import dayjs from "@/src/lib/dayjs";
 import { HttpError } from "@/src/lib/httpAxios";
 import { useRentalStore } from "@/src/store/rentalStore";
 import { Button, Divider, message, Modal, notification, Radio } from "antd";

@@ -4,9 +4,16 @@ import bookTableApiRequest from "@/src/apiRequests/bookTable";
 import { useAppContext } from "@/src/app/app-provider";
 import { useRentalStore } from "@/src/store/rentalStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { message } from "antd";
-import dayjs from "dayjs";
+import { DatePicker, message } from "antd";
+import dayjs from "@/src/lib/dayjs";
 import { useEffect, useState } from "react";
+import { date } from "zod";
+import BookingPaymentModal from "./PaymentModal";
+import { PaymentData } from "@/src/schemaValidations/transaction.schema";
+import transactionApiRequest from "@/src/apiRequests/transaction";
+import { notifyError } from "@/src/components/Notification/Notification";
+import { getCookie } from "cookies-next";
+import authApiRequest from "@/src/apiRequests/auth";
 
 const hours = Array.from({ length: 28 }, (_, i) =>
   dayjs("07:00", "HH:mm")
@@ -24,7 +31,19 @@ export interface BookingCell {
   slot: number;
   status: BookingStatus;
 }
-
+export interface BookingRequestBody {
+  storeId: string;
+  bookDate: string;
+  fromSlot: number;
+  toSlot: number;
+  tableIDs: string[];
+  bookListItems: {
+    productTemplateID: string;
+    quantity: number;
+    productName?: string;
+    price?: number;
+  }[];
+}
 interface PageProps {
   searchParams: {
     storeId?: string;
@@ -63,19 +82,36 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
   const [selectedSlots, setSelectedSlots] = useState<
     { table: string; slot: number }[]
   >([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [customerName, setCustomerName] = useState("");
-  const [payloadData, setPayloadData] = useState();
-  const { user } = useAppContext();
+  const [bookingModal, setBookingModal] = useState<{
+    open: boolean;
+    payload?: BookingRequestBody;
+  }>({ open: false });
+
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(dayjs(bookDate || undefined));
+  const { user, isAuthenticated } = useAppContext();
   const { cartItems } = useRentalStore();
+  const [paymentData, setPaymentData] = useState<PaymentData | undefined>(
+    undefined
+  );
 
   const getStatus = (table: string, slot: number): BookingStatus => {
-    const found = bookingData.find(
-      (b) => b.table === table && b.slot === slot
-    );
-    return found?.status || "available";
-  };
+    const found = bookingData.find((b) => b.table === table && b.slot === slot);
+    if (found?.status) return found.status;
 
+    if (selectedDate) {
+      const isToday = selectedDate.isSame(dayjs(), "day");
+      const nowSlot = Math.floor(
+        dayjs().diff(dayjs().startOf("day").hour(7), "minute") / 30
+      ) + 1;
+
+      const isPast = selectedDate.isBefore(dayjs(), "day");
+      const isBeforeNowSlot = isToday && slot < nowSlot;
+
+      if (isPast || isBeforeNowSlot) return "locked";
+    }
+
+    return "available";
+  };
   const handleClickSlot = (
     table: string,
     slot: number,
@@ -83,47 +119,62 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
   ) => {
     if (status !== "available") return;
 
+    // Nếu đang chọn từ bàn khác → reset
     if (selectedSlots.length && selectedSlots[0].table !== table) {
       setSelectedSlots([{ table, slot }]);
-    } else {
-      const exists = selectedSlots.find(
-        (s) => s.slot === slot && s.table === table
-      );
-      if (exists) {
-        setSelectedSlots(
-          selectedSlots.filter((s) => !(s.slot === slot && s.table === table))
-        );
-      } else {
-        setSelectedSlots(
-          [...selectedSlots, { table, slot }].sort(
-            (a, b) => a.slot - b.slot
-          )
-        );
+      return;
+    }
+    // Nếu click lại chính slot đầu tiên → hủy chọn
+    if (
+      selectedSlots.length === 1 &&
+      selectedSlots[0].table === table &&
+      selectedSlots[0].slot === slot
+    ) {
+      setSelectedSlots([]);
+      return;
+    }
+    // Nếu chưa chọn gì → chọn slot đầu tiên
+    if (selectedSlots.length === 0) {
+      setSelectedSlots([{ table, slot }]);
+      return;
+    }
+
+    // Nếu chọn 2 slot → chọn hết khoảng
+    const firstSlot = selectedSlots[0].slot;
+    const start = Math.min(firstSlot, slot);
+    const end = Math.max(firstSlot, slot);
+
+    // Kiểm tra dải slot hợp lệ
+    for (let s = start; s <= end; s++) {
+      if (getStatus(table, s) !== "available") {
+        message.warning("Một số slot trong khoảng đã bị đặt hoặc bị khóa.");
+        return;
       }
     }
+
+    const range = Array.from({ length: end - start + 1 }, (_, i) => ({
+      table,
+      slot: start + i,
+    }));
+
+    setSelectedSlots(range);
   };
 
-  const mutation = useMutation({
-    mutationFn: async (data: any) => {
-      setPayloadData(data);
-      return bookListApiRequest.createBookList(data, user?.token);
-    },
-    mutationKey: ["createBookListByStaff"],
-    onSuccess: () => {
-      message.success("Đặt bàn thành công!");
-      setSelectedSlots([]);
-      setCustomerName("");
-      setModalOpen(false);
-    },
-    onError: (error: any) => {
-      message.error(`Đặt bàn thất bại. Vui lòng thử lại. ${error.message}`);
-      console.error(error);
-    },
-  });
-
   const handleConfirmBooking = () => {
+    if (selectedSlots.length < 3) {
+      message.warning("Vui lòng chọn ít nhất ba slot để đặt bàn.");
+      return;
+    }
     if (!selectedSlots.length) return;
 
+    if (storeId === undefined) {
+      message.error("Vui lòng chọn cửa hàng trước khi đặt bàn.");
+      return;
+    }
+    if (!selectedDate) {
+      message.error("Vui lòng chọn ngày đặt bàn.");
+      return;
+    }
     const tableName = selectedSlots[0].table;
     const tableData = data?.data?.find((t) => t.TableName === tableName);
     const tableID = tableData?.TableID;
@@ -131,19 +182,21 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
     const fromSlot = selectedSlots[0].slot;
     const toSlot = selectedSlots[selectedSlots.length - 1].slot + 1;
 
-    const payload = {
+    const payload: BookingRequestBody = {
       storeId,
-      bookDate: bookDate?.toISOString(),
+      bookDate: selectedDate?.format(),
       fromSlot,
       toSlot,
       tableIDs: tableID ? [tableID] : [],
       bookListItems: cartItems.map((item) => ({
         productTemplateID: item.productTemplateID,
         quantity: item.quantity,
+        productName: item.name,
+        price: item.price, // Lưu giá sản phẩm
       })),
     };
-
-    mutation.mutate(payload);
+    setBookingModal({ open: true, payload });
+    // mutation.mutate(payload);
   };
 
   const {
@@ -153,16 +206,20 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
     error: rentalErrorData,
     isSuccess: rentalSuccess,
   } = useQuery<responseModel>({
-    queryKey: ["rentalTimeTable", storeId, bookDate?.toISOString()],
+    queryKey: ["rentalTimeTable", storeId, selectedDate?.format()],
     queryFn: async () => {
-      const res = await bookTableApiRequest.getBookTableTimeTableByDate({
-        storeId,
-        bookDate: bookDate?.toISOString(),
-      });
+      const res = await bookTableApiRequest.getBookTableTimeTableByDate(
+        {
+          storeId,
+          bookDate: selectedDate?.format() || dayjs().format(),
+        },
+        user?.token
+      );
       return res;
     },
     enabled: !!storeId,
   });
+
 
   useEffect(() => {
     if (!data?.data) return;
@@ -189,24 +246,46 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
   }, [data]);
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-white flex gap-6 text-sm items-center">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 border rounded bg-white" /> Trống
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-400 rounded" /> Đã đặt
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gray-400 rounded" /> Khoá
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-purple-400 rounded" /> Sự kiện
-        </div>
-        {/* <div className="text-green-700 font-semibold underline cursor-pointer">
+      <div className="flex justify-between p-4 bg-white  ">
+        <div className=" bg-white flex gap-6 text-sm items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 border rounded bg-white" /> Trống
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-400 rounded" /> Đã đặt
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-400 rounded" /> Khoá
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-purple-400 rounded" /> Sự kiện
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-yellow-500 rounded" /> Bạn đã đặt
+          </div>
+          {/* <div className="text-green-700 font-semibold underline cursor-pointer">
             Xem bàn & bảng giá
           </div> */}
-      </div>
 
+        </div>
+
+        <span >
+          Ngày:{" "}
+          <DatePicker
+            type="date"
+            value={selectedDate}
+            disabledDate={(current) => {
+              const today = dayjs().startOf("day");
+              const maxDate = today.add(2, "month").endOf("month");
+              return current < today || current > maxDate;
+            }}
+            onChange={(date) => setSelectedDate(date)}
+            disabled={rentalLoading || rentalError}
+          />
+
+
+        </span>
+      </div>
       <div className="overflow-auto border rounded-md">
         <table className="min-w-max table-fixed border-collapse">
           <thead>
@@ -235,14 +314,12 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
                   const isSelected = selectedSlots.some(
                     (s) => s.table === table.TableName && s.slot === slot
                   );
+
                   const bgColor =
-                    status === "booked"
-                      ? "bg-red-400 cursor-not-allowed"
-                      : table.Owner != null
-                        ? "bg-yellow-300"
-                        : isSelected
-                          ? "bg-green-400"
-                          : "bg-white hover:bg-green-100";
+                    (status === "booked" && table.Owner != null) ? "bg-yellow-500" :
+                      status === "booked" ? "bg-red-400 cursor-not-allowed" :
+                        status === "locked" ? "bg-gray-300 cursor-not-allowed" :
+                          isSelected ? "bg-green-400" : "bg-white hover:bg-green-100";
                   return (
                     <td
                       key={slot}
@@ -303,9 +380,11 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
         </div>
       )}
       {/* code này để debug payload data */}
-        {data && (
+      {data && (
         <div className="mt-4 p-4 bg-gray-100 rounded">
-          <pre>{JSON.stringify(data, null, 2)}</pre>
+          <pre>{JSON.stringify(bookingModal.payload, null, 2)}</pre>
+          <pre>{JSON.stringify(selectedDate?.format(), null, 2)}</pre>
+
         </div>
       )}
 
@@ -329,6 +408,15 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
             />
           </div>
         </Modal> */}
+      {bookingModal.payload && (
+        <BookingPaymentModal
+          open={bookingModal.open}
+          onClose={() => setBookingModal({ open: false })}
+          bookTables={bookingModal.payload}
+          paymentData={paymentData}
+          setPaymentData={() => setPaymentData(paymentData)}
+        />
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { CreateButton } from "@/src/components/admin/Button";
 import { InvoicesTableSkeleton, TableSkeleton } from "@/src/components/admin/layout/skeletons";
 import AntdCustomPagination from "@/src/components/admin/table/pagination";
 import SearchBar from "@/src/components/admin/table/search";
-import dayjs from "@/src/lib/dayjs ";
+import dayjs from "@/src/lib/dayjs";
 import { HomeOutlined, UserOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Col, message, Pagination, Row, Space, Table, Tag } from "antd";
 import type { TableProps } from "antd"

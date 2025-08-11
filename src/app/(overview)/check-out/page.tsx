@@ -10,6 +10,8 @@ import { Button, Modal, RadioChangeEvent } from "antd";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAppContext } from "../../app-provider";
+import { PaymentData } from "@/src/schemaValidations/transaction.schema";
+import Image from "next/image";
 
 interface FormData {
   email: string;
@@ -33,11 +35,6 @@ const data = [
   "Giao hàng qua Viettel Post",
 ];
 
-interface PaymentData {
-  id?: string;
-  checkoutUrl?: string;
-  qrCode?: string;
-}
 export default function CheckOut() {
   const [openResponsive, setOpenResponsive] = useState(false);
   const { cart, calculateTotal, clearCart, buyNowItem } = useCartStore();
@@ -174,7 +171,10 @@ export default function CheckOut() {
   const [clientOnlyTotal, setClientOnlyTotal] = useState("0");
 
   useEffect(() => {
-    setClientOnlyTotal(formatVND(calculateTotal()));
+    const formatMoney = () => {
+      return formatVND(calculateTotal());
+    };
+    setClientOnlyTotal(formatMoney());
   }, [cart]);
   useEffect(() => {}, [paymentData]);
 
@@ -185,10 +185,12 @@ export default function CheckOut() {
         <div className="w-full lg:w-2/3 pr-0 lg:pr-4 border-r-2 border-gray-200">
           {/* logo  */}
           <div className="flex justify-center items-center mb-6">
-            <img
+            <Image
               src="https://placehold.co/50x50"
               alt="BGImpact logo"
               className="mr-4"
+              width={50}
+              height={50}
             />
             <h1 className="text-4xl font-bold">BOARD GAME IMPACT</h1>
           </div>
@@ -326,10 +328,12 @@ export default function CheckOut() {
                   (index === productsToCheckout.length - 1 ? "" : " border-b-2")
                 }
               >
-                <img
+                <Image
                   src={imageUrls[0]}
                   alt={item.name || "Product image"}
-                  className="w-20 h-20 object-cover rounded mr-4"
+                  className="object-cover rounded mr-4"
+                  width={80}
+                  height={80}
                 />
 
                 <div className="flex-1">

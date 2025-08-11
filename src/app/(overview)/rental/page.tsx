@@ -7,7 +7,7 @@ import { useSelectedStore } from "@/src/hooks/useSelectStoreId";
 import { useStores } from "@/src/hooks/useStores";
 import { AppstoreOutlined, FilterOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Drawer, MenuProps, Pagination, Space } from "antd";
+import { Button, Card, Col, DatePicker, Drawer, MenuProps, Pagination, Row, Space } from "antd";
 import { useState } from "react";
 import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
 import Loading from "../loading";
@@ -16,9 +16,10 @@ import { useEffect } from "react";
 import { useRentalStore } from "@/src/store/rentalStore";
 import TimeSlotDisplay from "./extend/TimeSlotDisplay";
 import bookListApiRequest from "@/src/apiRequests/bookList";
-import BookingTable from "./table/page";
-import dayjs from "@/src/lib/dayjs ";
+import BookingTable from "./BookTimeTable";
+import dayjs from "@/src/lib/dayjs";
 import { date } from "zod";
+import StoreSelector from "./StoreSelecter";
 
 interface BoardGame {
   id: string;
@@ -132,6 +133,22 @@ export default function BoardGameRental() {
           ) : (
             <>
               <div className=" mb-4">
+
+
+                <Card style={{ height: '100%' }}>
+                  <p className="text-black font-semibold mb-4">
+                    Địa điểm cửa hàng cho thuê:
+                  </p>
+                  <StoreSelector
+                    value={selectedStoreId || ""}
+                    onChange={setSelectedStoreId}
+                    className="mb-6"
+                    placeholder="Tìm cửa hàng..."
+                  />
+                </Card>
+
+
+
                 <div className="flex ">
                   <Space wrap>
                     <Button
@@ -151,41 +168,9 @@ export default function BoardGameRental() {
                       Giỏ hàng thuê
                     </Button>
 
-                    <p className="text-black font-semibold">
-                      Địa điểm cửa hàng cho thuê:
-                    </p>
 
-                    {stores.length > 0 ? (
-                      <select
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        value={selectedStoreId || ""}
-                        onChange={(e) => setSelectedStoreId(e.target.value)}
-                      >
-                        {stores.map((store) => (
-                          <option
-                            className="p-2"
-                            key={store.id}
-                            value={store.id}
-                          >
-                            {store.store_name} - {store.address}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <p>Đang tải danh sách cửa hàng...</p>
-                    )}
 
-                    {/* <div className="flex items-center justify-between w-full sm:justify-end">
-                 
-                  <select
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    defaultValue="default"
-                  >
-                    <option value="default">BoardGame</option>
-                    <option value="table">Bàn</option>
-                   
-                  </select>
-                </div> */}
+
                   </Space>
                 </div>
               </div>
@@ -208,7 +193,7 @@ export default function BoardGameRental() {
                 {/* Product Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {(Array.isArray(data?.data) && data.data.length > 0) ||
-                  storesLoading ? (
+                    storesLoading ? (
                     data?.data.map((boardgame: BoardGame) => (
                       <CardProductRent
                         key={boardgame.id}

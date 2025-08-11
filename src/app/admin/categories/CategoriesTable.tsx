@@ -23,10 +23,9 @@ export default function CategoriesTable() {
 
     const fetchCategories = async () => {
         setLoading(true)
-        // Giả lập dữ liệu gọi từ API
         try {
-            const res = await categoryApiRequest.getCategoryByAdmin({}, user?.token);
-            const data: Category[] = res.data || [] // Giả sử API trả về danh sách categories
+            const res = await categoryApiRequest.getCategoryList({}, user?.token);
+            const data: Category[] = res.data || [] 
             setCategories(data);
         } catch (error) {
             if (error instanceof Error) {
@@ -38,7 +37,7 @@ export default function CategoriesTable() {
     }
     useEffect(() => {
         fetchCategories();
-    }, [searchText]);
+    }, [fetchCategories]);
 
     const handleDeactiveStatus = async (id: string) => {
         try {
