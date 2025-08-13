@@ -1,332 +1,404 @@
 "use client";
 
-import bookListApiRequest from "@/src/apiRequests/bookList";
-import { useRentalStore } from "@/src/store/rentalStore";
-import { useQuery } from "@tanstack/react-query";
-import { Button, Empty } from "antd";
+import React, { useCallback, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Card,
+  List,
+  Avatar,
+  Typography,
+  Space,
+  Tag,
+  Button,
+  Empty,
+  Modal,
+  Divider,
+  Row,
+  Col,
+  message,
+  Skeleton,
+  Pagination,
+} from "antd";
 import { useRouter } from "next/navigation";
+import bookListApiRequest from "@/src/apiRequests/bookList";
 import { useAppContext } from "../../app-provider";
+import { useRentalStore } from "@/src/store/rentalStore";
+import transactionApiRequest from "@/src/apiRequests/transaction";
+import { formatDateTime, formatVND } from "@/src/lib/utils";
+import PaymentModal from "@/src/components/CheckOut/PaymentModal";
 
-interface items {
-  product_name: string;
-  rent_price: number;
-  image: string;
-  rent_price_per_hour: number;
-  condition: string;
-  status: string;
-}
-interface Booklist {
+const { Title, Text } = Typography;
+
+/* ---------- Types matching backend JSON ---------- */
+
+interface ProductDto {
   id: string;
-  customer_id: string;
+  template_id: string;
+  ProductName: string;
+  TemplateImage?: string;
+}
+
+interface BookingDto {
+  id: string;
+  customer_id?: string;
   from: string;
   to: string;
-  type: number;
+  type: number; // 0: giờ, 1: ngày (theo sample)
   total_price: number;
-  status: string;
-  items: items[];
-}
-interface responseModel {
-  data: Booklist[];
-  message: string;
-  statusCode: number;
-  paging: null;
+  status: string; // CREATED | PAID | ...
+  products: ProductDto[]; // note: 'products' per sample
+  created_at?: string;
 }
 
-const RentalHistory = () => {
-  const { cartItems } = useRentalStore();
+interface PagingDto {
+  pageNum: number;
+  pageSize: number;
+  pageCount: number; // number of pages
+}
+
+interface BackendResponse {
+  statusCode: string; // "200"
+  message?: string;
+  data: BookingDto[];
+  paging?: PagingDto | null;
+}
+
+/* ---------- Helpers ---------- */
+
+const STATUS_MAP: Record<string, { text: string; color: string }> = {
+  CREATED: { text: "Chưa thanh toán", color: "default" },
+  PAID: { text: "Đã thanh toán", color: "green" },
+  CANCELLED: { text: "Đã hủy", color: "red" },
+  STARTED: { text: "Đang thuê", color: "processing" },
+  ENDED: { text: "Kết thúc", color: "default" },
+  OVERDUE: { text: "Quá hạn", color: "orange" },
+  UNKNOWN: { text: "Chờ xác nhận", color: "default" },
+};
+
+/* ---------- Component ---------- */
+
+export default function RentalHistoryPage() {
   const { user } = useAppContext();
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleString("vi-VN", {
-      dateStyle: "medium",
-      // timeStyle: "short",
-    });
   const router = useRouter();
+  const qc = useQueryClient();
 
-  const formatCurrency = (price: number) =>
-    price.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+  const [page, setPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10); // default pageSize (matches sample paging.pageSize)
 
-  // const getStatusColor = (status: OrderStatus) => {
-  //   switch (status) {
-  //     case "DELIVERING":
-  //       return "text-yellow-500";
-  //     case "SENT":
-  //       return "text-green-500";
-  //     case "CANCELLED":
-  //       return "text-red-500";
-  //     default:
-  //       return "text-gray-400";
-  //   }
-  // };
+  const [selected, setSelected] = useState<BookingDto | null>(null);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<{ id: string; type: number } | null>(null);
 
-  const { data, isLoading, isError, error } = useQuery<responseModel>({
-    queryKey: ["rentalHistory"],
+  const handleOpenPayment = (bookingId: string, bookingType: number) => {
+    setSelectedBooking({ id: bookingId, type: bookingType });
+    setPaymentModalOpen(true);
+  };
+  const openDetail = useCallback((b: BookingDto) => {
+    setSelected(b);
+    setDetailVisible(true);
+  }, []);
+  const closeDetail = useCallback(() => {
+    setSelected(null);
+    setDetailVisible(false);
+  }, []);
+
+  // Query: rental history with paging params
+  const { data: raw, isLoading, isError, refetch } = useQuery<BackendResponse>({
+    queryKey: ["rentalHistory", page, pageSize],
     queryFn: async () => {
-      // Hàm gọi API
       const res = await bookListApiRequest.getBookListHistory(
         {
           paging: {
-            pageNum: 1,
-            pageSize: 10,
+            pageNum: page,
+            pageSize,
           },
         },
         user?.token
       );
-      return res;
+      return res as BackendResponse;
     },
+    staleTime: 30_000,
   });
 
-  console.log("RentalHistory", data);
-  console.log("data", data?.data);
+  const bookings = raw?.data ?? [];
+  const paging = raw?.paging ?? null;
+
+  const totalEstimated = useMemo(() => {
+    if (!paging) return bookings.length;
+    return paging.pageCount * paging.pageSize;
+  }, [paging, bookings.length]);
+
+  // const payMutation = useMutation({
+  //   mutationFn: async (bookingId: string) => {
+  //     message.loading({ content: "Đang tạo link thanh toán...", key: "pay" });
+  //     const res = await transactionApiRequest.performTransaction(
+  //       { referenceId: bookingId },
+  //       user?.token
+  //     );
+  //     return res;
+  //   },
+  //   mutationKey: ["payBooking"],
+  //   onMutate: () => loadingIndicator(),
+  //   onSuccess: (res: any) => {
+  //     message.success({ content: "Chuyển đến trang thanh toán...", key: "pay" });
+  //     const url = res?.data?.checkoutUrl;
+  //     if (url) {
+  //       window.location.href = url;
+  //     } else {
+  //       qc.invalidateQueries({ queryKey: ['rentalHistory'] });
+  //     }
+  //   },
+  //   onError: (err: any) => {
+  //     message.error({ content: "Không thể tạo link thanh toán", key: "pay" });
+  //   },
+  // }
+  // );
+
+  // const handlePay = (booking: BookingDto) => {
+  //   Modal.confirm({
+  //     title: "Xác nhận thanh toán",
+  //     content: (
+  //       <>
+  //         <p>Đơn: <b>#{booking.id}</b></p>
+  //         <p>Ngày thuê: <b>{formatDateTime(booking.from, "DATE")}</b></p>
+  //         <p>Giờ: <b>{formatDateTime(booking.from, "TIME")}</b> — <b>{formatDateTime(booking.to, "TIME")}</b></p>
+  //         <p>Tổng tiền: <b>{formatVND(booking.total_price)}</b></p>
+  //       </>
+  //     ),
+  //     okText: "Thanh toán",
+  //     cancelText: "Hủy",
+  //     onOk: () => payMutation.mutate(booking.id),
+  //   });
+
+  // }
+  if (isLoading) {
+    return (
+      <Card bordered={false} className="w-full">
+        <Skeleton active paragraph={{ rows: 4 }} />
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card bordered={false} title="Lịch sử thuê">
+        <Text type="danger">Không thể tải lịch sử. Vui lòng thử lại.</Text>
+        <div style={{ marginTop: 12 }}>
+          <Button onClick={() => refetch()}>Tải lại</Button>
+        </div>
+      </Card>
+    );
+  }
+
   return (
-    <div className=" p-4 w-full bg-white mt-2 rounded-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">Lịch sử thuê</h2>
+    <>
+      <Card bordered className="w-full">
+        <Row justify="space-between" align="middle" style={{ marginBottom: 12 }}>
+          <Col>
+            <Title level={4} style={{ margin: 0 }}>
+              Lịch sử thuê
+            </Title>
+            <Text type="secondary">Danh sách các lượt đặt gần đây</Text>
+          </Col>
+          <Col>
+            <Space>
+              <Button onClick={() => refetch()}>Làm mới</Button>
+              <Button type="primary" onClick={() => router.push("/rental")}>
+                Tìm thuê board game
+              </Button>
+            </Space>
+          </Col>
+        </Row>
 
-      {Array.isArray(data?.data) && data.data.length === 0 ? (
-        <Empty description={<span>Bạn chưa có đơn đặt thuê</span>}>
-          <Button onClick={() => router.push("/rental")} type="primary">
-            Tìm thuê board game
-          </Button>
-        </Empty>
-      ) : (
-        Array.isArray(data?.data) &&
-        data.data.map((rental, index) => (
-          <section className="relative" key={rental.id || index}>
-            <div className="w-full  mx-auto ">
-              <div className="mt-7 border border-gray-300 pt-9">
-                <div className="flex max-md:flex-col items-center justify-between px-3 md:px-11">
-                  <div className="data">
-                    <p className="font-medium text-lg leading-8 text-black whitespace-nowrap">
-                      Mã đơn hàng : #10234987
-                    </p>
-                    <p className="font-medium text-lg leading-8 text-black mt-3 whitespace-nowrap">
-                      Thời gian thuê : {formatDate(rental.from)} -{" "}
-                      {formatDate(rental.to)}
-                    </p>
-                  </div>
-                  <div className="data">
-                    <p className="font-medium text-lg leading-8 text-black whitespace-nowrap">
-                      Phương thức thuê :{" "}
-                      {rental.type === 1 ? "Thuê theo ngày" : "Thuê theo giờ"}
-                    </p>
-                    <p className="font-medium text-lg leading-8 text-black mt-3 whitespace-nowrap">
-                      Trạng thái :{" "}
-                      {rental.status === "CREATED"
-                        ? "Mới tạo"
-                        : rental.status === "PAID"
-                        ? "Đã thanh toán"
-                        : rental.status === "CANCELLED"
-                        ? "Đã hủy"
-                        : rental.status === "STARTED"
-                        ? "Đang thuê"
-                        : rental.status === "ENDED"
-                        ? "Đã kết thúc"
-                        : rental.status === "OVERDUE"
-                        ? "Quá hạn"
-                        : "Chờ xác nhận"}
-                    </p>
-                  </div>
-                </div>
-
-                {rental.items.map((item, itemIndex) => (
-                  <div key={`${rental.id}-${itemIndex}`} className="mt-8">
-                    <svg
-                      className="my-9 w-full"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="1216"
-                      height="2"
-                      viewBox="0 0 1216 2"
-                      fill="none"
-                    >
-                      <path d="M0 1H1216" stroke="#D1D5DB" />
-                    </svg>
-                    <div className="flex max-lg:flex-col items-center gap-8 lg:gap-24 px-3 md:px-11">
-                      <div className="grid grid-cols-4 w-full">
-                        <div className="col-span-4 sm:col-span-1">
-                          <img
-                            src={
-                              item.image ||
-                              "https://pagedone.io/asset/uploads/1705474774.png"
-                            }
-                            alt=""
-                            className="max-sm:mx-auto object-cover"
-                          />
+        {bookings.length === 0 ? (
+          <Empty description="Bạn chưa có đơn đặt thuê">
+            <Button type="primary" onClick={() => router.push("/rental")}>
+              Tìm thuê board game
+            </Button>
+          </Empty>
+        ) : (
+          <>
+            <List
+              itemLayout="vertical"
+              dataSource={bookings}
+              split
+              renderItem={(b) => {
+                const status = STATUS_MAP[b.status] ?? STATUS_MAP.UNKNOWN;
+                return (
+                  <List.Item
+                    key={b.id}
+                    style={{ padding: 16 }}
+                    extra={
+                      <div style={{ minWidth: 220, textAlign: "right", display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div>
+                          <Text type="secondary">Tổng tiền</Text>
+                          <div style={{ fontSize: 18, fontWeight: 600 }}>{formatVND(b.total_price)}</div>
                         </div>
-                        <div className="col-span-4 sm:col-span-3 max-sm:mt-4 sm:pl-8 flex flex-col justify-center max-sm:items-center">
-                          <h6 className="font-manrope font-semibold text-2xl leading-9 text-black mb-3 whitespace-nowrap">
-                            {item.product_name || "Board Game Name"}
-                          </h6>
-                          <div className="flex items-center max-sm:flex-col gap-x-10 gap-y-3">
-                            {/* <span className="font-normal text-lg leading-8 text-gray-500 whitespace-nowrap">
-                              Qty: 1
-                            </span> */}
-                            <p className="font-semibold text-xl leading-8 text-black whitespace-nowrap">
-                              {rental.type === 1 ? (
-                                <>
-                                  Giá thuê :{" "}
-                                  {formatCurrency(item.rent_price_per_hour)}
-                                </>
-                              ) : (
-                                <>Giá thuê: {formatCurrency(item.rent_price)}</>
-                              )}
-                            </p>
+
+                        <div>
+                          <Text type="secondary">Ngày thuê</Text>
+                          <div>
+                            <Text strong>{formatDateTime(b.from, "DATE")}</Text>
+                          </div>
+                          <div style={{ fontSize: 12, color: "rgba(0,0,0,0.6)" }}>
+                            Giờ: {formatDateTime(b.from, "TIME")} — {formatDateTime(b.to, "TIME")}
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-around w-full  sm:pl-28 lg:pl-0">
-                        <div className="flex flex-col justify-center items-start max-sm:items-center">
-                          <p className="font-normal text-lg text-gray-500 leading-8 mb-2 text-left whitespace-nowrap">
-                            Trạng thái
-                          </p>
-                          <p className="font-semibold text-lg leading-8 text-green-500 text-left whitespace-nowrap">
-                            {item.status === "ACTIVE"
-                              ? "Kích hoạt"
-                              : rental.status === "DISABLED"
-                              ? "Chưa được thuê"
-                              : "Chờ xác nhận"}
-                          </p>
-                        </div>
-                        <div className="flex flex-col justify-center items-start max-sm:items-center">
-                          <p className="font-normal text-lg text-gray-500 leading-8 mb-2 text-left whitespace-nowrap">
-                            Tình trạng sản phẩm
-                          </p>
-                          <p className="font-semibold text-lg leading-8 text-black text-left whitespace-nowrap">
-                            {item.condition || "Mới"}
-                          </p>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          <Tag color={status.color}>{status.text}</Tag>
+                          <Button onClick={() => openDetail(b)}>Chi tiết</Button>
+                          {b.status === "CREATED" && (
+                            <Button
+                              type="primary"
+                              onClick={() => handleOpenPayment(b.id, 0)} // 0 = type booking
+                            >
+                              Thanh toán
+                            </Button>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    }
+                  >
+                    <List.Item.Meta
+                      avatar={<Avatar size={64} src={b.products?.[0]?.TemplateImage} shape="square" />}
+                      title={
+                        <Space direction="vertical" size={0}>
+                          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                            <Text strong>#{b.id}</Text>
+                            <Tag>{b.type === 1 ? "Thuê theo ngày" : "Thuê theo giờ"}</Tag>
+                            <Text type="secondary">{b.created_at ? formatVND(b.created_at) : ""}</Text>
+                          </div>
+                        </Space>
+                      }
+                      description={
+                        <div>
+                          <Text type="secondary">Số sản phẩm:</Text> <Text strong>{b.products?.length ?? 0}</Text>
+                          <div style={{ marginTop: 8 }}>
+                            <Space wrap>
+                              {b.products?.slice(0, 3).map((p) => (
+                                <Card key={p.template_id} size="small" style={{ width: 160 }}>
+                                  <div style={{ display: "flex", gap: 8 }}>
+                                    <img
+                                      src={p.TemplateImage || "https://pagedone.io/asset/uploads/1705474774.png"}
+                                      alt={p.ProductName}
+                                      style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }}
+                                    />
+                                    <div style={{ minWidth: 80 }}>
+                                      <Text strong style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                        {p.ProductName}
+                                      </Text>
+                                    </div>
+                                  </div>
+                                </Card>
+                              ))}
+                              {b.products && b.products.length > 3 && (
+                                <Card size="small" style={{ width: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  <Text type="secondary">+{b.products.length - 3} khác</Text>
+                                </Card>
+                              )}
+                            </Space>
+                          </div>
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                );
+              }}
+            />
 
-                <svg
-                  className="mt-9 w-full"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="1216"
-                  height="2"
-                  viewBox="0 0 1216 2"
-                  fill="none"
-                >
-                  <path d="M0 1H1216" stroke="#D1D5DB" />
-                </svg>
-
-                <div className="px-3 md:px-11 flex items-center justify-between max-sm:flex-col-reverse">
-                  <div className="flex max-sm:flex-col-reverse items-center">
-                    {/* <button className="flex items-center gap-3 py-10 pr-8 sm:border-r border-gray-300 font-normal text-xl leading-8 text-gray-500 group transition-all duration-500 hover:text-indigo-600">
-                      <svg
-                        width="40"
-                        height="41"
-                        viewBox="0 0 40 41"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          className="stroke-gray-600 transition-all duration-500 group-hover:stroke-indigo-600"
-                          d="M14.0261 14.7259L25.5755 26.2753M14.0261 26.2753L25.5755 14.7259"
-                          stroke=""
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                      cancel order
-                    </button> */}
-                    {/* <p className="font-normal text-xl leading-8 text-gray-500 sm:pl-8">
-                      Payment Is Succesfull
-                    </p> */}
-                  </div>
-                  <p className="font-medium text-xl leading-8 text-black max-sm:py-4">
-                    {" "}
-                    <span className="text-gray-500">Tổng tiền: </span>{" "}
-                    &nbsp;{formatCurrency(rental.total_price)}
-                  </p>
-                </div>
-              </div>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+              <Pagination
+                current={page}
+                pageSize={pageSize}
+                total={totalEstimated}
+                onChange={(p) => setPage(p)}
+                showSizeChanger={false}
+              />
             </div>
-          </section>
 
-          // <section className="bg-white antialiased hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg shadow-md  m-2" key={rental.id || index}>
-          //   <div className="mt-6 flow-root sm:mt-8 ">
-          //     <div className="divide-y divide-gray-700 dark:divide-gray-700">
-          //       {/* <Link href={`/customer/order/${order.id}`}> */}
-          //       <div className="flex flex-wrap items-center gap-y-4 p-6 ">
-          //         <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-          //           <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-          //             Mã đơn:
-          //           </dt>
-          //           <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-          //             <a href="#" className="hover:underline">
-          //               #FWB127364372
-          //             </a>
-          //           </dd>
-          //         </dl>
+            {/* Detail Modal */}
+            {/* <Modal
+              open={detailVisible}
+              onCancel={closeDetail}
+              title={selected ? `Chi tiết đơn #${selected.id}` : "Chi tiết đơn"}
+              footer={[
+                <Button key="close" onClick={closeDetail}>
+                  Đóng
+                </Button>,
+                selected && selected.status !== "PAID" && selected.status !== "CANCELLED" ? (
+                  <Button key="pay" type="primary" loading={payMutation.isPending} onClick={() => handlePay(selected)}>
+                    Thanh toán
+                  </Button>
+                ) : null,
+              ]}
+              width={800}
+            >
+              {selected ? (
+                <>
+                  <Row gutter={[16, 12]}>
+                    <Col span={12}>
+                      <Text type="secondary">Ngày thuê</Text>
+                      <div style={{ fontSize: 16, fontWeight: 600 }}>{formatDateTime(selected.from, "DATE")}</div>
+                      <div style={{ color: "rgba(0,0,0,0.65)" }}>
+                        Giờ thuê: <b>{formatDateTime(selected.from, "TIME")}</b>
+                      </div>
+                      <div style={{ color: "rgba(0,0,0,0.65)" }}>
+                        Giờ kết thúc: <b>{formatDateTime(selected.to, "TIME")}</b>
+                      </div>
+                    </Col>
+                    <Col span={12}>
+                      <Text type="secondary">Trạng thái</Text>
+                      <div style={{ marginTop: 6 }}>
+                        <Tag color={(STATUS_MAP[selected.status] ?? STATUS_MAP.UNKNOWN).color}>
+                          {(STATUS_MAP[selected.status] ?? STATUS_MAP.UNKNOWN).text}
+                        </Tag>
+                      </div>
+                      <div style={{ marginTop: 12 }}>
+                        <Text type="secondary">Tổng tiền</Text>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{formatVND(selected.total_price)}</div>
+                      </div>
+                    </Col>
+                  </Row>
 
-          //         <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-          //           <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-          //             Ngày/Giờ Thuê:
-          //           </dt>
-          //           <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-          //             {formatDate(rental.from)} -{formatDate(rental.to)}
-          //           </dd>
-          //         </dl>
+                  <Divider />
 
-          //         <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-          //           <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-          //             Tổng tiền:
-          //           </dt>
-          //           <dd className="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-          //             {formatCurrency(rental.total_price)}
-          //           </dd>
-          //         </dl>
+                  <List
+                    dataSource={selected.products}
+                    renderItem={(p) => (
+                      <List.Item key={p.template_id}>
+                        <List.Item.Meta avatar={<Avatar shape="square" size={64} src={p.TemplateImage} />} title={<Text strong>{p.ProductName}</Text>} description={<Text type="secondary">Template ID: {p.template_id}</Text>} />
+                      </List.Item>
+                    )}
+                  />
 
-          //         <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-          //           <dt className="text-base font-medium text-gray-500 dark:text-gray-400">
-          //             Trạng thái:
-          //           </dt>
-          //           {/* <dd className={getStatusColor(order.status)}>
-          //             <span>
-          //               {order.status === "DELIVERING"
-          //                 ? "Đang giao hàng"
-          //                 : order.status === "SENT"
-          //                 ? "Đã giao hàng"
-          //                 : order.status === "CANCELLED"
-          //                 ? "Đã hủy"
-          //                 : "Chờ xác nhận"}
-          //             </span>
-          //           </dd> */}
-          //         </dl>
+                  <Divider />
 
-          //         {/* <div className="w-full grid sm:grid-cols-2 lg:flex lg:w-64 lg:items-center lg:justify-end gap-4">
-          //           {order.status === "SENT" ? (
-          //             <button
-          //               type="button"
-          //               className="w-full rounded-lg border border-green-700 px-3 py-2 text-center text-sm font-medium text-green-700 hover:bg-green-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-300 dark:border-green-500 dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white dark:focus:ring-green-900 lg:w-auto"
-          //             >
-          //               Mua lại
-          //             </button>
-          //           ) : (
-          //             <button
-          //               type="button"
-          //               className="w-full rounded-lg border border-red-700 px-3 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900 lg:w-auto"
-          //             >
-          //               Hủy đơn
-          //             </button>
-          //           )}
-          //           <button
-          //             onClick={() => router.push(`order/${order.id}`)}
-          //             className="w-full inline-flex justify-center rounded-lg  border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700 lg:w-auto"
-          //           >
-          //             Chi tiết
-          //           </button>
-          //         </div> */}
-          //       </div>
-          //       {/* </Link> */}
-          //     </div>
-          //   </div>
-          // </section>
-        ))
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                    <Button onClick={() => router.push(`/rental/${selected.id}`)}>Xem trang chi tiết</Button>
+                    {selected.status === "CREATED" && <Button type="primary" onClick={() => handlePay(selected)}>Thanh toán</Button>}
+                  </div>
+                </>
+              ) : (
+                <Skeleton active />
+              )}
+            </Modal> */}
+          </>
+        )}
+
+      </Card>
+      {selectedBooking && (
+        <PaymentModal
+          open={paymentModalOpen}
+          onClose={() => setPaymentModalOpen(false)}
+          referenceID={selectedBooking.id}
+          type={selectedBooking.type}
+          token={user?.token}
+        />
       )}
-    </div>
+    </>
   );
-};
 
-export default RentalHistory;
+
+}

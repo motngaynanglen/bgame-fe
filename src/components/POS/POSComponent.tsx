@@ -25,6 +25,7 @@ import { notifyError } from "../Notification/Notification";
 import transactionApiRequest from "@/src/apiRequests/transaction";
 import { AxiosError } from "axios";
 import { EntityError } from "@/src/lib/httpAxios";
+import PaymentModal from "../CheckOut/PaymentModal";
 
 interface Product {
   id: string;
@@ -46,6 +47,8 @@ interface PaymentData {
   qrCode?: string;
 }
 export default function POSComponent() {
+  const [openPaymentModal, setOpenPaymentModal] = useState(false);
+
   const { user } = useAppContext();
 
   const {
@@ -66,31 +69,32 @@ export default function POSComponent() {
   const [paymentData, setPaymentData] = useState<PaymentData | undefined>(undefined);
   const [errorsItems, setErrorsItems] = useState<string[]>([]);
   const handlePaymentAction = async (id: string) => {
-    if (id === null || id === undefined || id === "") {
+    if (!id) {
       notifyError("Lỗi thanh toán", "Không có dữ liệu thanh toán.");
       return;
     }
     try {
-      // Gọi API để lấy URL thanh toán
       const res = await transactionApiRequest.performTransaction(
-        {
-          referenceID: id,
-          type: 1, // 1: Thanh toán đơn hàng
-        },
+        { referenceID: id, type: 1 },
         user?.token
       );
 
-      setPaymentData({ id: id, checkoutUrl: res.data.checkoutUrl, qrCode: res.data.qrCode });
-      // handleRedirectToPayment();
+      setPaymentData({
+        id: id,
+        checkoutUrl: res.data.checkoutUrl,
+        qrCode: res.data.qrCode
+      });
+
+      setOpenPaymentModal(true); // mở modal khi vừa tạo xong
       notification.success({
         message: "Thanh toán thành công",
-        description: "Đã tạo đơn hàng và lấy thông tin thanh toán.",
+        description: "Đã tạo đơn hàng và lấy thông tin thanh toán."
       });
     } catch (error) {
       notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
       return;
     }
-  }
+  };
   useEffect(() => {
     setPaymentData(undefined);
   }, [options]);
@@ -104,7 +108,7 @@ export default function POSComponent() {
 
   const searchProducts = useMutation({
     mutationFn: async (code: string) => {
-      const res = await productApiRequest.getByCode({ code }); 
+      const res = await productApiRequest.getByCode({ code });
       return res.data;
     },
     onSuccess: (products) => {
@@ -324,8 +328,25 @@ export default function POSComponent() {
           <Button onClick={handlePayment} type="primary" block size="large">
             THANH TOÁN
           </Button>
+          {paymentData?.id && (
+            <Button
+              onClick={() => setOpenPaymentModal(true)}
+              block
+              size="middle"
+              style={{ marginTop: 8 }}
+            >
+              Xem / Kiểm tra thanh toán
+            </Button>
+          )}
         </div>
       </div>
+      <PaymentModal
+        open={openPaymentModal}
+        onClose={() => setOpenPaymentModal(false)}
+        referenceID={paymentData?.id || ""}
+        type={1}
+        token={user?.token}
+      />
     </div>
   );
 }
