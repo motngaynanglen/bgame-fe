@@ -271,7 +271,7 @@ export default function Page() {
                               {item.book_item_status === "ACTIVE"
                                 ? "Hoạt động"
                                 : "Ngừng hoạt động"}
-                            </span>
+                            </span> 
                           </p>
                         </div>
                       </div>

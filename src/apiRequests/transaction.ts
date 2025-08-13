@@ -7,5 +7,11 @@ const transactionApiRequest = {
                 Authorization: `Bearer ${sessionToken}`,
             },
         }),
+    getTransactionStatusByRefId: (body: any, token?: string) =>
+        http.post<any>(`/api/Transaction/get-by-ref-id`, body, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }),
 }
 export default transactionApiRequest;
