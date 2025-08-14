@@ -1,18 +1,17 @@
 "use client";
 import { orderApiRequest } from "@/src/apiRequests/orders";
-import transactionApiRequest from "@/src/apiRequests/transaction";
-import CheckOutSuccess from "@/src/components/CheckOut/CheckOutSuccess";
 import { notifyError } from "@/src/components/Notification/Notification";
 import { HttpError } from "@/src/lib/httpAxios";
 import { formatVND } from "@/src/lib/utils";
 import { useCartStore } from "@/src/store/cartStore";
-import { Button, Modal, RadioChangeEvent } from "antd";
+import { Button } from "antd";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAppContext } from "../../app-provider";
-import { PaymentData } from "@/src/schemaValidations/transaction.schema";
+import PaymentModal from "@/src/components/CheckOut/PaymentModal";
 import Image from "next/image";
-
+import { Modal } from "antd";
+import Link from "next/link";
 interface FormData {
   email: string;
   fullName: string;
@@ -20,46 +19,15 @@ interface FormData {
   address: string;
 }
 
-interface AddressData {
-  province: string;
-  districts: {
-    district: string;
-    wards: string[];
-  }[];
-}
-
-const data = [
-  "Giao hàng tiết kiệm",
-  "Giao hàng nhanh",
-  "Giao hàng qua Ahamove",
-  "Giao hàng qua Viettel Post",
-];
-
 export default function CheckOut() {
-  const [openResponsive, setOpenResponsive] = useState(false);
   const { cart, calculateTotal, clearCart, buyNowItem } = useCartStore();
-  const [paymentData, setPaymentData] = useState<PaymentData | undefined>(
-    undefined
-  );
   const { user } = useAppContext();
-  const [value, setValue] = useState(1);
   const productsToCheckout = buyNowItem ? [buyNowItem] : cart;
-  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [clientOnlyTotal, setClientOnlyTotal] = useState("0");
 
-  const totalProductCount = productsToCheckout.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
-
-  // Tính số cửa hàng duy nhất (dựa vào item.storeID hoặc item.shopID)
-  const uniqueStoreIDs = new Set(
-    productsToCheckout.map((item) => item.storeId)
-  );
-  const totalStores = uniqueStoreIDs.size;
-
-  const onChange = (e: RadioChangeEvent) => {
-    setValue(e.target.value);
-  };
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentRefID, setPaymentRefID] = useState("");
+  const [paymentType] = useState(1); // tạm fix type = 1 (bank)
 
   const {
     register,
@@ -67,49 +35,27 @@ export default function CheckOut() {
     handleSubmit,
   } = useForm<FormData>();
 
-  const handlePaymentAction = async (id: string) => {
-    console.log(paymentData);
-    if (!paymentData || !paymentData.id) {
-      notifyError("Lỗi thanh toán", "Không có dữ liệu thanh toán.");
-      return;
-    }
-    try {
-      // Gọi API để lấy URL thanh toán
-      const res = await transactionApiRequest.performTransaction(
-        {
-          referenceID: id,
-          type: 1, // "bank" hoặc "cod"
-        },
-        user?.token
-      );
-      if (res.statusCode === "200") {
-        setPaymentData({
-          id: id,
-          checkoutUrl: res.data.checkoutUrl,
-          qrCode: res.data.qrCode,
-        });
-        clearCart();
-        handleRedirectToPayment();
-      } else {
-        notifyError("Lỗi thanh toán", res.message || "Vui lòng thử lại sau.");
-      }
-    } catch (error) {
-      notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
-      return;
-    }
-  };
-  const handleRedirectToPayment = () => {
-    if (paymentData && paymentData.checkoutUrl) {
-      window.open(paymentData.checkoutUrl, "_blank");
-    } else {
-      notifyError("Lỗi thanh toán", "Không có URL thanh toán để chuyển hướng.");
-    }
-  };
-
   const handleCreateOrder = async (formData: FormData) => {
+    if (!user?.token) {
+      Modal.confirm({
+        title: "Bạn chưa đăng nhập",
+        content: "Vui lòng đăng nhập để tiếp tục đặt hàng.",
+        okText: (
+          <Link href="/login" style={{ color: "white" }}>
+            Đăng nhập ngay
+          </Link>
+        ),
+        cancelText: "Đóng",
+        okButtonProps: {
+          style: { backgroundColor: "#1677ff" }, // giữ style mặc định
+        },
+      });
+      return;
+    }
+
     const body = {
       orders: cart.map((item) => ({
-        storeId: item.storeId, // Sử dụng storeId từ item
+        storeId: item.storeId,
         productTemplateID: item.id,
         quantity: item.quantity,
       })),
@@ -120,73 +66,42 @@ export default function CheckOut() {
     };
 
     try {
-      const res = await orderApiRequest.createOrderByCustomer(
-        body,
-        user?.token
-      );
-      if (res.statusCode == "200") {
-        setOpenResponsive(true);
-        setPaymentData({ id: res.data ?? undefined, checkoutUrl: undefined });
-        Modal.success({
-          title: "Đặt hàng thành công!",
-          content:
-            "Đơn hàng của bạn đã được tạo thành công. Vui lòng tiếp tục thanh toán nếu cần.",
-        });
-        // clearCart();
-      }
-      if (res.statusCode == "404") {
-        notifyError(
-          "Đặt mua thất bại!",
-          res.message || "Vui lòng thử lại sau."
-        );
-        // clearCart();
-      } else
-        notifyError(
-          "Đặt mua thất bại!",
-          res.message || "Vui lòng thử lại sau."
-        );
-    } catch (error: any) {
-      if (error instanceof HttpError && error.status === 422) {
-      }
-
-      if (error instanceof HttpError && error.status === 404) {
-        notifyError(
-          "Đặt mua thất bại!",
-          "Bạn cần thanh toán sản phẩm đã mua trước đó ."
-        );
-        // router.push("/login");
+      const res = await orderApiRequest.createOrderByCustomer(body, user?.token);
+      if (res.statusCode === "200") {
+        clearCart();
+        setPaymentRefID(res.data);
+        setPaymentModalOpen(true);
       } else {
-        // Xử lý lỗi khác nếu có
-        setOpenResponsive(true);
+        notifyError("Đặt hàng thất bại", res.message || "Vui lòng thử lại.");
+      }
+    } catch (error) {
+      if (error instanceof HttpError && error.status === 404) {
+        notifyError("Đặt hàng thất bại", "Bạn cần thanh toán sản phẩm đã mua trước đó.");
+      } else {
         console.error("Lỗi khác:", error);
-        // notifyError(
-        //   "Đặt mua thất bại",
-        //   error?.message ||
-        //     "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
-        // );
+        notifyError("Đặt hàng thất bại", "Có lỗi xảy ra. Vui lòng thử lại sau.");
       }
     }
   };
+  const totalProductCount = productsToCheckout.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
 
-  const [clientOnlyTotal, setClientOnlyTotal] = useState("0");
+  const totalStores = new Set(productsToCheckout.map((item) => item.storeId)).size;
 
   useEffect(() => {
-    const formatMoney = () => {
-      return formatVND(calculateTotal());
-    };
-    setClientOnlyTotal(formatMoney());
+    setClientOnlyTotal(formatVND(calculateTotal()));
   }, [cart]);
-  useEffect(() => {}, [paymentData]);
 
   return (
     <div className="container mx-auto p-4 bg-sky-50 min-h-screen ">
       <div className="flex flex-col lg:flex-row bg-white shadow-md rounded-lg p-6 ">
-        {/* form nhập thông tin giao hàng */}
+        {/* form thông tin giao hàng */}
         <div className="w-full lg:w-2/3 pr-0 lg:pr-4 border-r-2 border-gray-200">
-          {/* logo  */}
           <div className="flex justify-center items-center mb-6">
             <Image
-              src="https://placehold.co/50x50"
+              src="/assets/icon/logo.png"
               alt="BGImpact logo"
               className="mr-4"
               width={50}
@@ -194,122 +109,63 @@ export default function CheckOut() {
             />
             <h1 className="text-4xl font-bold">BOARD GAME IMPACT</h1>
           </div>
-          {/* form nhập thông tin giao hàng */}
-          <div>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold mb-4 text-black-2">
-                Thông tin nhận hàng
-              </h2>
+
+          <form className="space-y-4" onSubmit={handleSubmit(handleCreateOrder)}>
+            <input
+              type="email"
+              disabled={isSubmitting}
+              placeholder="Email"
+              className="w-full p-2 border border-gray-300 rounded"
+              {...register("email", { required: "Email là bắt buộc" })}
+            />
+            {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+
+            <input
+              type="text"
+              disabled={isSubmitting}
+              placeholder="Họ và tên"
+              className="w-full p-2 border border-gray-300 rounded"
+              {...register("fullName", { required: "Họ và tên là bắt buộc" })}
+            />
+            {errors.fullName && <p className="text-red-500">{errors.fullName.message}</p>}
+
+            <input
+              type="tel"
+              disabled={isSubmitting}
+              placeholder="Số điện thoại"
+              className="w-full p-2 border border-gray-300 rounded"
+              {...register("phoneNumber", { required: "Số điện thoại là bắt buộc" })}
+            />
+            {errors.phoneNumber && (
+              <p className="text-red-500">{errors.phoneNumber.message}</p>
+            )}
+
+            <input
+              type="text"
+              disabled={isSubmitting}
+              placeholder="Địa chỉ"
+              className="w-full p-2 border border-gray-300 rounded"
+              {...register("address", { required: "Địa chỉ là bắt buộc" })}
+            />
+            {errors.address && <p className="text-red-500">{errors.address.message}</p>}
+
+            <div className="flex justify-between items-center mt-4">
+              <a href="/cart" className="text-blue-500">
+                Quay về giỏ hàng
+              </a>
+              <Button
+                htmlType="submit"
+                disabled={isSubmitting}
+                loading={isSubmitting}
+                className="bg-green-500 text-white p-2 rounded"
+              >
+                ĐẶT HÀNG
+              </Button>
             </div>
-
-            <form
-              className="space-y-4"
-              onSubmit={handleSubmit(handleCreateOrder)}
-            >
-              <input
-                type="email"
-                disabled={isSubmitting}
-                placeholder="Email"
-                className="w-full p-2 border border-gray-300 rounded"
-                {...register("email", { required: "Email là bắt buộc" })}
-              />
-              {errors.email && (
-                <p className="text-red-500">{errors.email.message}</p>
-              )}
-              <input
-                type="text"
-                disabled={isSubmitting}
-                placeholder="Họ và tên"
-                className="w-full p-2 border border-gray-300 rounded"
-                {...register("fullName", { required: "Họ và tên là bắt buộc" })}
-              />
-              {errors.fullName && (
-                <p className="text-red-500">{errors.fullName.message}</p>
-              )}
-              <input
-                type="tel"
-                disabled={isSubmitting}
-                placeholder="Số điện thoại"
-                className="w-full p-2 border border-gray-300 rounded"
-                {...register("phoneNumber", {
-                  required: "Số điện thoại là bắt buộc",
-                })}
-              />
-              {errors.phoneNumber && (
-                <p className="text-red-500">{errors.phoneNumber.message}</p>
-              )}
-              <input
-                type="text"
-                disabled={isSubmitting}
-                placeholder="Địa chỉ"
-                className="w-full p-2 border border-gray-300 rounded"
-                {...register("address", { required: "Địa chỉ là bắt buộc" })}
-              />
-              {errors.address && (
-                <p className="text-red-500">{errors.address.message}</p>
-              )}
-              {/* <div className="flex justify-between space-x-4">
-                <select className="w-full p-2 border border-gray-300 rounded">
-                  <option>Tỉnh thành</option>
-                </select>
-                <select className="w-full p-2 border border-gray-300 rounded">
-                  <option>Quận huyện (tùy chọn)</option>
-                </select>
-                <select className="w-full p-2 border border-gray-300 rounded">
-                  <option>Phường xã (tùy chọn)</option>
-                </select>
-              </div> */}
-
-              {/* <textarea
-                placeholder="Khách nhập địa chỉ bằng tiếng anh tại đây (tùy chọn)"
-                className="w-full p-2 border border-gray-300 rounded"
-              ></textarea> */}
-              {/* <div className=" font-semibold text-xl mb-4">
-                <span>Vận chuyển</span>
-              </div>
-              <List
-                bordered
-                dataSource={data}
-                renderItem={(item, index) => (
-                  <List.Item>
-                    {" "}
-                    <Radio.Group
-                      value={value}
-                      onChange={onChange}
-                      className="flex items-center"
-                      options={[{ value: index, label: item }]}
-                    />
-                  </List.Item>
-                )}
-              /> */}
-              <div className="flex justify-between items-center">
-                <a href="/cart" className="text-blue-500">
-                  Quay về giỏ hàng
-                </a>
-                <div className="gap-2 flex items-center">
-                  <Button
-                    disabled={paymentData?.id === undefined ? true : false}
-                    onClick={() => handlePaymentAction(paymentData?.id || "")}
-                    // loading={isSubmitting}
-                    color="green"
-                  >
-                    THỰC HIỆN THANH TOÁN
-                  </Button>
-                  <Button
-                    htmlType="submit"
-                    disabled={isSubmitting}
-                    loading={isSubmitting}
-                    className="bg-green-500 text-white p-2 rounded"
-                  >
-                    ĐẶT HÀNG
-                  </Button>
-                </div>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
 
-        {/* ds sản phẩm, chọn phương thúc thanh toán  */}
+        {/* danh sách sản phẩm */}
         <div className="w-full ps-4 lg:w-1/3 mt-6 lg:mt-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold mb-2">Đơn hàng:</h2>
@@ -341,58 +197,27 @@ export default function CheckOut() {
                   <p className="text-md text-gray-600">
                     Giá: {formatVND(item.price)}
                   </p>
-                  <p>Số lượng: {item.quantity}</p>
+                  <p>Số lượng: {item.quantity}</p>
                 </div>
               </div>
             );
           })}
 
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Nhập mã giảm giá"
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-            <button className="bg-green-500 text-white p-2 rounded mt-2 w-full">
-              Áp dụng
-            </button>
-          </div>
-          <div className="mb-4">
-            <div className="flex justify-between">
-              <span>Tạm tính</span>
-              <span>{clientOnlyTotal}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Phí vận chuyển</span>
-              <span>-</span>
-            </div>
-          </div>
-          <div className="flex justify-between font-semibold text-xl mb-4">
+          <div className="flex justify-between font-semibold text-xl mt-4">
             <span>Tổng cộng</span>
             <span>{clientOnlyTotal}</span>
           </div>
         </div>
       </div>
 
-      {/* cai nay la hien thong bao thanh toan thanh */}
-      <Modal
-        title="Thông báo"
-        centered
-        open={openResponsive}
-        onCancel={() => setOpenResponsive(false)}
-        footer={null}
-        closable={true}
-      >
-        <CheckOutSuccess id={paymentData?.id} />
-        <Button
-          disabled={paymentData?.id === undefined ? true : false}
-          onClick={() => handlePaymentAction(paymentData?.id || "")}
-          // loading={isSubmitting}
-          color="green"
-        >
-          THỰC HIỆN THANH TOÁN
-        </Button>
-      </Modal>
+      {/* Payment Modal */}
+      <PaymentModal
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        referenceID={paymentRefID}
+        type={paymentType}
+        token={user?.token}
+      />
     </div>
   );
 }

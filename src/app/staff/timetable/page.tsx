@@ -1,507 +1,341 @@
-"use client";
-import bookListApiRequest from "@/src/apiRequests/bookList";
-import { CreateButton } from "@/src/components/admin/Button";
-import {
-  InvoicesTableSkeleton,
-  TableSkeleton,
-} from "@/src/components/admin/layout/skeletons";
-import AntdCustomPagination from "@/src/components/admin/table/pagination";
-import SearchBar from "@/src/components/admin/table/search";
-import { HomeOutlined, UserOutlined } from "@ant-design/icons";
+"use client"
+import { useEffect, useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
   Button,
-  Card,
   Col,
-  Collapse,
   DatePicker,
-  Dropdown,
-  message,
   Modal,
-  notification,
-  Pagination,
-  Radio,
   Row,
   Select,
   Space,
   Table,
   Tag,
-  TimePicker,
+  message,
+  notification
 } from "antd";
-import type { CollapseProps, TableProps } from "antd";
-import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
-import { Suspense, useEffect, useState } from "react";
-import { useAppContext } from "../../app-provider";
-import { formatDateTime, formatTimeStringRemoveSeconds } from "@/src/lib/utils";
+import { HomeOutlined, UserOutlined, PlayCircleOutlined, StopOutlined, PlusOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import dayjs from "@/src/lib/dayjs";
-import { CheckboxGroupProps } from "antd/es/checkbox";
-import { useRouter } from "next/navigation";
+import { useAppContext } from "../../app-provider";
+import bookListApiRequest from "@/src/apiRequests/bookList";
+import SearchBar from "@/src/components/admin/table/search";
+import AntdCustomPagination from "@/src/components/admin/table/pagination";
+import { formatDateTime } from "@/src/lib/utils";
 import { notifyError } from "@/src/components/Notification/Notification";
 import { HttpError } from "@/src/lib/httpAxios";
+import PaymentModal from "@/src/components/CheckOut/PaymentModal";
+import { title } from "process";
+import Link from "next/link";
+const { confirm } = Modal;
+
 const { RangePicker } = DatePicker;
 
 interface DataType {
   key: string;
   id: string;
+  code: string;
   customer_id: string;
-  customer_name: string;
-  date: string;
+  full_name: string;
   from: string;
   to: string;
   type: number;
-  rent: number;
-  rent_per_hour: number;
+  total_table: number;
   status: string;
 }
+
 interface PagingType {
   pageNum: number;
   pageSize: number;
   pageCount: number;
 }
-const statusName = ["THEO GIỜ", "THEO LƯỢT"];
 
-const role: string = "manager";
-const baseUrl: string = "/" + role + "/" + "boardgames";
-const createUrl: string = baseUrl + "/" + "create";
-
-
-
-const breadcrumb: BreadcrumbItemType[] = [
-  {
-    href: "/manager",
-    title: <HomeOutlined />,
-  },
-  {
-    // href: baseUrl,
-    title: (
-      <>
-        <UserOutlined />
-        <span>Board Game List</span>
-      </>
-    ),
-  },
-];
-
-const AddButtons: CollapseProps["items"] = [
-  {
-    key: "1",
-    label: (
-      <p key="add-button" className="p-0 m-0">
-        Bổ xung sản phẩm mới
-      </p>
-    ),
-    children: <></>,
-  },
-];
-const options: CheckboxGroupProps<string>["options"] = [
-  { label: <span key="all">Tất cả</span>, value: "all" },
-  { label: <span key="days">Thuê theo ngày</span>, value: "days" },
-  { label: <span key="hours">Thuê theo giờ</span>, value: "hours" },
-];
-const defaultToDay = {
-  from: dayjs().hour(1).minute(0).second(0).local().toISOString(),
-  to: dayjs().hour(23).minute(0).second(0).local().toISOString(),
+const statusMap: Record<string, { text: string; color: string }> = {
+  CREATED: { text: "Chờ thanh toán", color: "yellow" },
+  PAID: { text: "Chờ bắt đầu", color: "blue" },
+  STARTED: { text: "Đang thuê", color: "orange" },
+  ENDED: { text: "Hoàn tất", color: "green" },
+  OVERDUE: { text: "Trễ hạn", color: "grey" },
+  CANCELLED: { text: "Đã hủy", color: "red" }
 };
-export default function StaffManageTimeTable({
-  searchParams,
-}: {
-  searchParams?: { query?: string; page?: string };
-}) {
-  const [openModal, setOpenModal] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<"days" | "hours">(
-    "days"
-  );
-  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
 
-  const [useData, setData] = useState<DataType[] | undefined>(undefined);
-  const [paging, setPaging] = useState<PagingType | undefined>(undefined);
-  const [mode, setMode] = useState<number>(0);
+export default function StaffManageBookList({ searchParams }: { searchParams?: { query?: string; page?: string } }) {
+  const [data, setData] = useState<DataType[]>([]);
+  const [paging, setPaging] = useState<PagingType>();
+  const [mode, setMode] = useState(0);
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
-  const [tableLoading, setTableLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
+  const [paymentModal, setPaymentModal] = useState<{
+    open: boolean;
+    booking: DataType | null;
+  }>({
+    open: false,
+    booking: null,
+  });
+
   const { user } = useAppContext();
   const router = useRouter();
+
+  const defaultToDay = {
+    from: dayjs().hour(1).minute(0).second(0).toISOString(),
+    to: dayjs().hour(23).minute(0).second(0).toISOString()
+  };
+
   const apiBody = {
     from: dateRange ? dateRange[0] : defaultToDay.from,
     to: dateRange ? dateRange[1] : defaultToDay.to,
-    paging: {
-      pageNum: searchParams?.page ?? 1,
-      pageSize: 10,
-    },
+    paging: { pageNum: searchParams?.page ?? 1, pageSize: 10 }
   };
-  const handleOk = () => {
-    setConfirmLoading(true);
-    setTimeout(() => {
-      setOpenModal(false);
-      setConfirmLoading(false);
-    }, 2000);
-  };
-  const handleCancel = () => {
-    setOpenModal(false);
-  };
-  const ExtendBookModal = () => {
-    return (
-      <Modal
-        title={`Đặt trước ko ok`}
-        centered
-        open={openModal}
-        onOk={() => handleOk}
-        footer={[
-          <Button
-            key={"modal-button-1"}
-            // onClick={handleSubmit}
-            disabled={!selectedDate}
-          >
-            Đặt trước
-          </Button>,
-        ]}
-        confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-      >
-        <Radio.Group
-          options={options}
-          defaultValue="days"
-          optionType="button"
-          buttonStyle="solid"
-          onChange={(e) => setSelectedOption(e.target.value)}
-        />
-        <p className="mt-4">Chọn thời gian thuê: </p>
-        {selectedOption === "days" && (
-          <div>
-            <DatePicker
-              format="YYYY-MM-DD HH:mm"
-              // disabledDate={disabledDate}
-              // disabledTime={disabledDateTime}
-              showTime={{ format: "HH:mm" }}
-              minuteStep={10}
-              onChange={(date) => setSelectedDate(date ? date : null)}
-            />
-            <p className="text-lg text-green-800 mt-4">
-              {/* Phí thuê: {rent_price} */}
-            </p>
-          </div>
-        )}
-      </Modal>
-    );
-  };
-  const onChange = (value: number) => {
-    setMode(value);
-  };
-  const handleDateChange = (date: dayjs.Dayjs | null) => {
-    if (date) {
-      const from = date
-        .set("hour", 1)
-        .set("minute", 0)
-        .set("second", 0)
-        .local()
-        .toISOString();
-      const to = date
-        .set("hour", 23)
-        .set("minute", 0)
-        .set("second", 0)
-        .toISOString();
-      setDateRange([from, to]);
-    } else {
-      setDateRange(null);
-    }
-  };
-  const handleRangeChange = (
-    dates: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
-  ) => {
-    if (dates && dates[0] && dates[1]) {
-      const from = dates[0]
-        .set("hour", 1)
-        .set("minute", 0)
-        .set("second", 0)
-        .local()
-        .toISOString();
-      const to = dates[1]
-        .set("hour", 23)
-        .set("minute", 0)
-        .set("second", 0)
-        .local()
-        .toISOString();
-      setDateRange([from, to]);
-    } else {
-      setDateRange(null);
-    }
-  };
-  const fetchTableData = async () => {
-    setTableLoading(true);
-    if (!user) {
-      message.error("Bạn cần đăng nhập để đặt trước.");
-      setTableLoading(false);
-      return;
-    }
-    const response = await bookListApiRequest.getBookListByDate(
-      apiBody,
-      user.token
-    );
-    const data: DataType[] | undefined = response.data?.map(
-      (item: DataType) => ({
-        ...item,
-        key: item.id, // Gán id vào key
-      })
-    );
-    console.log(data);
-    setPaging(response.paging);
-    setTableLoading(false);
-    return data;
-  };
-  useEffect(() => {
-    fetchTableData().then((result) => {
-      setData(result);
+
+  const handleOpenPayment = (record: DataType) => {
+    setPaymentModal({
+      open: true,
+      booking: record,
     });
-  }, [dateRange, searchParams]);
-  const onClickEnd = async (id: string) => {
-    const body = {
-      bookListId: id,
-    };
-    if (!user) {
-      message.error("Bạn cần đăng nhập để đặt trước.");
-      return;
-    }
-
-    Modal.confirm({
-      title: "Xác nhận bắt đầu",
-      content: `Một khi nhận đồng nghĩa với không thể hoàn tác.`,
-      onOk: async () => {
-        try {
-          // Gọi API để nhận đơn hàng
-          const response = await bookListApiRequest.endBookList(body, user.token);
-          notification.success({
-            message: response.message || "Đã nhận đơn sản phẩm",
-            description: "",
-          });
-          fetchTableData().then((result) => {
-            setData(result);
-          });
-
-        } catch (error) {
-          if (error instanceof HttpError) {
-            notifyError(error.message, "Có lỗi xảy ra khi xử lý yêu cầu.");
-
-          }
-        }
-      }
-    });
-
   };
-  const onClickExtend = async (id: string) => {
-    const body = {
-      bookListId: id,
-      to: "2025-03-31T08:04:59.826Z",
-      bookType: 0,
-    };
+  const handleClosePayment = () => {
+    setPaymentModal({
+      open: false,
+      booking: null,
+    });
+  };
+  const fetchData = async () => {
+    setLoading(true);
     if (!user) {
-      message.error("Bạn cần đăng nhập để đặt trước.");
+      message.error("Bạn cần đăng nhập để xem dữ liệu.");
+      setLoading(false);
       return;
     }
     try {
-      const response = await bookListApiRequest.endBookList(body, user.token);
-      fetchTableData().then((result) => {
-        setData(result);
-      });
-      message.success("Đã kết toán hành động thành công");
-    } catch (error) {
-      message.error("Kết toán hành động thất bại");
+      const res = await bookListApiRequest.getBookListByDate(apiBody, user.token);
+      const mapped = res.data.map((item: any) => ({ ...item, key: item.id }));
+      setData(mapped);
+      setPaging(res.paging);
+    } catch (err) {
+      message.error("Không thể tải dữ liệu");
     }
+    setLoading(false);
   };
-  const onClickStart = async (id: string) => {
-    const body = {
-      bookListId: id,
-    };
-    if (!user) {
-      message.error("Bạn cần đăng nhập để đặt trước.");
-      return;
-    }
+
+  useEffect(() => {
+    fetchData();
+  }, [dateRange, searchParams]);
+
+  const confirmAction = (title: string, onOk: () => void) => {
     Modal.confirm({
-      title: "Xác nhận bắt đầu",
-      content: `Một khi nhận đồng nghĩa với không thể hoàn tác.`,
-      onOk: async () => {
-        try {
-          // Gọi API để nhận đơn hàng
-          const response = await bookListApiRequest.startBookList(body, user.token);
-          notification.success({
-            message: response.message,
-            description: "",
-          });
-          fetchTableData().then((result) => {
-            setData(result);
-          });
-
-        } catch (error) {
-          if (error instanceof HttpError) {
-            notifyError(error.message, "Có lỗi xảy ra khi xử lý yêu cầu.");
-
-          }
-        }
-      }
+      title,
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk
     });
   };
-  const columns: TableProps<DataType>["columns"] = [
+
+  // const handleStart = (id: string) => {
+  //   confirmAction("Bắt đầu đơn hàng?", async () => {
+  //     try {
+  //       await bookListApiRequest.startBookList({ bookListId: id }, user!.token);
+  //       notification.success({ message: "Đã bắt đầu" });
+  //       fetchData();
+  //     } catch (error) {
+  //       if (error instanceof HttpError) notifyError(error.message);
+  //     }
+  //   });
+  // };
+
+  // const handleEnd = (id: string) => {
+  //   confirmAction("Kết thúc đơn hàng?", async () => {
+  //     try {
+  //       await bookListApiRequest.endBookList({ bookListId: id }, user!.token);
+  //       notification.success({ message: "Đã kết thúc" });
+  //       fetchData();
+  //     } catch (error) {
+  //       if (error instanceof HttpError) notifyError(error.message);
+  //     }
+  //   });
+  // };
+  const handleConfirmStart = (bookingId: string) => {
+    confirm({
+      title: "Xác nhận bắt đầu",
+      content: "Bạn có chắc muốn bắt đầu đơn này không?",
+      okText: "Bắt đầu",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await bookListApiRequest.startBookList({ bookListId: bookingId }, user!.token);
+          notification.success({ message: "Đã bắt đầu" });
+          fetchData();
+        } catch (error) {
+          if (error instanceof HttpError) notifyError(error.message);
+        }
+      },
+    });
+  };
+
+  const handleConfirmEnd = (bookingId: string) => {
+    confirm({
+      title: "Xác nhận kết thúc",
+      content: "Bạn có chắc muốn kết thúc đơn này không?",
+      okText: "Kết thúc",
+      cancelText: "Hủy",
+      onOk: async () => {
+        // Gọi API kết thúc
+        try {
+          await bookListApiRequest.endBookList({ bookListId: bookingId }, user!.token);
+          notification.success({ message: "Đã kết thúc" });
+          fetchData();
+        } catch (error) {
+          if (error instanceof HttpError) notifyError(error.message);
+        }
+      },
+    });
+  };
+  const columns = [
     {
-      title: "Tên khách hàng",
-      dataIndex: "customer_name",
-      key: "customer_name",
-      render: (text) => <a>{text || "Khách vô danh"}</a>,
+      title: "Khách hàng",
+      dataIndex: "full_name",
+      render: (name: string) => name || "Khách vô danh"
     },
     {
-      title: "Ngày",
-      dataIndex: "date",
-      key: "date",
-      render: (_, record) => <>{formatDateTime(record.from, "DATE")}</>,
+      title: "Mã đơn",
+      dataIndex: "code",
+      render: (_: any, record: DataType) => <Link href={`/staff/booklist/${record.id}`}>{record.code ?? "Không có mã"}</Link>
     },
     {
-      title: "Giờ bắt đầu",
-      dataIndex: "from",
-      key: "from",
-      render: (_, record) => <>{formatDateTime(record.from, "TIME")}</>,
-    },
-    {
-      title: "Giờ kết thúc",
-      dataIndex: "to",
-      key: "to",
-      render: (_, record) => <>{formatDateTime(record.to, "TIME")}</>,
-    },
-    {
-      title: "Loại thuê",
-      key: "type",
+      title: "Loại",
       dataIndex: "type",
-      render: (_, { type }) => (
-        <>
-          <Tag>{statusName[type]}</Tag>
-        </>
-      ),
+      render: (type: number) => (type === 0 ? <Tag color="blue">Theo giờ</Tag> : <Tag color="green">Cả ngày</Tag>)
     },
     {
-      title: "Công Cụ",
-      key: "action",
-      render: (_, record) => (
-        <>
-          <Row gutter={[12, 12]}>
-            <Col span={12} className="flex justify-center">
-              {(() => {
-                switch (record.status) {
-                  case "ACTIVE":
-                    return (
-                      <Button
-                        color="primary"
-                        variant="dashed"
-                        onClick={() => onClickStart(record.id)}
-                      >
-                        Check
-                      </Button>
-                    );
-                  case "STARTED":
-                    return (
-                      <Space className="flex justify-between">
-                        <Button
-                          color="cyan"
-                          variant="filled"
-                          onClick={() => onClickEnd(record.id)}
-                        >
-                          End
-                        </Button>
-                        <Button
-                          color="yellow"
-                          variant="filled"
-                          onClick={() => setOpenModal(true)}
-                        >
-                          Extend
-                        </Button>
-                      </Space>
-                    );
-                  case "ENDED":
-                    return (
-                      <Button variant="filled" disabled>
-                        DONE
-                      </Button>
-                    );
-                  default:
-                    return null;
-                }
-              })()}
-            </Col>
-            <Col span={12}>
-              <Button color="red" variant="filled">
-                Cancel
-              </Button>
-            </Col>
-          </Row>
-        </>
-      ),
+      title: "Ngày thuê",
+      dataIndex: "from",
+      render: (val: string) => formatDateTime(val, "DATE")
     },
+    {
+      title: "Bắt đầu",
+      dataIndex: "from",
+      render: (val: string) => formatDateTime(val, "TIME")
+    },
+    {
+      title: "Kết thúc",
+      dataIndex: "to",
+      render: (val: string) => formatDateTime(val, "TIME")
+    },
+    {
+      title: "Số bàn",
+      dataIndex: "total_table",
+      render: (val: number) => `${val} bàn`
+    },
+    // {
+    //   title: "Khách hàng ID",
+    //   dataIndex: "customer_id",
+    //   render: (id: string) => id || "Không có ID"
+    // },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      render: (status: string) => {
+        const st = statusMap[status] || { text: status, color: "default" };
+        return <Tag color={st.color}>{st.text}</Tag>;
+      }
+    },
+    {
+      title: "Hành động",
+      render: (_: any, record: DataType) => {
+        switch (record.status) {
+          case "CREATED":
+            return (
+              <Button
+                color="green"
+                variant="filled"
+                onClick={() => handleOpenPayment(record)}
+              >
+                Thanh toán
+              </Button>
+            );
+          case "PAID":
+            return (
+              <Button type="primary" icon={<PlayCircleOutlined />} onClick={() => handleConfirmStart(record.id)}>
+                Start
+              </Button>
+            );
+          case "STARTED":
+            return (
+              <Space>
+                <Button danger icon={<StopOutlined />} onClick={() => handleConfirmEnd(record.id)}>
+                  End
+                </Button>
+                {/* <Button icon={<PlusOutlined />}>Gia hạn</Button> */}
+              </Space>
+            );
+          case "ENDED":
+            return <Tag color="green">Đã xong</Tag>;
+          default:
+            return null;
+        }
+      }
+    }
   ];
 
   return (
     <>
-      <Breadcrumb items={breadcrumb} className="pb-4" />
+      <Breadcrumb
+        items={[
+          { href: "/manager", title: <HomeOutlined /> },
+          { title: <><UserOutlined /> <span>Quản lý đơn hàng</span></> }
+        ]}
+        className="pb-4"
+      />
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 12 }}>
         <Col span={14}>
           <Suspense>
-            <SearchBar placeholder={"Tìm kiếm theo tên khách hàng..."} />
+            <SearchBar placeholder="Tìm theo tên khách hàng..." />
           </Suspense>
         </Col>
         <Col span={10}>
-          <Row gutter={[12, 12]}>
-            <Col>
-              <Select
-                defaultValue={0}
-                options={[
-                  { value: 0, label: <span>Theo ngày </span> },
-                  { value: 1, label: <span>Theo khoảng</span> },
-                ]}
-                className="w-30 h-10 me-4"
-                onChange={(value) => onChange(value)}
-              />
-              {mode == 0 ? (
-                <DatePicker
-                  picker="date"
-                  className="h-10"
-                  placeholder={"Chọn ngày"}
-                  defaultValue={dayjs()}
-                  onChange={handleDateChange}
-                />
-              ) : (
-                <RangePicker
-                  picker="date"
-                  className="h-10"
-                  placeholder={["Từ ngày", "Đến ngày"]}
-                  onChange={handleRangeChange}
-                />
-              )}
-            </Col>
-          </Row>
+          <Space>
+            <Select
+              defaultValue={0}
+              options={[
+                { value: 0, label: "Theo ngày" },
+                { value: 1, label: "Theo khoảng" }
+              ]}
+              onChange={setMode}
+            />
+            {mode === 0 ? (
+              <DatePicker defaultValue={dayjs()} onChange={(d) => {
+                if (d) setDateRange([d.startOf("day").toISOString(), d.endOf("day").toISOString()]);
+              }} />
+            ) : (
+              <RangePicker onChange={(dates) => {
+                if (dates && dates[0] && dates[1]) {
+                  setDateRange([dates[0].startOf("day").toISOString(), dates[1].endOf("day").toISOString()]);
+                }
+              }} />
+            )}
+          </Space>
         </Col>
       </Row>
 
-      <br />
-      <Table<DataType>
-        loading={tableLoading}
+      <Table
+        loading={loading}
         columns={columns}
-        dataSource={useData ?? []}
+        dataSource={data}
         pagination={false}
-        onRow={(record) => ({
-          onClick: () => {
-            router.push(`/staff/booklist/${record.id}`);
-          },
-          style: { cursor: "pointer" },
-        })}
+        // onRow={(record) => ({
+        //   onClick: () => router.push(`/staff/booklist/${record.id}`),
+        //   style: { cursor: "pointer" }
+        // })}
       />
-      <br />
+
       <AntdCustomPagination totalPages={paging?.pageCount ?? 1} />
-      {/* {useData === undefined ? (
-                <TableSkeleton />
-            ) : (
-                <>
-                    <Table<DataType> loading={true} columns={columns} dataSource={useData} pagination={false} />
-                    <br />
-                    <AntdCustomPagination totalPages={20} />
-                </>
-            )} */}
-      <ExtendBookModal />
+      <PaymentModal
+        open={paymentModal.open}
+        onClose={handleClosePayment}
+        referenceID={paymentModal.booking?.id || ""}
+        type={0} // booking
+        token={user?.token}
+      />
     </>
   );
 }

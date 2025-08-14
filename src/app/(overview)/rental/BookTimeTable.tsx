@@ -180,7 +180,7 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
     const tableID = tableData?.TableID;
 
     const fromSlot = selectedSlots[0].slot;
-    const toSlot = selectedSlots[selectedSlots.length - 1].slot + 1;
+    const toSlot = selectedSlots[selectedSlots.length - 1].slot;
 
     const payload: BookingRequestBody = {
       storeId,
@@ -232,7 +232,7 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
         table.ToSlot != null &&
         typeof table.TableName === "string"
       ) {
-        for (let s = table.FromSlot; s < table.ToSlot; s++) {
+        for (let s = table.FromSlot; s <= table.ToSlot; s++) {
           result.push({
             table: table.TableName,
             slot: s,
@@ -369,7 +369,7 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
               </strong> */}
             ✅ Đã chọn: <strong>{selectedSlots[0].table}</strong>, từ slot{" "}
             <strong>{selectedSlots[0].slot}</strong> đến{" "}
-            <strong>{selectedSlots[selectedSlots.length - 1].slot + 1}</strong>
+            <strong>{selectedSlots[selectedSlots.length - 1].slot}</strong>
           </div>
           <button
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
