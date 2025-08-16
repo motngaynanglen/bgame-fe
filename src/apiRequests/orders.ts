@@ -45,6 +45,12 @@ export const orderApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+    getOrderHistoryPaged: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Order/get-order-paged", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
   getOrderById: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/Order/get-by-id", body, {
       headers: {
