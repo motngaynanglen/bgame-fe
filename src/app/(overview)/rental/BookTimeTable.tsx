@@ -4,7 +4,7 @@ import bookTableApiRequest from "@/src/apiRequests/bookTable";
 import { useAppContext } from "@/src/app/app-provider";
 import { useRentalStore } from "@/src/store/rentalStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { DatePicker, message } from "antd";
+import { Button, Card, Col, DatePicker, message, Row } from "antd";
 import dayjs from "@/src/lib/dayjs";
 import { useEffect, useState } from "react";
 import { date } from "zod";
@@ -77,7 +77,9 @@ interface responseModel {
   paging: null;
 }
 
-export default function BookingTable({ searchParams: { storeId, bookDate } }: PageProps) {
+export default function BookingTable({
+  searchParams: { storeId, bookDate },
+}: PageProps) {
   const [bookingData, setBookingData] = useState<BookingCell[]>([]);
   const [selectedSlots, setSelectedSlots] = useState<
     { table: string; slot: number }[]
@@ -87,7 +89,9 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
     payload?: BookingRequestBody;
   }>({ open: false });
 
-  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(dayjs(bookDate || undefined));
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(
+    dayjs(bookDate || undefined)
+  );
   const { user, isAuthenticated } = useAppContext();
   const { cartItems } = useRentalStore();
   const [paymentData, setPaymentData] = useState<PaymentData | undefined>(
@@ -100,9 +104,10 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
 
     if (selectedDate) {
       const isToday = selectedDate.isSame(dayjs(), "day");
-      const nowSlot = Math.floor(
-        dayjs().diff(dayjs().startOf("day").hour(7), "minute") / 30
-      ) + 1;
+      const nowSlot =
+        Math.floor(
+          dayjs().diff(dayjs().startOf("day").hour(7), "minute") / 30
+        ) + 1;
 
       const isPast = selectedDate.isBefore(dayjs(), "day");
       const isBeforeNowSlot = isToday && slot < nowSlot;
@@ -220,7 +225,6 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
     enabled: !!storeId,
   });
 
-
   useEffect(() => {
     if (!data?.data) return;
 
@@ -266,10 +270,9 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
           {/* <div className="text-green-700 font-semibold underline cursor-pointer">
             Xem bàn & bảng giá
           </div> */}
-
         </div>
 
-        <span >
+        <span>
           Ngày:{" "}
           <DatePicker
             type="date"
@@ -282,8 +285,6 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
             onChange={(date) => setSelectedDate(date)}
             disabled={rentalLoading || rentalError}
           />
-
-
         </span>
       </div>
       <div className="overflow-auto border rounded-md">
@@ -306,8 +307,12 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
             </tr>
           </thead>
           <tbody>
-            {[...new Map(data?.data?.map(item => [item.TableName, item])).values()].map((table, index) => (
-              <tr key={'table' + index} className="border-b">
+            {[
+              ...new Map(
+                data?.data?.map((item) => [item.TableName, item])
+              ).values(),
+            ].map((table, index) => (
+              <tr key={"table" + index} className="border-b">
                 <td className="bg-green-100 border p-2">{table.TableName}</td>
                 {slots.map((slot) => {
                   const status = getStatus(table.TableName, slot);
@@ -316,16 +321,22 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
                   );
 
                   const bgColor =
-                    (status === "booked" && table.Owner != null) ? "bg-yellow-500" :
-                      status === "booked" ? "bg-red-400 cursor-not-allowed" :
-                        status === "locked" ? "bg-gray-300 cursor-not-allowed" :
-                          isSelected ? "bg-green-400" : "bg-white hover:bg-green-100";
+                    status === "booked" && table.Owner != null
+                      ? "bg-yellow-500"
+                      : status === "booked"
+                      ? "bg-red-400 cursor-not-allowed"
+                      : status === "locked"
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : isSelected
+                      ? "bg-green-400"
+                      : "bg-white hover:bg-green-100";
                   return (
                     <td
                       key={slot}
-                      onClick={() => handleClickSlot(table.TableName, slot, status)}
+                      onClick={() =>
+                        handleClickSlot(table.TableName, slot, status)
+                      }
                       className={`border-b border-r h-8 cursor-pointer transition-all duration-200 ${bgColor}`}
-
                     ></td>
                   );
                 })}
@@ -379,12 +390,52 @@ export default function BookingTable({ searchParams: { storeId, bookDate } }: Pa
           </button>
         </div>
       )}
+
+      <div className="grid grid-cols-4 gap-4">
+        {[
+          ...new Map(
+            data?.data?.map((item) => [item.TableName, item])
+          ).values(),
+        ].map((cell, index) => (
+          <div key={index}>
+            <div
+              key={index}
+              className={`p-4 rounded cursor-pointer text-center `}
+            >
+              <div
+                key={cell.TableID}
+                className="col-span-1 flex flex-col items-center"
+              >
+                {/* Thanh trên */}
+                <div className="w-10 h-3 rounded-md bg-[#e6ebed] mb-1"></div>
+
+                {/* Dòng chứa thanh trái, ô giữa và thanh phải */}
+                <div className="flex items-center">
+                  {/* Thanh trái */}
+                  <div className="w-3 h-10 rounded-md bg-[#e6ebed] mr-1"></div>
+
+                  {/* Ô vuông chính giữa */}
+                  <div className="w-14 h-14 rounded-md bg-[#e6ebed] flex justify-center items-center text-gray-500 text-sm font-sans">
+                    {cell.TableName}
+                  </div>
+
+                  {/* Thanh phải */}
+                  <div className="w-3 h-10 rounded-md bg-[#e6ebed] ml-1"></div>
+                </div>
+
+                {/* Thanh dưới */}
+                <div className="w-10 h-3 rounded-md bg-[#e6ebed] mt-1"></div>
+              </div>
+            </div>
+
+          </div>
+        ))}
+      </div>
       {/* code này để debug payload data */}
       {data && (
         <div className="mt-4 p-4 bg-gray-100 rounded">
           <pre>{JSON.stringify(bookingModal.payload, null, 2)}</pre>
           <pre>{JSON.stringify(selectedDate?.format(), null, 2)}</pre>
-
         </div>
       )}
 
