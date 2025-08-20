@@ -1,24 +1,34 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+//version 2: add cartStore interface để lưu trữ store name và location cho cart
+
 interface CartItem {
   productTemplateID: string;
   quantity: number;
   name?: string;
   price?: number; // Thêm trường price
   image?: string;
-  storeId?: string; 
+  storeId?: string;
 }
-
+interface CartStore {
+  storeId: string;
+  storeName: string;
+  storeLocation: string;
+}
 interface RentalStore {
   cartItems: CartItem[];
   currentStoreId: string | null;
+  cartStore: CartStore | null;
+
+  setStoreInfo: (storeId: string, storeName: string, storeLocation: string) => void;
   setStoreId: (storeId: string) => void;
-  addToCart: (productTemplateID: string, name?: string, image?: string, price?: number) => void; // Cập nhật addToCart
+
+  addToCart: (productTemplateID: string, name?: string, image?: string, price?: number) => void; 
   removeFromCart: (productTemplateID: string) => void;
   updateQuantity: (productTemplateID: string, quantity: number) => void;
   clearCart: () => void;
-  
+
 
   generateApiBody: (
     customerId: string,
@@ -34,14 +44,30 @@ export const useRentalStore = create<RentalStore>()(
     (set, get) => ({
       cartItems: [],
       currentStoreId: null,
+      cartStore: null,
 
-      setStoreId: (storeId: string) => {
+      setStoreInfo: (storeId, storeName, storeLocation) => { // update form version 2
         const prevStoreId = get().currentStoreId;
         if (prevStoreId && prevStoreId !== storeId) {
-          // Nếu đổi cửa hàng, reset giỏ hàng
+          set({ cartItems: [] }); 
+        }
+        set({
+          currentStoreId: storeId,
+          cartStore: { storeId, storeName, storeLocation },
+        });
+      },
+      setStoreId: (storeId: string) => { //update form version 2
+         const prevStoreId = get().currentStoreId;
+        if (prevStoreId && prevStoreId !== storeId) {
           set({ cartItems: [] });
         }
-        set({ currentStoreId: storeId });
+        const currentInfo = get().cartStore;
+        set({
+          currentStoreId: storeId,
+          cartStore: currentInfo
+            ? { ...currentInfo, storeId }
+            : { storeId, storeName: "", storeLocation: "" }, // fallback khi chưa có store info
+        });
       },
 
       addToCart: (productTemplateID, name, image, price) =>
@@ -100,7 +126,7 @@ export const useRentalStore = create<RentalStore>()(
           bookType,
         };
       },
-      
+
     }),
 
     {

@@ -129,7 +129,7 @@ export default function BoardGameRental() {
       <div className="flex container min-h-screen mx-auto max-w-screen-3xl">
         <main className=" lg:w-3/4 p-4">
           {showBookingTable ? (
-            <BookingTable searchParams={{ storeId: selectedStoreId, bookDate: new Date() }} />
+            <BookingTable storeId={selectedStoreId} bookDate={new Date()} />
           ) : (
             <>
               <div className=" mb-4">
