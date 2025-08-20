@@ -9,11 +9,6 @@ import { SearchOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
-/**
- * StoreSelecter
- * - giữ hook useStores / API đã có (useStores used in your original file)
- * - improved UI: avatar, address snippet, autoSelectFirst option
- */
 export default function StoreSelecter({
   value,
   onChange,
@@ -27,7 +22,7 @@ export default function StoreSelecter({
   className?: string;
   autoSelectFirst?: boolean;
 }) {
-  const { stores, isLoading, refetch } = useStores(); // your existing hook
+  const { stores, isLoading, refetch } = useStores(); 
   const [search, setSearch] = useState("");
 
   useEffect(() => {

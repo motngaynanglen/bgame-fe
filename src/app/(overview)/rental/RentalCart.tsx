@@ -8,14 +8,16 @@ import {
   DoubleRightOutlined,
   DoubleLeftOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const { Title, Text } = Typography;
 
 export default function CartRental({
+  forceOpen,
   showBookingTable,
   onChooseTable,
 }: {
+  forceOpen?: boolean;
   showBookingTable?: boolean;
   onChooseTable: (value: boolean) => void;
 }) {
@@ -25,6 +27,14 @@ export default function CartRental({
   const handleChooseTable = (value: boolean) => {
     onChooseTable?.(value);
   };
+  useEffect(() => {
+    if (forceOpen) {
+      setOpen(true);
+    }
+    else {
+      setOpen(false);
+    }
+  }, [forceOpen]);
   const totalQuantity = cartItems.reduce(
     (sum, item) => sum + (item.quantity || 0),
     0
@@ -56,7 +66,7 @@ export default function CartRental({
         {open && (
           <div className="flex-1 px-2 py-2 overflow-y-auto">
             <Text type="secondary" className="block text-sm mb-2">
-              {cartStore?.storeName ? `🏬 Cửa hàng: ${cartStore.storeName}` : "Chưa chọn cửa hàng"}
+              {cartStore?.storeId ? `🏬 Cửa hàng: ${cartStore.storeName ? cartStore.storeName : "Chưa tải được tên"}` : "Chưa chọn cửa hàng"}
             </Text>
 
             <div className="space-y-3">
@@ -127,7 +137,10 @@ export default function CartRental({
               <Button
                 type="primary"
                 block
-                onClick={() => onChooseTable(true)}
+                onClick={() => {
+                  onChooseTable(true);
+                  setOpen(false);
+                }}
                 disabled={cartItems.length === 0}
               >
                 Chọn bàn
