@@ -1,5 +1,5 @@
 import React from "react";
-import StarBorder from "../Bits/StarBorder ";
+import StarBorder from "../Bits/StarBorder";
 import PixelTransition from "../Bits/PixelTransition";
 import { ArrowRightOutlined } from "@ant-design/icons";
 
