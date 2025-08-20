@@ -1,219 +1,231 @@
-"use client"
-import React, { useState, useEffect, useCallback } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
-  Card,
   Typography,
-  Divider,
+  Steps,
   List,
+  Avatar,
   Button,
+  Divider,
   Row,
   Col,
-  Image,
-  Steps,
   Spin,
   Result,
-  message,
   QRCode,
+  message,
+  Card,
   Space,
 } from "antd";
-import { BookingRequestBody } from "./BookTimeTable";
-import { formatDateTime } from "@/src/lib/utils";
-import { useAppContext } from "../../app-provider";
-import transactionApiRequest from "@/src/apiRequests/transaction";
-import { notifyError } from "@/src/components/Notification/Notification";
-import { PaymentData } from "@/src/schemaValidations/transaction.schema";
-import { set } from "zod";
-import { a } from "@react-spring/web";
 import { useMutation } from "@tanstack/react-query";
+import { CheckCircleTwoTone } from "@ant-design/icons";
+import { useAppContext } from "@/src/app/app-provider";
+import transactionApiRequest from "@/src/apiRequests/transaction";
 import bookListApiRequest from "@/src/apiRequests/bookList";
-import { m } from "framer-motion";
+import { notifyError } from "@/src/components/Notification/Notification";
 import PaymentStatusChecker from "@/src/components/CheckOut/PaymentStatusChecker";
+import { formatDateTime, formatDurationText } from "@/src/lib/utils";
+import { BookingData, BookingRequestBody } from "./BookTimeTable";
+import { PaymentData } from "@/src/schemaValidations/transaction.schema";
+import { useRentalStore } from "@/src/store/rentalStore";
 
 const { Title, Text } = Typography;
 const { Step } = Steps;
 
-interface BookingPaymentModalProps {
-  open: boolean;
-  onClose: () => void;
-  bookTables?: BookingRequestBody;
-  paymentData?: PaymentData;
-  setPaymentData: (data: PaymentData) => void;
-}
-
-interface UserInfo {
-  name?: string;
-  phone?: string;
-  email?: string;
-}
-
 const formatSlot = (slot: number, isFirst: boolean = false) => {
-  if(isFirst) {
-    slot = slot - 1; 
-  }
+  if (isFirst) slot = slot - 1;
   const hour = Math.floor(slot / 2) + 7;
-  const minute = (slot) % 2 === 0 ? "00" : "30";
+  const minute = slot % 2 === 0 ? "00" : "30";
   return `${hour.toString().padStart(2, "0")}:${minute}`;
 };
 
-export default function BookingPaymentModal({ open, onClose, bookTables }: BookingPaymentModalProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [paymentData, setPaymentData] = useState<PaymentData>();
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
+interface BookingPaymentModalProps {
+  open: boolean;
+  onClose: () => void;
+  bookTables?: BookingData;
+  bookingBody?: BookingRequestBody;
+}
+
+export default function BookingPaymentModal({
+  open,
+  onClose,
+  bookTables,
+  bookingBody
+}: BookingPaymentModalProps) {
   const { user, isAuthenticated } = useAppContext();
-  const mutation = useMutation({
-    mutationFn: async (data: any) => {
-      return bookListApiRequest.createBookList(data, user?.token);
+  const { cartStore, cartItems } = useRentalStore();
+  const [step, setStep] = useState(0);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  // Mutation tạo booking
+  const createBooking = useMutation({
+    mutationFn: async (data: BookingRequestBody) => {
+      const res = await bookListApiRequest.createBookList(data, user?.token);
+
+      if (res.statusCode !== "200") {
+        // Ném lỗi để React Query xử lý trong onError, Cần config để theo template
+        throw new Error(res.message || "Đặt bàn thất bại");
+      }
+
+      return res;
     },
-    mutationKey: ["createBookListByStaff"],
     onSuccess: (data) => {
+
       setPaymentData({ id: data.data });
       handlePaymentAction(data.data);
-      message.success("Đặt bàn thành công!");
-      setCurrentStep(2);
+      setStep(1);
     },
-    onError: (error: any) => {
-      message.error(`Đặt bàn thất bại. Vui lòng thử lại. ${error.message}`);
-      console.error(error);
+    onError: (err: any) => {
+      message.error(`Đặt bàn thất bại: ${err.message}`);
     },
   });
-  // Bước 2 → Bước 3: kiểm tra thanh toán
-  // const handleCheckPayment = useCallback(async () => {
-  //   setLoading(true);
-  //   try {
-  //     await new Promise((res) => setTimeout(res, 2000)); // Fake API
-  //     setPaymentSuccess(true);
-  //     setCurrentStep(3);
-  //   } catch {
-  //     notifyError("Kiểm tra thanh toán", "Thất bại, vui lòng thử lại.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, []);
-  useEffect(() => {
-    if (open) {
-      setCurrentStep(0);
-      setPaymentSuccess(false);
-      setLoading(false);
-    }
-  }, [open]);
-
-  if (!bookTables) {
-    if (open) {
-      message.error("Không có thông tin đặt bàn để thanh toán.");
-    }
-    return null;
-  }
-  const { bookDate, fromSlot, toSlot, tableIDs, bookListItems } = bookTables;
-  const slotRange = `${formatSlot(fromSlot,true)} - ${formatSlot(toSlot)}`;
-  const tables = tableIDs.map((id, idx) => `Bàn ${idx + 1}`);
-  const totalHours = (toSlot - fromSlot + 1) / 2;
-
-  const products = bookListItems.map((item) => {
-    return {
-      ...item,
-      name: item.productName,
-      price: item.price,
-      total: item.quantity * (item.price ?? 0) * totalHours,
-    };
-  });
-  const totalAmount = products.reduce((sum, p) => sum + p.total, 0);
-
-  // Bước 1 → Bước 2: tạo link + QR
-  const handleCreatePayment = () => {
-    if (!isAuthenticated) {
-      message.error("Vui lòng đăng nhập để thực hiện thanh toán.");
+  const handleConfirmBooking = () => {
+    if (!user || !isAuthenticated) {
+      notifyError("Chưa đăng nhập", "Vui lòng đăng nhập để thực hiện thanh toán.");
       return;
     }
-    setCurrentStep(1);
-    mutation.mutate(bookTables);
+    if (!bookingBody) {
+      return;
+    }
+    createBooking.mutate(bookingBody);
   };
-
   const handlePaymentAction = async (id: string) => {
     setLoading(true);
-    try {      // Gọi API để lấy URL thanh toán
+    try {
       const res = await transactionApiRequest.performTransaction(
         {
           referenceID: id,
-          type: 0, // booking
+          type: 0,
           isOffline: false,
           isCash: false,
         },
         user?.token
       );
       if (res.statusCode === "200") {
-        const data = {
-          id: id,
+        setPaymentData({
+          id,
           qrCode: res.data.qrCode,
           checkoutUrl: res.data.checkoutUrl,
-        };
-        setPaymentData(data);
+        });
+        setStep(2);
       } else {
         notifyError("Lỗi thanh toán", res.message || "Vui lòng thử lại sau.");
       }
-    } catch (error) {
-      notifyError("Lỗi thanh toán", "Có lỗi xảy ra khi xử lý thanh toán.");
-      return;
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setStep(0);
+      setPaymentData(null);
+      setPaymentSuccess(false);
+    }
+  }, [open]);
+
+  if (!bookTables) return null;
+
+  const { bookDate, fromSlot, toSlot, tables } = bookTables;
+  const slotRange = `${formatSlot(fromSlot, true)} - ${formatSlot(toSlot)}`;
+  const tableNames = tables.map((table) => table.tableName).join(", ");
+  const slotCount = toSlot - fromSlot + 1;
+  const totalHours = slotCount / 2; // dùng để tính tiền
+  const durationLabel = formatDurationText(slotCount); // dùng để hiển thị
+
+  const products = cartItems.map((item) => ({
+    ...item,
+    name: item.name,
+    price: item.price,
+    total: item.quantity * (item.price ?? 0) * totalHours,
+  }));
+  const totalAmount = products.reduce((sum, p) => sum + p.total, 0);
 
   return (
     <Modal
       open={open}
       onCancel={onClose}
       footer={null}
-      title={<Title level={3}>Thanh toán đặt bàn</Title>}
-      width={960}
-      bodyStyle={{ padding: 24 }}
+      width={800}
+      title={<Title level={4}>Thanh toán đặt bàn</Title>}
     >
-      <Steps current={currentStep} style={{ marginBottom: 32 }}>
-        <Step title="Xác nhận thông tin" />
-        <Step title="Tạo link thanh toán" />
-        <Step title="Hoàn tất thanh toán" />
+      <Steps current={step} size="small" className="mb-4">
+        <Step title="Xác nhận" />
+        <Step title="Tạo link" />
+        <Step title="Thanh toán" />
+        <Step title="Hoàn tất" />
       </Steps>
 
-      {currentStep === 0 && (
+      {step === 0 && (
         <Row gutter={24}>
           <Col span={16}>
             <Space direction="vertical" size="large" style={{ width: "100%" }}>
-              <Card title="Thông tin khách hàng" bordered>
-                <Space direction="vertical">
-                  <Text><strong>Họ tên:</strong> {user?.name}</Text>
-                  <Text><strong>SĐT:</strong> {"user?.phone"}</Text>
-                  <Text><strong>Email:</strong> {"user?.email"}</Text>
-                </Space>
+              {/* Thông tin đặt bàn */}
+              <Card title="Thông tin đặt bàn" bordered>
+                <Row gutter={[16, 16]}>
+                  <Col span={12}>
+                    <Text type="secondary">🏬 Cửa hàng</Text>
+                    <div className="font-medium">{cartStore?.storeName || "N/A"}</div>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">📅 Ngày chơi</Text>
+                    <div className="font-medium">
+                      {formatDateTime(bookDate, "DATE")}
+                    </div>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">⏰ Khung giờ</Text>
+                    <div className="font-medium">{slotRange}</div>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">🪑 Bàn</Text>
+                    <div className="font-medium">{tableNames}</div>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">⏳ Tổng thời gian</Text>
+                    <div className="font-medium">{durationLabel}</div>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">🎲 Tổng slot</Text>
+                    <div className="font-medium">{slotCount} slot</div>
+                  </Col>
+                </Row>
               </Card>
 
-              <Card title="Chi tiết đặt bàn" bordered>
-                <Space direction="vertical">
-                  <Text><strong>Ngày:</strong> {formatDateTime(bookDate, "DATE")}</Text>
-                  <Text><strong>Khung giờ:</strong> {slotRange}</Text>
-                  <Text><strong>Bàn:</strong> {tables.join(", ")}</Text>
-                </Space>
-              </Card>
-
+              {/* Sản phẩm */}
               <Card
                 title={`Sản phẩm đã đặt (${products.length})`}
                 bordered
-                extra={<Text type="secondary">{totalHours} giờ chơi</Text>}
+                extra={<Text type="secondary">{durationLabel} chơi</Text>}
               >
                 <List
+                  itemLayout="horizontal"
                   dataSource={products}
                   renderItem={(item) => (
                     <List.Item>
-                      <Row style={{ width: "100%" }}>
-                        <Col span={10}>{item.name}</Col>
-                        <Col span={4}>x{item.quantity}</Col>
-                        <Col span={10} style={{ textAlign: "right" }}>
-                          {item.price?.toLocaleString()} đ/giờ
-                        </Col>
-                        <Col span={24} style={{ textAlign: "right", color: "#fa541c" }}>
-                          {item.total?.toLocaleString()} đ
-                        </Col>
-                      </Row>
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar
+                            shape="square"
+                            size={56}
+                            src={item.image}
+                            alt={item.name}
+                          />
+                        }
+                        title={<div className="font-medium">{item.name}</div>}
+                        description={
+                          <>
+                            <Text type="secondary">
+                              SL: {item.quantity} × {item.price?.toLocaleString()} đ/giờ
+                            </Text>
+                            <div style={{ color: "#fa541c" }}>
+                              {item.total?.toLocaleString()} đ
+                            </div>
+                          </>
+                        }
+                      />
                     </List.Item>
                   )}
                 />
@@ -221,57 +233,68 @@ export default function BookingPaymentModal({ open, onClose, bookTables }: Booki
             </Space>
           </Col>
 
+          {/* Thanh toán */}
           <Col span={8}>
-            <Card title="Thanh toán" bordered>
+            <Card title="Thanh toán">
               <div style={{ marginBottom: 16 }}>
                 <Text strong>Tổng cộng: </Text>
-                <Text strong style={{ fontSize: 18, color: "#fa541c" }}>
+                <Text strong style={{ fontSize: 20, color: "#fa541c" }}>
                   {totalAmount.toLocaleString()} đ
                 </Text>
               </div>
-              <Button
-                type="primary"
-                size="large"
-                block
-                onClick={handleCreatePayment}
-              >
-                Đặt đơn & Tạo link thanh toán
-              </Button>
+              {user && isAuthenticated ? (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  onClick={handleConfirmBooking}
+                >
+                  Đặt đơn & Tạo link thanh toán
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                // onClick={}
+                >
+                  Đăng nhập để thanh toán
+                </Button>
+              )}
+
             </Card>
           </Col>
         </Row>
       )}
-      {currentStep === 1 && (
-        <div style={{ textAlign: "center", padding: "40px 0" }}>
-          <Spin spinning={loading || mutation.isPending} size="large">
-            <Title level={4}>Đang tạo link thanh toán...</Title>
+
+      {step === 1 && (
+        <div className="text-center py-6">
+          <Spin spinning={loading || createBooking.isPending} size="large">
+            <Title level={5}>Đang tạo link thanh toán...</Title>
             <Text>Vui lòng chờ trong giây lát</Text>
           </Spin>
         </div>
       )}
 
-      {currentStep === 2 && paymentData && (
-        <div style={{ textAlign: "center" }}>
+      {step === 2 && paymentData && (
+        <div className="text-center">
           {paymentData.qrCode && (
-            <>
-              <div className="justify-center items-center flex flex-col">
-                <QRCode value={paymentData.qrCode} size={256} level="H" />
-              </div>
-              <p className="font-bold" style={{ marginTop: 8 }}>Quét mã để thanh toán</p>
-            </>
+            <div className="flex justify-center items-center flex-col">
+              <QRCode value={paymentData.qrCode} size={256} />
+              <p className="font-bold mt-2">Quét mã để thanh toán</p>
+            </div>
           )}
 
           {paymentData.checkoutUrl && (
             <>
-              <p className="italic">Hoặc truy cập đường dẫn dưới đây</p>
-              <p>
-                <a href={paymentData.checkoutUrl} target="_blank" rel="noopener noreferrer">
-                  {paymentData.checkoutUrl}
-                </a>
-              </p>
+              <p className="italic">Hoặc truy cập:</p>
+              <a href={paymentData.checkoutUrl} target="_blank" rel="noopener noreferrer">
+                {paymentData.checkoutUrl}
+              </a>
             </>
           )}
-          <div style={{ marginTop: 12 }}>
+
+          <div className="mt-4">
             <Button
               type="primary"
               onClick={() => paymentData.id && handlePaymentAction(paymentData.id)}
@@ -280,37 +303,32 @@ export default function BookingPaymentModal({ open, onClose, bookTables }: Booki
               Yêu cầu lại mã QR
             </Button>
           </div>
-          {paymentData.id && (
 
+          {paymentData.id && (
             <PaymentStatusChecker
               referenceID={paymentData.id}
               token={user?.token}
               onSuccess={() => {
                 setPaymentSuccess(true);
-                setCurrentStep(3);
+                setStep(3);
               }}
             />
           )}
         </div>
       )}
 
-      {currentStep === 3 && paymentSuccess && (
+      {step === 3 && paymentSuccess && (
         <Result
-          status="success"
+          icon={<CheckCircleTwoTone twoToneColor="#52c41a" />}
           title="Thanh toán thành công!"
-          subTitle="Cảm ơn bạn đã đặt bàn. Bạn có thể xem chi tiết trong lịch sử đặt bàn."
+          subTitle="Cảm ơn bạn đã đặt bàn."
           extra={[
-            <Button key="history" href="/customer/rental-history">
-              Lịch sử đặt bàn
+            <Button key="close" type="primary" onClick={onClose}>
+              Đóng
             </Button>,
-            // <Button key="detail" href={`/customer/rental-history/${bookDate}`} type="primary">
-            //   Xem chi tiết
-            // </Button>,
           ]}
         />
       )}
     </Modal>
-
   );
-};
-
+}

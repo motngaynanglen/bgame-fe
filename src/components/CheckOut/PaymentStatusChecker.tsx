@@ -39,6 +39,7 @@ export default function PaymentStatusChecker({
     const startChecking = () => {
         setChecking(true);
         setTimeLeft(30);
+
         intervalRef.current = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
@@ -46,10 +47,13 @@ export default function PaymentStatusChecker({
                     setChecking(false);
                     return 0;
                 }
+                if ((prev - 1) % 3 === 0) {
+                    checkPaymentStatus();
+                }
                 return prev - 1;
             });
-            checkPaymentStatus();
-        }, 3000);
+
+        }, 1000);
     };
 
     useEffect(() => {

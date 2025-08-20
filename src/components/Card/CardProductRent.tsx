@@ -17,7 +17,7 @@ import type { CheckboxGroupProps } from "antd/es/checkbox";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import StarBorder from "../Bits/StarBorder ";
+import StarBorder from "../Bits/StarBorder";
 import CustomDatePicker from "../DateRantalPicker/DateRental";
 import CustomRangePicker from "../DateRantalPicker/HourRental";
 import { notifyError, notifySuccess } from "../Notification/Notification";

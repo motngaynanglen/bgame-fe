@@ -1,8 +1,11 @@
+import { formatVND } from "@/src/lib/utils";
 import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
 import { Menu, MenuProps, Button, Tag, Slider, Checkbox } from "antd";
+import { format } from "path";
 import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { BsPeople } from "react-icons/bs";
+import dynamic from "next/dynamic";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -244,7 +247,7 @@ export default function CategoryFilter() {
       </div>
       <div className="p-2">
         <p className="text-sm text-gray-500 mb-2">Chọn khoảng giá</p>
-        <PriceRangeSlider />
+        <DynamicPriceRangeSlider />
       </div>
       {/* Menu */}
       <Menu
@@ -273,7 +276,7 @@ export function PriceRangeSlider() {
         step={10000}
         value={range}
         onChange={handleChange}
-        tooltip={{ formatter: (value) => `${value?.toLocaleString()}đ` }}
+        tooltip={{ formatter: (value) => `${formatVND(value ?? 0)}` }}
       />
 
       <div className="flex justify-between text-sm text-gray-700 mt-3">
@@ -292,3 +295,6 @@ export function PriceRangeSlider() {
     </div>
   );
 }
+const DynamicPriceRangeSlider = dynamic(() => Promise.resolve(PriceRangeSlider), {
+  ssr: false,
+});

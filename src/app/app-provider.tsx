@@ -41,23 +41,21 @@ export default function AppProvider({
     setStoredUser(user);
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       try {
         // Gọi endpoint proxy trên Next.js FE
         const res = await authApiRequest.me();
-        if (res) {
-          console.log("data request", res);
-        } else {
-          // Nếu server proxy trả về lỗi (ví dụ: 401 từ BE), token đã hết hạn
+        if (!res) {
           setUser(null);
         }
       } catch (error) {
-        console.error("Lỗi khi kiểm tra token:", error);
         setUser(null);
       }
     };
-    checkAuth();
+    if (user) {
+      checkAuth();
+    }
   }, [isAuthenticated, setUser]);
   useEffect(() => {
     // const token = getCookie("sessionToken");
