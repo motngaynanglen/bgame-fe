@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React from "react";
-import StarBorder from "../Bits/StarBorder ";
+import StarBorder from "../Bits/StarBorder";
 
 export default function AboutRental() {
   const router = useRouter();
