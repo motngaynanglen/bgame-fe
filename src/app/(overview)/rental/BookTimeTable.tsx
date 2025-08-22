@@ -381,8 +381,8 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
           )
         }]} />
       )}
-      
-      <div className="grid grid-cols-4 gap-4">
+
+      {/* <div className="grid grid-cols-4 gap-4">
         {[
           ...new Map(
             data?.data?.map((item) => [item.TableName, item])
@@ -397,31 +397,32 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
                 key={cell.TableID}
                 className="col-span-1 flex flex-col items-center"
               >
-                {/* Thanh trên */}
+                // Thanh trên 
                 <div className="w-10 h-3 rounded-md bg-[#e6ebed] mb-1"></div>
 
-                {/* Dòng chứa thanh trái, ô giữa và thanh phải */}
+                // Dòng chứa thanh trái, ô giữa và thanh phải 
                 <div className="flex items-center">
-                  {/* Thanh trái */}
+                  // Thanh trái
                   <div className="w-3 h-10 rounded-md bg-[#e6ebed] mr-1"></div>
 
-                  {/* Ô vuông chính giữa */}
+                  // Ô vuông chính giữa
                   <div className="w-14 h-14 rounded-md bg-[#e6ebed] flex justify-center items-center text-gray-500 text-sm font-sans">
                     {cell.TableName}
                   </div>
 
-                  {/* Thanh phải */}
+                  // Thanh phải
                   <div className="w-3 h-10 rounded-md bg-[#e6ebed] ml-1"></div>
                 </div>
 
-                {/* Thanh dưới */}
+                // Thanh dưới
                 <div className="w-10 h-3 rounded-md bg-[#e6ebed] mt-1"></div>
               </div>
             </div>
 
           </div>
         ))}
-      </div>
+      </div> 
+      */}
       {/* code này để debug payload data */}
        
 
