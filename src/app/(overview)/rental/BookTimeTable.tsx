@@ -249,23 +249,24 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
     };
   };
   function getTableBgColor(status: string, isSelected: boolean, owner?: any) {
-  if (status === "booked" && owner != null) {
-    return "bg-yellow-400";
+    if (status === "booked" && owner != null) {
+      return "bg-yellow-400";
+    }
+    if (status === "booked") {
+      return "bg-red-400 cursor-not-allowed";
+    }
+    if (status === "locked") {
+      return "bg-gray-200 cursor-not-allowed";
+    }
+    if (isSelected) {
+      return "bg-green-400";
+    }
+    return "bg-white hover:bg-green-100";
   }
-  if (status === "booked") {
-    return "bg-red-400 cursor-not-allowed";
-  }
-  if (status === "locked") {
-    return "bg-gray-200 cursor-not-allowed";
-  }
-  if (isSelected) {
-    return "bg-green-400";
-  }
-  return "bg-white hover:bg-green-100";
-}
 
   return (
     <Card
+      className="w-11/12"
       title="Đặt bàn"
       extra={
         <DatePicker
@@ -424,7 +425,7 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
       </div> 
       */}
       {/* code này để debug payload data */}
-       
+
 
       {/* Modal */}
       {bookingModal.payload && (
