@@ -189,7 +189,7 @@ export const ManagerMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	},
 	{
 		key: "group-14",
-		label: (<Link href={"/manager/something"} className={clsx("font-medium")}>Quản lý Cái gì đó</Link>),
+		label: (<Link href={"/manager/table"} className={clsx("font-medium")}>Quản lý Bàn</Link>),
 		icon: (<UserOutlined />),
 	},
 
