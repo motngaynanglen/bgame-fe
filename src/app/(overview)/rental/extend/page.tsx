@@ -3,7 +3,6 @@ import bookListApiRequest from "@/src/apiRequests/bookList";
 import { useSelectedStore } from "@/src/hooks/useSelectStoreId";
 import { useStores } from "@/src/hooks/useStores";
 import { useQuery } from "@tanstack/react-query";
-import TimeSlotDisplay from "./TimeSlotDisplay";
 import StoreSelector from "./StoreSelecter";
 import { useEffect, useState } from "react";
 import { Button, Card, Col, DatePicker, Drawer, Result, Row, Select } from "antd";
