@@ -96,7 +96,7 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
         ) + 1;
 
       const isPast = selectedDate.isBefore(dayjs(), "day");
-      const isBeforeNowSlot = isToday && slot < nowSlot;
+      const isBeforeNowSlot = isToday && slot < (nowSlot + 2); //đặt trước 30 phuts tu khi choi
 
       if (isPast || isBeforeNowSlot) return "locked";
     }
