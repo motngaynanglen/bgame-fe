@@ -212,7 +212,7 @@ export default function RentalHistoryPage() {
                 return (
                   <List.Item
                     key={b.id}
-                    className="!p-0"
+                    className="!p-2 sm:!p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                     style={{ border: "none" }}
                     extra={
                       <div className="min-w-[220px] text-right flex flex-col gap-3 md:gap-3">
@@ -273,7 +273,7 @@ export default function RentalHistoryPage() {
                         title={
                           <div className="flex flex-col gap-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <Text strong>#{b.code || b.id}</Text>
+                              Mã đơn: <Text strong>#{b.code || b.id}</Text>
                               <Tag>{b.type === 1 ? "Thuê theo ngày" : "Thuê theo giờ"}</Tag>
                               {b.created_at && (
                                 <Text type="secondary">{formatDateTime(b.created_at, "DATETIME")}</Text>
@@ -344,9 +344,7 @@ export default function RentalHistoryPage() {
                               </div>
                               <div className="rounded-lg border border-gray-100 p-3">
                                 <div className="text-xs text-black/60">Ngày thuê</div>
-                                <div className="font-semibold">
-                                  {formatDateTime(b.from, "DATE")}
-                                </div>
+
                                 <div className="text-[12px] text-black/60">
                                   Giờ: {formatDateTime(b.from, "TIME")} — {formatDateTime(b.to, "TIME")}
                                 </div>

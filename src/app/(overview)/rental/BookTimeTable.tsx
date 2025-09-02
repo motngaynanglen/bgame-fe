@@ -7,13 +7,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Card, Collapse, DatePicker, Empty, message, Skeleton } from "antd";
 import dayjs, { formatToUTC7 } from "@/src/lib/dayjs";
 import { useEffect, useState } from "react";
-import { date } from "zod";
 import BookingPaymentModal from "./PaymentModal";
-import { PaymentData } from "@/src/schemaValidations/transaction.schema";
-import transactionApiRequest from "@/src/apiRequests/transaction";
-import { notifyError } from "@/src/components/Notification/Notification";
-import { getCookie } from "cookies-next";
-import authApiRequest from "@/src/apiRequests/auth";
+
 
 const hours = Array.from({ length: 29 }, (_, i) => {
   return dayjs("07:00", "HH:mm").add(i * 30, "minute").format("HH:mm");
@@ -95,12 +90,13 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
     if (slot < 1 || slot > 28) return "locked";
     if (selectedDate) {
       const isToday = selectedDate.isSame(dayjs(), "day");
-      const nowSlot = Math.floor(
-        dayjs().diff(dayjs().startOf("day").hour(7), "minute") / 30
-      ) + 1;
+      const nowSlot =
+        Math.floor(
+          dayjs().diff(dayjs().startOf("day").hour(7), "minute") / 30
+        ) + 1;
 
       const isPast = selectedDate.isBefore(dayjs(), "day");
-      const isBeforeNowSlot = isToday && slot < nowSlot;
+      const isBeforeNowSlot = isToday && slot < (nowSlot + 2); //đặt trước 30 phuts tu khi choi
 
       if (isPast || isBeforeNowSlot) return "locked";
     }
@@ -216,7 +212,6 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
     staleTime: 30_000,
   });
 
-
   useEffect(() => {
     if (!data?.data) return;
 
@@ -254,23 +249,24 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
     };
   };
   function getTableBgColor(status: string, isSelected: boolean, owner?: any) {
-  if (status === "booked" && owner != null) {
-    return "bg-yellow-400";
+    if (status === "booked" && owner != null) {
+      return "bg-yellow-400";
+    }
+    if (status === "booked") {
+      return "bg-red-400 cursor-not-allowed";
+    }
+    if (status === "locked") {
+      return "bg-gray-200 cursor-not-allowed";
+    }
+    if (isSelected) {
+      return "bg-green-400";
+    }
+    return "bg-white hover:bg-green-100";
   }
-  if (status === "booked") {
-    return "bg-red-400 cursor-not-allowed";
-  }
-  if (status === "locked") {
-    return "bg-gray-200 cursor-not-allowed";
-  }
-  if (isSelected) {
-    return "bg-green-400";
-  }
-  return "bg-white hover:bg-green-100";
-}
 
   return (
     <Card
+      className="w-11/12"
       title="Đặt bàn"
       extra={
         <DatePicker
@@ -386,6 +382,50 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
           )
         }]} />
       )}
+
+      {/* <div className="grid grid-cols-4 gap-4">
+        {[
+          ...new Map(
+            data?.data?.map((item) => [item.TableName, item])
+          ).values(),
+        ].map((cell, index) => (
+          <div key={index}>
+            <div
+              key={index}
+              className={`p-4 rounded cursor-pointer text-center `}
+            >
+              <div
+                key={cell.TableID}
+                className="col-span-1 flex flex-col items-center"
+              >
+                // Thanh trên 
+                <div className="w-10 h-3 rounded-md bg-[#e6ebed] mb-1"></div>
+
+                // Dòng chứa thanh trái, ô giữa và thanh phải 
+                <div className="flex items-center">
+                  // Thanh trái
+                  <div className="w-3 h-10 rounded-md bg-[#e6ebed] mr-1"></div>
+
+                  // Ô vuông chính giữa
+                  <div className="w-14 h-14 rounded-md bg-[#e6ebed] flex justify-center items-center text-gray-500 text-sm font-sans">
+                    {cell.TableName}
+                  </div>
+
+                  // Thanh phải
+                  <div className="w-3 h-10 rounded-md bg-[#e6ebed] ml-1"></div>
+                </div>
+
+                // Thanh dưới
+                <div className="w-10 h-3 rounded-md bg-[#e6ebed] mt-1"></div>
+              </div>
+            </div>
+
+          </div>
+        ))}
+      </div> 
+      */}
+      {/* code này để debug payload data */}
+
 
       {/* Modal */}
       {bookingModal.payload && (

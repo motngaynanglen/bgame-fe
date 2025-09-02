@@ -201,7 +201,7 @@ export default function OrderDetail() {
                 </tr>
               </thead>
               <tbody>
-                {data.order_items.map((item) => (
+                {(Array.isArray(data.order_items) ? data.order_items : []).map((item) => (
                   <tr key={item.order_item_id}>
                     <td className="border border-gray-100 p-2">
                       {item.product_id}
