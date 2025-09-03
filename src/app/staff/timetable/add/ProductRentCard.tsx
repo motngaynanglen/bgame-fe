@@ -1,7 +1,7 @@
 "use client";
 import bookListApiRequest from "@/src/apiRequests/bookList";
 import { useAppContext } from "@/src/app/app-provider";
-import StarBorder from "@/src/components/Bits/StarBorder ";
+import StarBorder from "@/src/components/Bits/StarBorder";
 import CustomDatePicker from "@/src/components/DateRantalPicker/DateRental";
 import CustomRangePicker from "@/src/components/DateRantalPicker/HourRental";
 import { notifyError, notifySuccess } from "@/src/components/Notification/Notification";

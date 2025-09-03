@@ -108,3 +108,11 @@ export function toISOStringWithOffset(date: Date, offsetHours: number) {
   const local = new Date(date.getTime() - offsetHours * 60 * 60 * 1000);
   return local.toISOString();
 }
+export const formatDurationText = (slotCount: number) => {
+  const totalMinutes = slotCount * 30;
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h > 0 && m > 0) return `${h} giờ ${m} phút`;
+  if (h > 0) return `${h} giờ`;
+  return `${m} phút`;
+};

@@ -3,7 +3,7 @@ import storeApiRequest from "../apiRequests/stores";
 import { useCallback } from "react";
 import { message } from "antd";
 
-interface Store {
+export interface Store {
   id: string;
   store_name: string;
   address: string;

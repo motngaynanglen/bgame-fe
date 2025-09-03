@@ -4,17 +4,22 @@ import { useAppContext } from "@/src/app/app-provider";
 import dayjs from "@/src/lib/dayjs";
 import { PaymentData } from "@/src/schemaValidations/transaction.schema";
 import { useRentalStore } from "@/src/store/rentalStore";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Card, Collapse, DatePicker, Empty, message, Skeleton } from "antd";
+import dayjs, { formatToUTC7 } from "@/src/lib/dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker, message } from "antd";
 import { useEffect, useState } from "react";
 import BookingPaymentModal from "./PaymentModal";
 
-const hours = Array.from({ length: 28 }, (_, i) =>
-  dayjs("07:00", "HH:mm")
-    .add(i * 30, "minute")  
-    .format("HH:mm")
-);
-const slots = Array.from({ length: 28 }, (_, i) => i + 1); // Slot 1 → 28
+
+const hours = Array.from({ length: 29 }, (_, i) => {
+  return dayjs("07:00", "HH:mm").add(i * 30, "minute").format("HH:mm");
+});
+const slots = Array.from({ length: 29 }, (_, i) => i + 1); // Slot 1 → 29 
+// Cơ bản có 28 slot tương ứng 7h tới 21h (14h). Số Slot = (số giờ)  x2 + 1
+// Hiển thị nội dung thead lệch về bên trái nên phải; điễn giải slot 1 tương ứng 7h - 7h30 nên phải theo n+1
+// Nếu để 28 slot thì thời gian cuối cùng sẽ không được hiển thị.
 
 
 export type BookingStatus = "available" | "booked" | "locked" | "event";
@@ -22,7 +27,7 @@ export type BookingStatus = "available" | "booked" | "locked" | "event";
 export interface BookingCell {
   table: string;
   slot: number;
-  status: BookingStatus;
+  status?: BookingStatus;
 }
 export interface BookingRequestBody {
   storeId: string;
@@ -33,21 +38,23 @@ export interface BookingRequestBody {
   bookListItems: {
     productTemplateID: string;
     quantity: number;
-    productName?: string;
-    price?: number;
   }[];
 }
+interface TableData {
+  tableId: string;
+  tableName: string;
+}
+export interface BookingData {
+  bookDate: string;
+  fromSlot: number;
+  toSlot: number;
+  tables: TableData[];
+}
 interface PageProps {
-  searchParams: {
-    storeId?: string;
-    bookDate?: Date;
-    cartItems?: {
-      productTemplateID: string;
-      quantity: number;
-      product_name?: string; // Thêm trường product_name
-      price?: number;
-    }[];
-  };
+
+  storeId?: string;
+  bookDate?: Date;
+
 }
 
 
@@ -66,30 +73,26 @@ interface responseModel {
   paging: null;
 }
 
-export default function BookingTable({
-  searchParams: { storeId, bookDate, cartItems = [] },
-}: PageProps) {
+export default function BookingTable({ storeId, bookDate }: PageProps) {
+  const { user, isAuthenticated } = useAppContext();
+
   const [bookingData, setBookingData] = useState<BookingCell[]>([]);
-  const [selectedSlots, setSelectedSlots] = useState<
-    { table: string; slot: number }[]
-  >([]);
+  const initialDate = bookDate ? dayjs(bookDate) : dayjs();
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+
+  const [selectedSlots, setSelectedSlots] = useState<BookingCell[]>([]);
   const [bookingModal, setBookingModal] = useState<{
     open: boolean;
     payload?: BookingRequestBody;
+    bookingData?: BookingData;
   }>({ open: false });
 
-  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(
-    dayjs(bookDate || undefined)
-  );
-  const { user, isAuthenticated } = useAppContext();
-  const [paymentData, setPaymentData] = useState<PaymentData | undefined>(
-    undefined
-  );
+  const { cartStore, cartItems } = useRentalStore();
 
   const getStatus = (table: string, slot: number): BookingStatus => {
     const found = bookingData.find((b) => b.table === table && b.slot === slot);
     if (found?.status) return found.status;
-
+    if (slot < 1 || slot > 28) return "locked";
     if (selectedDate) {
       const isToday = selectedDate.isSame(dayjs(), "day");
       const nowSlot =
@@ -98,7 +101,7 @@ export default function BookingTable({
         ) + 1;
 
       const isPast = selectedDate.isBefore(dayjs(), "day");
-      const isBeforeNowSlot = isToday && slot < nowSlot;
+      const isBeforeNowSlot = isToday && slot < (nowSlot + 2); //đặt trước 30 phuts tu khi choi
 
       if (isPast || isBeforeNowSlot) return "locked";
     }
@@ -184,8 +187,6 @@ export default function BookingTable({
       bookListItems: cartItems.map((item) => ({
         productTemplateID: item.productTemplateID,
         quantity: item.quantity,
-        productName: item.product_name,
-        price: item.price, // Lưu giá sản phẩm
       })),
     };
     setBookingModal({ open: true, payload });
@@ -198,19 +199,22 @@ export default function BookingTable({
     isError: rentalError,
     error: rentalErrorData,
     isSuccess: rentalSuccess,
+    refetch: rentalRefetch,
   } = useQuery<responseModel>({
     queryKey: ["rentalTimeTable", storeId, selectedDate?.format()],
     queryFn: async () => {
+      const date = formatToUTC7(selectedDate);
       const res = await bookTableApiRequest.getBookTableTimeTableByDate(
         {
           storeId,
-          bookDate: selectedDate?.format() || dayjs().format(),
+          bookDate: date,
         },
         user?.token
       );
       return res;
     },
     enabled: !!storeId,
+    staleTime: 30_000,
   });
 
   useEffect(() => {
@@ -236,147 +240,152 @@ export default function BookingTable({
 
     setBookingData(result);
   }, [data]);
+  const convertPayloadToBookingData = (payload: BookingRequestBody): BookingData | undefined => {
+    if (!data?.data) return;
+
+    return {
+      bookDate: payload.bookDate,
+      fromSlot: payload.fromSlot,
+      toSlot: payload.toSlot,
+      tables: payload.tableIDs.map((tableId) => ({
+        tableId: tableId,
+        tableName: data.data.find((t) => t.TableID === tableId)?.TableName || "", // Lấy tên bàn từ dữ liệu
+      })),
+    };
+  };
+  function getTableBgColor(status: string, isSelected: boolean, owner?: any) {
+    if (status === "booked" && owner != null) {
+      return "bg-yellow-400";
+    }
+    if (status === "booked") {
+      return "bg-red-400 cursor-not-allowed";
+    }
+    if (status === "locked") {
+      return "bg-gray-200 cursor-not-allowed";
+    }
+    if (isSelected) {
+      return "bg-green-400";
+    }
+    return "bg-white hover:bg-green-100";
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between p-4 bg-white  ">
-        <div className=" bg-white flex gap-6 text-sm items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border rounded bg-white" /> Trống
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-400 rounded" /> Đã đặt
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-400 rounded" /> Khoá
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-purple-400 rounded" /> Sự kiện
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-500 rounded" /> Bạn đã đặt
-          </div>
-          {/* <div className="text-green-700 font-semibold underline cursor-pointer">
-            Xem bàn & bảng giá
-          </div> */}
+    <Card
+      className="w-11/12"
+      title="Đặt bàn"
+      extra={
+        <DatePicker
+          value={selectedDate}
+          onChange={(date) => setSelectedDate(date!)}
+          disabledDate={(current) => {
+            const today = dayjs().startOf("day");
+            const maxDate = today.add(2, "month").endOf("month");
+            return current < today || current > maxDate;
+          }}
+        />
+      }
+    >
+      {/* Legend */}
+      <div className="flex gap-4 flex-wrap mb-4 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 border rounded bg-white" /> Trống
         </div>
-
-        <span>
-          Ngày:{" "}
-          <DatePicker
-            type="date"
-            value={selectedDate}
-            disabledDate={(current) => {
-              const today = dayjs().startOf("day");
-              const maxDate = today.add(2, "month").endOf("month");
-              return current < today || current > maxDate;
-            }}
-            onChange={(date) => setSelectedDate(date)}
-            disabled={rentalLoading || rentalError}
-          />
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-red-400 rounded" /> Đã đặt
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-yellow-400 rounded" /> Bạn đã đặt
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-gray-300 rounded" /> Khoá
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-purple-400 rounded" /> Sự kiện
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-green-400 rounded" /> Bạn đang chọn
+        </div>
       </div>
+
+      {/* Table */}
       <div className="overflow-auto border rounded-md">
-        <table className="min-w-max table-fixed border-collapse">
-          <thead>
-            <tr className="bg-cyan-200">
-              <th className="w-[72px] border-b border-gray-300 px-2 py-1 text-left h-8">
-                <span></span>
-              </th>
-              {hours.map((hour) => (
-                <th
-                  key={hour}
-                  className="w-[48px] border-b border-gray-300 relative text-center  font-normal p-0"
-                >
-                  <span className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2  whitespace-nowrap text-[16px]">
-                    {hour}
-                  </span>
+        {rentalLoading ? (
+          <Skeleton active paragraph={{ rows: 6 }} />
+        ) : rentalError ? (
+          <Empty description="Không thể tải dữ liệu" />
+        ) : (
+          <table className="min-w-max table-fixed border-collapse text-xs">
+            <thead>
+              <tr className="bg-cyan-200">
+                <th className="w-[72px] border-b border-gray-300 px-2 py-1 text-left h-8">
+                  <span></span>
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ...new Map(
-                data?.data?.map((item) => [item.TableName, item])
-              ).values(),
-            ].map((table, index) => (
-              <tr key={"table" + index} className="border-b">
-                <td className="bg-green-100 border p-2">{table.TableName}</td>
-                {slots.map((slot) => {
-                  const status = getStatus(table.TableName, slot);
-                  const isSelected = selectedSlots.some(
-                    (s) => s.table === table.TableName && s.slot === slot
-                  );
-
-                  const bgColor =
-                    status === "booked" && table.Owner != null
-                      ? "bg-yellow-500"
-                      : status === "booked"
-                      ? "bg-red-400 cursor-not-allowed"
-                      : status === "locked"
-                      ? "bg-gray-300 cursor-not-allowed"
-                      : isSelected
-                      ? "bg-green-400"
-                      : "bg-white hover:bg-green-100";
-                  return (
-                    <td
-                      key={slot}
-                      onClick={() =>
-                        handleClickSlot(table.TableName, slot, status)
-                      }
-                      className={`border-b border-r h-8 cursor-pointer transition-all duration-200 ${bgColor}`}
-                    ></td>
-                  );
-                })}
-                {/* {hours.map((hour) => {
-                    const status = getStatus(table, hour);
-                    const isSelected = selectedSlots.some(
-                      (s) => s.table === table && s.time === hour
-                    );
-                    return (
-                      <td
-                        key={hour}
-                        onClick={() => handleClickSlot(table, hour, status)}
-                        //                     className={`border h-10 cursor-pointer transition-all
-                        //   ${status === "available" ? "bg-white hover:bg-red-100" : ""}
-                        //   ${status === "booked" ? "bg-red-400 cursor-not-allowed" : ""}
-                        //   ${status === "locked" ? "bg-gray-400 cursor-not-allowed" : ""}
-                        //   ${status === "event" ? "bg-purple-300 cursor-not-allowed" : ""}
-                        //   ${isSelected ? "bg-red-500 text-white" : ""}
-
-                        // `}
-                        className={`border-b border-r h-8 cursor-pointer transition-all duration-200 ${isSelected ? "bg-red-400" : "bg-white hover:bg-red-100"
-                          }`}
-                      ></td>
-                    );
-                  })} */}
+                {hours.map((hour) => (
+                  <th
+                    key={hour}
+                    className="w-[48px] border-b border-gray-300 relative text-center  font-normal p-0"
+                  >
+                    <span className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2  whitespace-nowrap text-[16px]">
+                      {hour}
+                    </span>
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {[...new Map(data?.data?.map((item) => [item.TableName, item])).values()].map(
+                (table: BookingList, index: number) => (
+                  <tr key={index} className="border-b">
+                    <td className="sticky left-0 bg-slate-50 border-r px-2 py-2 font-medium">
+                      {table.TableName}
+                    </td>
+                    {slots.map((slot) => {
+                      const status = getStatus(table.TableName, slot);
+                      const isSelected = selectedSlots.some(
+                        (s) => s.table === table.TableName && s.slot === slot
+                      );
+                      const bgColor = getTableBgColor(status, isSelected, table.Owner);
+                      return (
+                        <td
+                          key={slot}
+                          onClick={() => handleClickSlot(table.TableName, slot, status)}
+                          className={`h-8 min-w-[32px] border-r cursor-pointer transition-all duration-150 ${bgColor}`}
+                        />
+                      );
+                    })}
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
+      {/* Actions */}
       {selectedSlots.length > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-green-700">
-            {/*  <strong>{selectedSlots[0].table}</strong>, từ{" "}
-              <strong>{selectedSlots[0].slot}</strong> đến{" "}
-              <strong>
-                {dayjs(selectedSlots[selectedSlots.length - 1].slot, "HH:mm")
-                  .add(30, "minute")
-                  .format("HH:mm")}
-              </strong> */}
-            ✅ Đã chọn: <strong>{selectedSlots[0].table}</strong>, từ slot{" "}
-            <strong>{selectedSlots[0].slot}</strong> đến{" "}
-            <strong>{selectedSlots[selectedSlots.length - 1].slot}</strong>
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm">
+            ✅ Đã chọn: <b>{selectedSlots[0].table}</b> từ slot{" "}
+            <b>{selectedSlots[0].slot}</b> đến slot{" "}
+            <b>{selectedSlots[selectedSlots.length - 1].slot}</b>
           </div>
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            onClick={handleConfirmBooking}
-          >
-            Xác nhận đặt bàn
-          </button>
+          <div className="flex gap-2">
+            <Button onClick={() => setSelectedSlots([])}>Hủy chọn</Button>
+            <Button type="primary" onClick={handleConfirmBooking}>
+              Xác nhận đặt bàn
+            </Button>
+          </div>
         </div>
+      )}
+
+      {/* Debug */}
+      {data && (
+        <Collapse className="mt-4" items={[{
+          key: "1", label: "Debug Payload", children: (
+            <pre className="text-xs">{JSON.stringify(bookingModal.payload, null, 2)}</pre>
+          )
+        }]} />
       )}
 
       {/* <div className="grid grid-cols-4 gap-4">
@@ -394,62 +403,44 @@ export default function BookingTable({
                 key={cell.TableID}
                 className="col-span-1 flex flex-col items-center"
               >
+                // Thanh trên 
                 <div className="w-10 h-3 rounded-md bg-[#e6ebed] mb-1"></div>
 
+                // Dòng chứa thanh trái, ô giữa và thanh phải 
                 <div className="flex items-center">
+                  // Thanh trái
                   <div className="w-3 h-10 rounded-md bg-[#e6ebed] mr-1"></div>
 
+                  // Ô vuông chính giữa
                   <div className="w-14 h-14 rounded-md bg-[#e6ebed] flex justify-center items-center text-gray-500 text-sm font-sans">
                     {cell.TableName}
                   </div>
 
+                  // Thanh phải
                   <div className="w-3 h-10 rounded-md bg-[#e6ebed] ml-1"></div>
                 </div>
 
+                // Thanh dưới
                 <div className="w-10 h-3 rounded-md bg-[#e6ebed] mt-1"></div>
               </div>
             </div>
 
           </div>
         ))}
-      </div> */}
+      </div> 
+      */}
       {/* code này để debug payload data */}
-      {/* {data && (
-        <div className="mt-4 p-4 bg-gray-100 rounded">
-          <pre>{JSON.stringify(bookingModal.payload, null, 2)}</pre>
-          <pre>{JSON.stringify(selectedDate?.format(), null, 2)}</pre>
-        </div>
-      )} */}
 
-      {/* <Modal
-          open={modalOpen}
-          title="Xác nhận đặt bàn"
-          onCancel={() => setModalOpen(false)}
-          onOk={handleConfirmBooking}
-          okText="Đặt bàn"
-        >
-          <div className="space-y-4">
-            <Input
-              placeholder="Họ tên khách"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            />
-            <Input
-              placeholder="Số điện thoại"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-        </Modal> */}
+
+      {/* Modal */}
       {bookingModal.payload && (
         <BookingPaymentModal
           open={bookingModal.open}
           onClose={() => setBookingModal({ open: false })}
-          bookTables={bookingModal.payload}
-          paymentData={paymentData}
-          setPaymentData={() => setPaymentData(paymentData)}
+          bookTables={convertPayloadToBookingData(bookingModal.payload)}
+          bookingBody={bookingModal.payload}
         />
       )}
-    </div>
+    </Card>
   );
 }
