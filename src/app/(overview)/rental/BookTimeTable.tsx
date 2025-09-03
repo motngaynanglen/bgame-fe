@@ -1,26 +1,31 @@
 "use client";
 import bookTableApiRequest from "@/src/apiRequests/bookTable";
 import { useAppContext } from "@/src/app/app-provider";
-import dayjs from "@/src/lib/dayjs";
 import { PaymentData } from "@/src/schemaValidations/transaction.schema";
 import { useRentalStore } from "@/src/store/rentalStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Card, Collapse, DatePicker, Empty, message, Skeleton } from "antd";
+import {
+  Button,
+  Card,
+  Collapse,
+  DatePicker,
+  Empty,
+  message,
+  Skeleton,
+} from "antd";
 import dayjs, { formatToUTC7 } from "@/src/lib/dayjs";
-import { useQuery } from "@tanstack/react-query";
-import { DatePicker, message } from "antd";
 import { useEffect, useState } from "react";
 import BookingPaymentModal from "./PaymentModal";
 
-
 const hours = Array.from({ length: 29 }, (_, i) => {
-  return dayjs("07:00", "HH:mm").add(i * 30, "minute").format("HH:mm");
+  return dayjs("07:00", "HH:mm")
+    .add(i * 30, "minute")
+    .format("HH:mm");
 });
-const slots = Array.from({ length: 29 }, (_, i) => i + 1); // Slot 1 → 29 
+const slots = Array.from({ length: 29 }, (_, i) => i + 1); // Slot 1 → 29
 // Cơ bản có 28 slot tương ứng 7h tới 21h (14h). Số Slot = (số giờ)  x2 + 1
 // Hiển thị nội dung thead lệch về bên trái nên phải; điễn giải slot 1 tương ứng 7h - 7h30 nên phải theo n+1
 // Nếu để 28 slot thì thời gian cuối cùng sẽ không được hiển thị.
-
 
 export type BookingStatus = "available" | "booked" | "locked" | "event";
 
@@ -51,12 +56,10 @@ export interface BookingData {
   tables: TableData[];
 }
 interface PageProps {
-
   storeId?: string;
   bookDate?: Date;
-
+  
 }
-
 
 interface BookingList {
   TableID: string;
@@ -101,7 +104,7 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
         ) + 1;
 
       const isPast = selectedDate.isBefore(dayjs(), "day");
-      const isBeforeNowSlot = isToday && slot < (nowSlot + 2); //đặt trước 30 phuts tu khi choi
+      const isBeforeNowSlot = isToday && slot < nowSlot + 2; //đặt trước 30 phuts tu khi choi
 
       if (isPast || isBeforeNowSlot) return "locked";
     }
@@ -240,7 +243,9 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
 
     setBookingData(result);
   }, [data]);
-  const convertPayloadToBookingData = (payload: BookingRequestBody): BookingData | undefined => {
+  const convertPayloadToBookingData = (
+    payload: BookingRequestBody
+  ): BookingData | undefined => {
     if (!data?.data) return;
 
     return {
@@ -249,7 +254,8 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
       toSlot: payload.toSlot,
       tables: payload.tableIDs.map((tableId) => ({
         tableId: tableId,
-        tableName: data.data.find((t) => t.TableID === tableId)?.TableName || "", // Lấy tên bàn từ dữ liệu
+        tableName:
+          data.data.find((t) => t.TableID === tableId)?.TableName || "", // Lấy tên bàn từ dữ liệu
       })),
     };
   };
@@ -334,29 +340,37 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
             </thead>
 
             <tbody>
-              {[...new Map(data?.data?.map((item) => [item.TableName, item])).values()].map(
-                (table: BookingList, index: number) => (
-                  <tr key={index} className="border-b">
-                    <td className="sticky left-0 bg-slate-50 border-r px-2 py-2 font-medium">
-                      {table.TableName}
-                    </td>
-                    {slots.map((slot) => {
-                      const status = getStatus(table.TableName, slot);
-                      const isSelected = selectedSlots.some(
-                        (s) => s.table === table.TableName && s.slot === slot
-                      );
-                      const bgColor = getTableBgColor(status, isSelected, table.Owner);
-                      return (
-                        <td
-                          key={slot}
-                          onClick={() => handleClickSlot(table.TableName, slot, status)}
-                          className={`h-8 min-w-[32px] border-r cursor-pointer transition-all duration-150 ${bgColor}`}
-                        />
-                      );
-                    })}
-                  </tr>
-                )
-              )}
+              {[
+                ...new Map(
+                  data?.data?.map((item) => [item.TableName, item])
+                ).values(),
+              ].map((table: BookingList, index: number) => (
+                <tr key={index} className="border-b">
+                  <td className="sticky left-0 bg-slate-50 border-r px-2 py-2 font-medium">
+                    {table.TableName}
+                  </td>
+                  {slots.map((slot) => {
+                    const status = getStatus(table.TableName, slot);
+                    const isSelected = selectedSlots.some(
+                      (s) => s.table === table.TableName && s.slot === slot
+                    );
+                    const bgColor = getTableBgColor(
+                      status,
+                      isSelected,
+                      table.Owner
+                    );
+                    return (
+                      <td
+                        key={slot}
+                        onClick={() =>
+                          handleClickSlot(table.TableName, slot, status)
+                        }
+                        className={`h-8 min-w-[32px] border-r cursor-pointer transition-all duration-150 ${bgColor}`}
+                      />
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
@@ -381,56 +395,21 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
 
       {/* Debug */}
       {data && (
-        <Collapse className="mt-4" items={[{
-          key: "1", label: "Debug Payload", children: (
-            <pre className="text-xs">{JSON.stringify(bookingModal.payload, null, 2)}</pre>
-          )
-        }]} />
+        <Collapse
+          className="mt-4"
+          items={[
+            {
+              key: "1",
+              label: "Debug Payload",
+              children: (
+                <pre className="text-xs">
+                  {JSON.stringify(bookingModal.payload, null, 2)}
+                </pre>
+              ),
+            },
+          ]}
+        />
       )}
-
-      {/* <div className="grid grid-cols-4 gap-4">
-        {[
-          ...new Map(
-            data?.data?.map((item) => [item.TableName, item])
-          ).values(),
-        ].map((cell, index) => (
-          <div key={index}>
-            <div
-              key={index}
-              className={`p-4 rounded cursor-pointer text-center `}
-            >
-              <div
-                key={cell.TableID}
-                className="col-span-1 flex flex-col items-center"
-              >
-                // Thanh trên 
-                <div className="w-10 h-3 rounded-md bg-[#e6ebed] mb-1"></div>
-
-                // Dòng chứa thanh trái, ô giữa và thanh phải 
-                <div className="flex items-center">
-                  // Thanh trái
-                  <div className="w-3 h-10 rounded-md bg-[#e6ebed] mr-1"></div>
-
-                  // Ô vuông chính giữa
-                  <div className="w-14 h-14 rounded-md bg-[#e6ebed] flex justify-center items-center text-gray-500 text-sm font-sans">
-                    {cell.TableName}
-                  </div>
-
-                  // Thanh phải
-                  <div className="w-3 h-10 rounded-md bg-[#e6ebed] ml-1"></div>
-                </div>
-
-                // Thanh dưới
-                <div className="w-10 h-3 rounded-md bg-[#e6ebed] mt-1"></div>
-              </div>
-            </div>
-
-          </div>
-        ))}
-      </div> 
-      */}
-      {/* code này để debug payload data */}
-
 
       {/* Modal */}
       {bookingModal.payload && (
