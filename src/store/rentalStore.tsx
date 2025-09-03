@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware";
 interface CartItem {
   productTemplateID: string;
   quantity: number;
-  name?: string;
+  product_name?: string; // Thêm trường product_name
   price?: number; // Thêm trường price
   image?: string;
   storeId?: string; 
@@ -14,7 +14,7 @@ interface RentalStore {
   cartItems: CartItem[];
   currentStoreId: string | null;
   setStoreId: (storeId: string) => void;
-  addToCart: (productTemplateID: string, name?: string, image?: string, price?: number) => void; // Cập nhật addToCart
+  addToCart: (productTemplateID: string, product_name?: string, image?: string, price?: number) => void; // Cập nhật addToCart
   removeFromCart: (productTemplateID: string) => void;
   updateQuantity: (productTemplateID: string, quantity: number) => void;
   clearCart: () => void;
@@ -44,7 +44,7 @@ export const useRentalStore = create<RentalStore>()(
         set({ currentStoreId: storeId });
       },
 
-      addToCart: (productTemplateID, name, image, price) =>
+      addToCart: (productTemplateID, product_name, image, price) =>
         set((state) => {
           const existingItem = state.cartItems.find(
             (item) => item.productTemplateID === productTemplateID
@@ -63,7 +63,7 @@ export const useRentalStore = create<RentalStore>()(
               cartItems: [
                 ...state.cartItems,
 
-                { productTemplateID, quantity: 1, name, image, storeId: state.currentStoreId ?? undefined, price }, // Lưu cả name và image
+                { productTemplateID, quantity: 1, product_name, image, storeId: state.currentStoreId ?? undefined, price }, // Lưu cả product_name và image
               ],
             };
           }
@@ -106,15 +106,15 @@ export const useRentalStore = create<RentalStore>()(
     {
       name: "rentalCart",
       storage: {
-        getItem: (name) => {
-          const item = sessionStorage.getItem(name);
+        getItem: (product_name) => {
+          const item = sessionStorage.getItem(product_name);
           return item ? JSON.parse(item) : null;
         },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
+        setItem: (product_name, value) => {
+          sessionStorage.setItem(product_name, JSON.stringify(value));
         },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
+        removeItem: (product_name) => {
+          sessionStorage.removeItem(product_name);
         },
       },
     }

@@ -1,28 +1,21 @@
 "use client";
-import bookListApiRequest from "@/src/apiRequests/bookList";
 import bookTableApiRequest from "@/src/apiRequests/bookTable";
 import { useAppContext } from "@/src/app/app-provider";
-import { useRentalStore } from "@/src/store/rentalStore";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Card, Col, DatePicker, message, Row } from "antd";
 import dayjs from "@/src/lib/dayjs";
-import { useEffect, useState } from "react";
-import { date } from "zod";
-import BookingPaymentModal from "./PaymentModal";
 import { PaymentData } from "@/src/schemaValidations/transaction.schema";
-import transactionApiRequest from "@/src/apiRequests/transaction";
-import { notifyError } from "@/src/components/Notification/Notification";
-import { getCookie } from "cookies-next";
-import authApiRequest from "@/src/apiRequests/auth";
+import { useRentalStore } from "@/src/store/rentalStore";
+import { useQuery } from "@tanstack/react-query";
+import { DatePicker, message } from "antd";
+import { useEffect, useState } from "react";
+import BookingPaymentModal from "./PaymentModal";
 
 const hours = Array.from({ length: 28 }, (_, i) =>
   dayjs("07:00", "HH:mm")
-    .add(i * 30, "minute")
+    .add(i * 30, "minute")  
     .format("HH:mm")
 );
 const slots = Array.from({ length: 28 }, (_, i) => i + 1); // Slot 1 → 28
 
-// const tables = ["Table 1", "Table 2", "Table 3", "Table 4"];
 
 export type BookingStatus = "available" | "booked" | "locked" | "event";
 
@@ -48,20 +41,16 @@ interface PageProps {
   searchParams: {
     storeId?: string;
     bookDate?: Date;
+    cartItems?: {
+      productTemplateID: string;
+      quantity: number;
+      product_name?: string; // Thêm trường product_name
+      price?: number;
+    }[];
   };
 }
 
-interface Boards {
-  id: string;
-  name: string;
-  storeId: string;
-  capacity: number;
-  status: boolean;
-  createdAt: string;
-  createdBy: string;
-  updatedBy: string;
-  updatedAt: string;
-}
+
 interface BookingList {
   TableID: string;
   TableName: string;
@@ -78,7 +67,7 @@ interface responseModel {
 }
 
 export default function BookingTable({
-  searchParams: { storeId, bookDate },
+  searchParams: { storeId, bookDate, cartItems = [] },
 }: PageProps) {
   const [bookingData, setBookingData] = useState<BookingCell[]>([]);
   const [selectedSlots, setSelectedSlots] = useState<
@@ -93,7 +82,6 @@ export default function BookingTable({
     dayjs(bookDate || undefined)
   );
   const { user, isAuthenticated } = useAppContext();
-  const { cartItems } = useRentalStore();
   const [paymentData, setPaymentData] = useState<PaymentData | undefined>(
     undefined
   );
@@ -196,7 +184,7 @@ export default function BookingTable({
       bookListItems: cartItems.map((item) => ({
         productTemplateID: item.productTemplateID,
         quantity: item.quantity,
-        productName: item.name,
+        productName: item.product_name,
         price: item.price, // Lưu giá sản phẩm
       })),
     };
@@ -391,7 +379,7 @@ export default function BookingTable({
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-4 gap-4">
         {[
           ...new Map(
             data?.data?.map((item) => [item.TableName, item])
@@ -406,38 +394,32 @@ export default function BookingTable({
                 key={cell.TableID}
                 className="col-span-1 flex flex-col items-center"
               >
-                {/* Thanh trên */}
                 <div className="w-10 h-3 rounded-md bg-[#e6ebed] mb-1"></div>
 
-                {/* Dòng chứa thanh trái, ô giữa và thanh phải */}
                 <div className="flex items-center">
-                  {/* Thanh trái */}
                   <div className="w-3 h-10 rounded-md bg-[#e6ebed] mr-1"></div>
 
-                  {/* Ô vuông chính giữa */}
                   <div className="w-14 h-14 rounded-md bg-[#e6ebed] flex justify-center items-center text-gray-500 text-sm font-sans">
                     {cell.TableName}
                   </div>
 
-                  {/* Thanh phải */}
                   <div className="w-3 h-10 rounded-md bg-[#e6ebed] ml-1"></div>
                 </div>
 
-                {/* Thanh dưới */}
                 <div className="w-10 h-3 rounded-md bg-[#e6ebed] mt-1"></div>
               </div>
             </div>
 
           </div>
         ))}
-      </div>
+      </div> */}
       {/* code này để debug payload data */}
-      {data && (
+      {/* {data && (
         <div className="mt-4 p-4 bg-gray-100 rounded">
           <pre>{JSON.stringify(bookingModal.payload, null, 2)}</pre>
           <pre>{JSON.stringify(selectedDate?.format(), null, 2)}</pre>
         </div>
-      )}
+      )} */}
 
       {/* <Modal
           open={modalOpen}

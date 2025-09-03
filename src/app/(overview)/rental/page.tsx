@@ -1,24 +1,20 @@
 "use client";
-import productApiRequest from "@/src/apiRequests/product";
-import CategoryFilter from "@/src/components/Filter/CategoryFilter";
 import CardProductRent from "@/src/components/Card/CardProductRent";
+import CategoryFilter from "@/src/components/Filter/CategoryFilter";
 import CartRental from "@/src/components/Products/CartRental";
 import { useSelectedStore } from "@/src/hooks/useSelectStoreId";
 import { useStores } from "@/src/hooks/useStores";
-import { AppstoreOutlined, FilterOutlined } from "@ant-design/icons";
+import { FilterOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Col, DatePicker, Drawer, MenuProps, Pagination, Row, Space } from "antd";
+import { Button, Card, Drawer, Pagination, Space } from "antd";
 import { useState } from "react";
 import Breadcrumb from "../../../components/Breadcrumb/Breadcrumb";
 import Loading from "../loading";
 
-import { useEffect } from "react";
-import { useRentalStore } from "@/src/store/rentalStore";
-import TimeSlotDisplay from "./extend/TimeSlotDisplay";
 import bookListApiRequest from "@/src/apiRequests/bookList";
+import { useRentalStore } from "@/src/store/rentalStore";
+import { useEffect } from "react";
 import BookingTable from "./BookTimeTable";
-import dayjs from "@/src/lib/dayjs";
-import { date } from "zod";
 import StoreSelector from "./StoreSelecter";
 
 interface BoardGame {
@@ -67,6 +63,10 @@ export default function BoardGameRental() {
       setStoreId(selectedStoreId);
     }
   }, [selectedStoreId, setStoreId]);
+    
+  
+  const { cartItems } = useRentalStore();
+  
 
   const fetchBoardGamesByStoreId = async (storeId: string) => {
     try {
@@ -129,7 +129,7 @@ export default function BoardGameRental() {
       <div className="flex container min-h-screen mx-auto max-w-screen-3xl">
         <main className=" lg:w-3/4 p-4">
           {showBookingTable ? (
-            <BookingTable searchParams={{ storeId: selectedStoreId, bookDate: new Date() }} />
+            <BookingTable searchParams={{ storeId: selectedStoreId, bookDate: new Date(), cartItems: cartItems }} />
           ) : (
             <>
               <div className=" mb-4">
