@@ -14,7 +14,11 @@ function CardProduct({
   time,
   player,
   quantity,
+  duration,
+  number_of_player_max,
+  number_of_player_min,
   product_group_ref_id,
+  publisher
 }: {
   id: string;
   image: string;
@@ -24,7 +28,11 @@ function CardProduct({
   time: string;
   player: string;
   quantity: number;
+  duration: string | null | undefined;
+  number_of_player_max: number | null | undefined;
+  number_of_player_min: number | null | undefined;
   product_group_ref_id: string | null | undefined;
+  publisher: string | null | undefined;
 }) {
   const router = useRouter();
 
@@ -86,6 +94,16 @@ function CardProduct({
                 (5)
               </p>
             </div> */}
+            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 flex flex-col">
+              <span>
+                {" "}
+                ⏰ {duration ?? "xx"} phút  - 🎂 {age ?? "xx"}+ tuổi
+              </span>
+              <span>
+                👥 {number_of_player_min || "xx"} -{" "}
+                {number_of_player_max || "xx"} người
+              </span>
+            </div>
             <div className="mt-2 flex items-center gap-2">
               {quantity > 0 ? (
                 <p className="text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">

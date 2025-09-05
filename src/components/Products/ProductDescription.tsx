@@ -22,6 +22,7 @@ interface BoardGameInfo {
   description: string;
   sales_quantity: number;
   rent_quantity: number;
+  duration: string | null | undefined;
 }
 
 function SingleProductDescription({
@@ -29,108 +30,98 @@ function SingleProductDescription({
 }: {
   productData: BoardGameInfo | undefined;
 }) {
-  console.log("productData at 1 ", productData);
-
-  const items: DescriptionsProps["items"] = useMemo(
+  const productInfoItems = useMemo(
     () => [
       {
-        key: "1",
-        label: <h1 className="text-xl">Nhà phát hành</h1>,
-        span: 1,
-        children: <p className="text-xl">{productData?.publisher}</p>,
+        icon: '🏢',
+        label: 'Nhà phát hành',
+        value: productData?.publisher || 'Đang cập nhật',
       },
       {
-        key: "2",
-        label: <h1 className="text-xl">Số người chơi</h1>,
-        children: (
-          <p className="text-xl">
-            {productData?.number_of_player_min} -{" "}
-            {productData?.number_of_player_max}
-          </p>
-        ),
+        icon: '👥',
+        label: 'Số người chơi',
+        value: `${productData?.number_of_player_min || '?'} - ${productData?.number_of_player_max || '?'}`,
       },
       {
-        key: "3",
-        label: <h1 className="text-xl">Thời gian chơi</h1>,
-        children: <p className="text-xl">{productData?.time}</p>,
+        icon: '⏰',
+        label: 'Thời gian chơi',
+        value: productData?.duration ? `${productData.duration} phút` : 'Đang cập nhật',
       },
       {
-        key: "4",
-        label: <h1 className="text-xl">Độ tuổi đề xuất</h1>,
-        children: <p className="text-xl">{productData?.age}+ </p>,
+        icon: '🎂',
+        label: 'Độ tuổi đề xuất',
+        value: productData?.age ? `Từ ${productData.age}+` : 'Mọi lứa tuổi',
       },
     ],
-    []
+    [productData]
   );
 
-  console.log("productData", productData);
-
   return (
-    <div className="space-y-8 pb-16 ">
-      <Collapse
-        defaultActiveKey={["1"]}
-        expandIconPosition="right"
-        items={[
-          {
-            key: "1",
-            label: <h1 className="text-xl">Mô tả sản phẩm</h1>,
-            children: (
-              <div>
-                <Descriptions bordered items={items} column={1} />
-                <p className="text-gray-600 mt-4 ml-2 text-lg">
-                  Giới thiệu sản phẩm:
-                  {productData?.description ? (
-                    <TipTapEditor
-                      value={productData.description}
-                      isReadonly={true}
-                    />
-                  ) : "Boardgame rất hay"}
-                </p>
+    <div className="space-y-6 pb-6">
+      {/* Product Specifications */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">📋 Thông số kỹ thuật</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {productInfoItems.map((item, index) => (
+            <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+              <span className="text-2xl">{item.icon}</span>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-700 text-lg">{item.label}</h3>
+                <p className="text-gray-900 text-lg font-medium mt-1">{item.value}</p>
               </div>
-            ),
-          },
-        ]}
-      />
-
-      {/* <div id="review" className="space-y-4">
-        <h3 className="text-xl font-bold mb-4 text-black-2">Đánh giá (02):</h3>
-        <ul className="space-y-6">
-          {[
-            {
-              name: "Rocky Mike",
-              date: "06 July, 2022",
-              comment:
-                "I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born.",
-              rating: 5,
-            },
-            {
-              name: "Rony Jhon",
-              date: "07 July, 2022",
-              comment:
-                "I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born.",
-              rating: 5,
-            },
-          ].map((review, index) => (
-            <li key={index} className="flex space-x-4">
-              <img
-                src={`/assets/images/review-img-3.png`}
-                alt="Reviewer"
-                className="w-16 h-16 rounded-full"
-              />
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h5 className="font-semibold text-black-2">{review.name}</h5>
-                  <Rate disabled defaultValue={review.rating} />
-                </div>
-                <div className="flex space-x-1 text-orange-500">
-                  <span className="text-sm text-gray-500">{review.date}</span>
-                </div>
-                <p className="text-gray-600">{review.comment}</p>
-              </div>
-            </li>
+            </div>
           ))}
-        </ul>
-      </div> */}
+        </div>
+      </div>
+
+      {/* Product Description */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <Collapse
+          defaultActiveKey={['description']}
+          expandIcon={({ isActive }) => (
+            <div className="transform transition-transform">
+              {isActive ? '▼' : '►'}
+            </div>
+          )}
+          items={[
+            {
+              key: 'description',
+              label: (
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  📝 Mô tả sản phẩm
+                </h2>
+              ),
+              children: (
+                <div className="p-6">
+                  {productData?.description ? (
+                    <div className="prose prose-lg max-w-none">
+                      <TipTapEditor
+                        value={productData.description}
+                        isReadonly={true}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <div className="text-4xl mb-4">📖</div>
+                      <p className="text-lg">Chưa có mô tả cho sản phẩm này</p>
+                      <p className="text-sm">Sản phẩm đang được cập nhật thông tin</p>
+                    </div>
+                  )}
+                </div>
+              ),
+              extra: (
+                <div className="text-sm text-gray-500">
+                  {productData?.description ? 'Nhấn để thu gọn' : 'Thông tin bổ sung'}
+                </div>
+              ),
+            },
+          ]}
+          className="product-description-collapse"
+        />
+      </div>
+
+    
     </div>
   );
 }

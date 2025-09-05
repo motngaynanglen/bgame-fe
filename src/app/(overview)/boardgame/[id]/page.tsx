@@ -21,6 +21,7 @@ interface BoardGameInfo {
   description: string;
   sales_quantity: number;
   rent_quantity: number;
+  duration: string | null | undefined;
 }
 
 export default function BoardGameDetailPage() {
