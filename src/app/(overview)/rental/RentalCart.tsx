@@ -88,12 +88,12 @@ export default function CartRental({
                       <div className="flex items-center gap-2">
                         <img
                           src={imageUrls[0]}
-                          alt={item.name}
+                          alt={item.product_name} // Cập nhật product_name
                           className="w-12 h-12 object-cover rounded-md"
                         />
                         <div className="flex-1 min-w-0">
-                          <Text strong className="block truncate" title={item.name}>
-                            {item.name}
+                          <Text strong className="block truncate" title={item.product_name}>  
+                            {item.product_name} 
                           </Text>
                           <div className="flex items-center gap-2">
                             <Text type="secondary" className="text-sm">

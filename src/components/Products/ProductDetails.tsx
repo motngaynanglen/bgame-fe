@@ -28,6 +28,7 @@ interface BoardGameInfo {
   description: string;
   sales_quantity: number;
   rent_quantity: number;
+  duration: string | null | undefined;
 }
 
 interface responseModel {
@@ -151,7 +152,12 @@ function ProductDetails({
 
   console.log("hehe: ", productId);
 
-  const { data: storesData, isLoading: isLoadingStores, isError: isErrorStores, error: errorStore } = useQuery({
+  const {
+    data: storesData,
+    isLoading: isLoadingStores,
+    isError: isErrorStores,
+    error: errorStore,
+  } = useQuery({
     queryKey: ["storesByProductTemplateId", productId],
     queryFn: async () => {
       const res = await storeApiRequest.getListAndProductCountById({
@@ -174,8 +180,9 @@ function ProductDetails({
   if (isError) {
     return <div>Mất kết nối từ server: {error?.message}</div>;
   }
-  if(isErrorStores) {
-    return <div>Mất kết nối từ server: {errorStore?.message}</div>;}
+  if (isErrorStores) {
+    return <div>Mất kết nối từ server: {errorStore?.message}</div>;
+  }
 
   onProductData(data?.data);
 
@@ -183,184 +190,195 @@ function ProductDetails({
 
   if (data) {
     const imageUrls = data.data.image?.split("||") || [];
+
     return (
-      <div className="grid lg:grid-cols-12  gap-6 lg:gap-10 mb-8 text-gray-800 border-2 rounded-lg border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+      <div className="bg-white my-4 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
         {contextHolder}
-        {/* Image Section */}
-        <div className="lg:col-start-1 lg:col-end-7 col-span-12 ">
-          <div className="space-y-4 col-start-2">
-            <div className="relative w-full  border-2 rounded-lg overflow-hidden flex justify-center items-center  border-gray-300">
-              <Image
-                src={imageUrls[0]}
-                alt="Thumbnail"
-                style={{ width: "auto", height: "auto", objectFit: "cover" }}
-              />
-              {/* <img src={boardgame?.image} alt="Thumbnail" className="w-full h-full object-contain" /> */}
-            </div>
 
-            <div className="flex space-x-4">
-              <Image.PreviewGroup>
-                {imageUrls
-                  .filter((_, index) => index === 1)
-                  .map((url, index) => (
-                    <button
-                      key={index}
-                      className="border rounded-lg overflow-hidden focus:ring-2 focus:ring-orange-500 w-40 h-40 object-cover "
-                    >
-                      <Image
+        <div className="grid lg:grid-cols-12 gap-8 p-6 lg:p-8">
+          {/* Image Gallery Section */}
+          <div className="lg:col-span-7">
+            <div className="space-y-4">
+              {/* Main Image */}
+              <div className="relative w-full h-[400px] max-w-md mx-auto aspect-square bg-gray-100 rounded-xl overflow-hidden">
+                {/* <Image
+                  src={imageUrls[0]}
+                  alt={data.data.product_name}
+                  className="w-full h-full object-scale-down" // Hoặc object-contain
+                  preview={false}
+                  style={{
+                    objectFit: "scale-down", // Tự động co dãn vừa khít
+                    backgroundColor: "#f8fafc", // Màu nền trùng với background
+                  }}
+                /> */}
+                {/* <div className="w-full h-[220px] rounded-lg overflow-hidden"> */}
+                <img
+                  src={imageUrls[0]}
+                  alt={data.data.product_name}
+                  className="w-full h-full object-cover"
+                />
+                {/* </div> */}
+                {data.data.sales_quantity <= 0 && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <span className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                      HẾT HÀNG
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnail Gallery */}
+              {imageUrls.length > 1 && (
+                <div className="flex space-x-3 overflow-x-auto pb-2">
+                  <Image.PreviewGroup>
+                    {imageUrls.map((url, index) => (
+                      <button
                         key={index}
-                        src={url}
-                        alt={`Board game ${index + 1}`}
-                        // className="w-20 h-20 object-cover rounded-md"
-                      />
-                    </button>
-                  ))}
-              </Image.PreviewGroup>
+                        className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-orange-500 transition-colors"
+                      >
+                        <Image
+                          src={url}
+                          alt={`${data.data.product_name} ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </Image.PreviewGroup>
+                </div>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Details Section */}
-        <div className="space-y-6 lg:col-end-12 lg:col-span-5 col-span-12 ">
-          {/* name product */}
-          <h3 className="font-body text-xl lg:text-4xl uppercase font-bold">
-            {data?.data.product_name}
-          </h3>
-          <div className="flex items-center space-x-2">
-            <Rate disabled defaultValue={5} />
-            <Link href="#" className="text-sm text-gray-500 hover:underline">
-              (5 đánh giá)
-            </Link>
-          </div>
+          {/* Product Info Section */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Product Header */}
+            <div className="space-y-3">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+                {data.data.product_name}
+              </h1>
 
-          <div className="text-2xl font-semibold">
-            {formatPrice(data?.data.price ?? "Giá liên hệ")}{" "}
-            {/* gia tien o day */}
-            {/* <span className="line-through text-gray-400">$80.00</span> */}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-500">Nhà phát hành:</span>
-            <Link href="#" className="text-tertiary hover:underline">
-              {data?.data.publisher}
-            </Link>
-          </div>
-          {/* category */}
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-500">Mã sản phẩm: </span>
-            <Link href="#" className="text-tertiary hover:underline">
-              {data?.data.code}
-            </Link>
-          </div>
-          {/* status */}
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-500">Trạng thái:</span>
-            <span className="text-green-500">
-              {data.data.sales_quantity > 0 ? (
-                <span className="font-medium text-secondary dark:text-green-400">
-                  Còn hàng
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-3xl font-bold text-orange-600">
+                  {formatPrice(data.data.price)}₫
                 </span>
-              ) : (
-                <span className="font-medium text-red-500 dark:text-red-400">
-                  Hết hàng
-                </span>
-              )}
-            </span>
-          </div>
-          {/* quality */}
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-500">Số lượng:</span>
-            <div className="relative">
+              </div>
+            </div>
+
+            {/* Product Meta */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-500">Mã SP</span>
+                  <p className="font-medium">{data.data.code}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Nhà phát hành</span>
+                  <p className="font-medium">
+                    {data.data.publisher || "Đang cập nhật"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-500">Số lượng kho</span>
+                  <p className="font-medium text-lg">
+                    {data.data.sales_quantity} sản phẩm
+                  </p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Trạng Thái</span>
+                  <p
+                    className={`text-lg ${
+                      data.data.sales_quantity > 0
+                        ? " text-green-800"
+                        : " text-red-800"
+                    }`}
+                  >
+                    {data.data.sales_quantity > 0 ? "CÒN HÀNG" : "HẾT HÀNG"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Số lượng:
+              </label>
               <InputNumber
                 min={1}
+                max={data.data.sales_quantity}
                 value={quantity}
                 onChange={handleChange}
-                className="custom-input-number"
+                className="w-24"
+                disabled={data.data.sales_quantity <= 0}
               />
             </div>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            {/* btn them sp vao gio hang */}
-            <button
-              disabled={data.data.sales_quantity <= 0}
-              onClick={handleAddProduct}
-              className={`bg-gradient-to-b from-tertiary to-gray-700 border  text-white px-4 py-2 rounded-lg hover:bg-orange-600 ${
-                data.data.sales_quantity > 0
-                  ? ""
-                  : "opacity-50 cursor-not-allowed"
-              }`}
-            >
-              Thêm vào giỏ hàng
-            </button>
-            {/* btn mua ngay */}
-            {/* <Magnet padding={10} disabled={false} magnetStrength={2}>
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
               <button
                 disabled={data.data.sales_quantity <= 0}
-                className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary ${
-                  data.data.sales_quantity > 0
-                    ? ""
-                    : "opacity-50 cursor-not-allowed"
+                onClick={handleAddProduct}
+                className={`flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all ${
+                  data.data.sales_quantity <= 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:shadow-lg"
                 }`}
-                onClick={handleBuyNow}
               >
-                Mua ngay
+                🛒 Thêm vào giỏ hàng
               </button>
-            </Magnet> */}
-          </div>
 
-          {/* btn them wishlist */}
-          {/* <ul className="flex space-x-6">
-            <li>
               <button
-                // onClick={handleAddWishlist}
-                className="bg-gradient-to-b from-tertiary to-gray-700 border  text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+                disabled={data.data.sales_quantity <= 0}
+                onClick={handleBuyNow}
+                className={`flex-1 bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all ${
+                  data.data.sales_quantity <= 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:shadow-lg"
+                }`}
               >
-                Thêm vào danh sách yêu thích
+                ⚡ Mua ngay
               </button>
-            </li>
-          </ul> */}
-          {/* <div>
-            <h6 className="font-semibold">Phương thức thanh toán</h6>
-            <div className="flex space-x-4">
-              {["visa2", "mastercard", "vnpay", "paypal", "pay"].map((item) => (
-                <img
-                  key={item}
-                  src={`/assets/icon/${item}.svg`}
-                  alt={item}
-                  className="w-10 h-auto"
-                />
-              ))}
             </div>
-          </div> */}
-          <div>
-            <h2 className="p-1 font-semibold">
-              Có {(storesData && Array.isArray(storesData) ? storesData.length : 0)} cửa hàng còn sản phẩm
-            </h2>
 
-            {storesData && storesData.length > 0 ? (
-              <ul
-                className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white 
-                     max-h-[100px] sm:max-h-[150px] overflow-y-auto"
-              >
-                {storesData.map((store: any) => (
-                  <li
-                    key={store.id}
-                    className="w-full px-4 py-2 border-b border-gray-200 dark:border-gray-600"
-                  >
-                    {store.store_name} -{" "}
-                    {/* <Link
-                      className="hover: underline-offset-1"
-                      href={"https://maps.app.goo.gl/zMYvU3sV4LiMevgr5"}
-                    > */}
-                    {store.address}
-                    {/* </Link> */}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>Đang tải danh sách cửa hàng...</p>
-            )}
+            {/* Store Availability */}
+            <div className="pt-4 border-t border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-3">
+                📍 Có {storesData?.length || 0} cửa hàng có sẵn
+              </h3>
+
+              {storesData && storesData.length > 0 ? (
+                <div className="max-h-40 overflow-y-auto space-y-2">
+                  {storesData.slice(0, 3).map((store: any) => (
+                    <div
+                      key={store.id}
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {store.store_name}
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          {store.address}
+                        </p>
+                      </div>
+                      <span className="text-xs text-green-600 font-semibold">
+                        {store.sale_count || "đang cập nhật số lượng sản phẩm"} sản phẩm
+                      </span>
+                    </div>
+                  ))}
+                  {storesData.length > 3 && (
+                    <p className="text-sm text-gray-500 text-center">
+                      +{storesData.length - 3} cửa hàng khác
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-gray-500">Đang tải thông tin cửa hàng...</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
