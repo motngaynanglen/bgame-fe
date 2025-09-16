@@ -92,19 +92,6 @@ export default function StaffBookListSearch({
                       </span>{" "}
                       - Mã: {product.code}
                     </p>
-                    {/* <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          product.product_type === "SALES_PRODUCT"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {product.product_type === "SALES_PRODUCT"
-                          ? "Sản phẩm bán"
-                          : "Sản phẩm cho thuê"}
-                      </span>
-                    </div> */}
                   </div>
 
                   {/* Giá tiền */}

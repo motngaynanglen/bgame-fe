@@ -15,6 +15,11 @@ function CardHotDeal({
   player,
   quantity,
   product_group_ref_id,
+  duration,
+  age,
+  number_of_player_max,
+  number_of_player_min,
+  publisher,
 }: {
   id: string;
   image: string;
@@ -26,6 +31,11 @@ function CardHotDeal({
   player: string;
   quantity: number;
   product_group_ref_id: string;
+  number_of_player_min: number;
+  number_of_player_max: number;
+  duration: string | null | undefined;
+  age: string | null | undefined;
+  publisher: string | null | undefined;
 }) {
   const router = useRouter();
 
@@ -35,7 +45,7 @@ function CardHotDeal({
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const product:CartItem = {
+    const product: CartItem = {
       id: id,
       // product_group_ref_id: product_group_ref_id,
       name: title,
@@ -52,7 +62,7 @@ function CardHotDeal({
   return (
     <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105 card-product w-full min-w-0 ">
       <>{contextHolder}</>
-      <div className="relative w-full h-[370px] perspective-1000">
+      <div className="relative w-full h-[400px] perspective-1000">
         <div className=" w-full h-full transform-3d">
           {/* Mặt sau */}
           <div className="card-back backface-hidden overflow-hidden  absolute rotate-y-180 w-full h-full  rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800 hover:shadow-blue-300">
@@ -104,7 +114,16 @@ function CardHotDeal({
                   (5)
                 </p>
               </div> */}
-
+              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 flex flex-col">
+                <span>
+                  {" "}
+                  ⏰ {duration ?? "xx"} phút - 🎂 {age ?? "xx"}+ tuổi
+                </span>
+                <span>
+                  👥 {number_of_player_min || "xx"} -{" "}
+                  {number_of_player_max || "xx"} người
+                </span>
+              </div>
               <div className="mt-2 flex items-center gap-2">
                 {quantity > 0 ? (
                   <p className="text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">

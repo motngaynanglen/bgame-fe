@@ -1,14 +1,19 @@
 "use client";
-import { DatePicker, DatePickerProps, Modal } from "antd";
+import { Avatar, DatePicker, DatePickerProps, Modal } from "antd";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import Avatar from "../../components/Customer/Avatar";
 import { useAppContext } from "../app-provider";
 
 import userApiRequest from "@/src/apiRequests/user";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 
 dayjs.extend(customParseFormat);
 interface IFormInput {
@@ -125,200 +130,337 @@ export default function ProfilePage() {
 
   // console.log(user);
   return (
-    <div className=" flex flex-col items-center ">
-      <div className="w-full bg-white pt-2 p-6 rounded-lg shadow-md ">
-        <h1 className="text-2xl font-semibold mb-4 text-black-2">
-          Thông tin cá nhân
-        </h1>
-        <div className="flex justify-around">
-          <div className="">
-            <Avatar />
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Personal Information Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+            <h1 className="text-2xl font-bold text-white">
+              👤 Thông tin cá nhân
+            </h1>
+            <p className="text-blue-100 text-sm">
+              Cập nhật thông tin tài khoản của bạn
+            </p>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+          <div className="p-6">
+            <div className="flex flex-col lg:flex-row  gap-8">
+              {/* Avatar Section */}
+              <div className="flex flex-col  lg:items-start">
+                <div className="relative">
+                  <Avatar
+                    size={200}
+                    src={data?.image}
+                    className="border-4 border-blue-100 shadow-lg"
+                  >
+                    {data?.full_name?.[0]?.toUpperCase() || "U"}
+                  </Avatar>
+                  <button className="absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+                    <EditOutlined className="text-sm" />
+                  </button>
+                </div>
+                {/* <p className="text-gray-500 text-sm mt-3">
+                  Nhấn để thay đổi ảnh
+                </p> */}
+              </div>
+
+              {/* Form Section */}
+              <form onSubmit={handleSubmit(onSubmit)} className="flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Full Name */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Họ và tên *
+                    </label>
+                    <input
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 
+                           focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      type="text"
+                      defaultValue={data?.full_name}
+                      {...register("fullName", { required: "Tên là bắt buộc" })}
+                    />
+                    {errors.fullName && (
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <ExclamationCircleOutlined />
+                        {errors.fullName.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Email *
+                    </label>
+                    <input
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 
+                           focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      defaultValue={data?.email}
+                      {...register("email", {
+                        required: "Email là bắt buộc",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Email không hợp lệ",
+                        },
+                      })}
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <ExclamationCircleOutlined />
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Gender */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Giới tính *
+                    </label>
+                    <select
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 
+                           focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      {...register("gender", {
+                        required: "Giới tính là bắt buộc",
+                      })}
+                    >
+                      <option value="male">Nam</option>
+                      <option value="female">Nữ</option>
+                      <option value="other">Không xác định</option>
+                    </select>
+                    {errors.gender && (
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <ExclamationCircleOutlined />
+                        {errors.gender.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Phone Number */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Số điện thoại *
+                    </label>
+                    <input
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 
+                           focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      defaultValue={data?.phone_number}
+                      {...register("phoneNumber", {
+                        required: "Số điện thoại là bắt buộc",
+                      })}
+                    />
+                    {errors.phoneNumber && (
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <ExclamationCircleOutlined />
+                        {errors.phoneNumber.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Date of Birth */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Ngày sinh *
+                    </label>
+                    <DatePicker
+                      onChange={onChange}
+                      size="large"
+                      className="w-full rounded-xl"
+                      defaultValue={dayjs(data?.date_of_birth)}
+                      format={dateFormat}
+                    />
+                    {errors.dateOfBirth && (
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <ExclamationCircleOutlined />
+                        {errors.dateOfBirth.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end mt-8 pt-6 border-t border-gray-100">
+                  <button
+                    type="submit"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 
+                         rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 
+                         transition-all shadow-lg hover:shadow-xl"
+                  >
+                    💾 Lưu thay đổi
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* Shipping Address Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+            <h1 className="text-2xl font-bold text-white">
+              📦 Địa chỉ giao hàng
+            </h1>
+            <p className="text-green-100 text-sm">
+              Quản lý địa chỉ nhận hàng của bạn
+            </p>
+          </div>
+
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
               <div>
-                <label className="block text-gray-700">Tên</label>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Địa chỉ giao hàng mặc định
+                </h2>
+                <p className="text-gray-500 text-sm">
+                  Địa chỉ sẽ được sử dụng cho đơn hàng
+                </p>
+              </div>
+              <button
+                className="bg-green-600 text-white px-6 py-2 rounded-xl font-semibold 
+                     hover:bg-green-700 transition-all mt-4 sm:mt-0 flex items-center gap-2"
+                onClick={() => showModal()}
+              >
+                <PlusOutlined />
+                Thêm địa chỉ mới
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {data?.address ? (
+                <div className="border-2 border-green-200 bg-green-50 rounded-xl p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">
+                          Mặc định
+                        </span>
+                        <span className="text-green-600">✓</span>
+                      </div>
+                      <p className="text-gray-700 font-medium">
+                        {data.full_name}
+                      </p>
+                      <p className="text-gray-600">{data.phone_number}</p>
+                      <p className="text-gray-800 mt-2">{data.address}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="text-blue-600 hover:text-blue-800 transition-colors">
+                        <EditOutlined />
+                      </button>
+                      <button className="text-red-600 hover:text-red-800 transition-colors">
+                        <DeleteOutlined />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-xl">
+                  <div className="text-4xl mb-4">🏠</div>
+                  <p className="text-gray-500">
+                    Bạn chưa có địa chỉ giao hàng nào
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Thêm địa chỉ để nhận hàng thuận tiện hơn
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Address Modal */}
+        <Modal
+          title={
+            <div className="flex items-center gap-2">
+              <PlusOutlined />
+              <span>Thêm địa chỉ mới</span>
+            </div>
+          }
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          footer={null}
+          width={600}
+        >
+          <form
+            onSubmit={handleSubmitAddress(onSubmitAddress)}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Name */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Tên người nhận *
+                </label>
                 <input
-                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3"
                   type="text"
                   defaultValue={data?.full_name}
-                  {...register("fullName", { required: "Tên là bắt buộc" })}
+                  {...registerAddress("name", { required: "Tên là bắt buộc" })}
                 />
-                {errors.fullName && (
+                {errorsAddress.name && (
                   <p className="text-red-500 text-sm">
-                    {errors.fullName.message}
+                    {errorsAddress.name.message}
                   </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-gray-700">Email</label>
-                <input
-                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
-                  defaultValue={data?.email}
-                  {...register("email", {
-                    required: "Email là bắt buộc",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Email không hợp lệ",
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email.message}</p>
                 )}
               </div>
 
-              <div>
-                <label className="block text-gray-700">Giới tính</label>
-                <select
-                  className="w-full border border-gray-300 rounded px-3 py-2.5 mt-1 text-black-2"
-                  {...register("gender", { required: "Giới tính là bắt buộc" })}
-                >
-                  <option value="male">Nam</option>
-                  <option value="female">Nữ</option>
-                  <option value="other">Không xác định</option>
-                </select>
-                {errors.gender && (
-                  <p className="text-red-500 text-sm">
-                    {errors.gender.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-gray-700">Số điện thoại</label>
+              {/* Phone */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Điện thoại *
+                </label>
                 <input
-                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2 "
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3"
                   defaultValue={data?.phone_number}
-                  {...register("phoneNumber", {
-                    required: "số điện thoại là bắt buộc",
+                  {...registerAddress("phone", {
+                    required: "Số điện thoại là bắt buộc",
                   })}
                 />
-                {errors.phoneNumber && (
+                {errorsAddress.phone && (
                   <p className="text-red-500 text-sm">
-                    {errors.phoneNumber.message}
+                    {errorsAddress.phone.message}
                   </p>
                 )}
               </div>
-              <div>
-                <label className="block text-gray-700">Ngày sinh</label>
-                {/* <input
-                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
-                  defaultValue={data?.date_of_birth}
-                  {...register("dateOfBirth", {
-                    required: "Ngày sinh là bắt buộc",
-                  })}
-                /> */}
-                <DatePicker
-                  onChange={onChange}
-                  size="large"
-                  defaultValue={dayjs(data?.date_of_birth)}
-                  format={dateFormat}
-                />
-                {errors.dateOfBirth && (
-                  <p className="text-red-500 text-sm">
-                    {errors.dateOfBirth.message}
-                  </p>
-                )}
-              </div>
-              {/* <div>
-                <label className="block text-gray-700">Địa chỉ</label>
-                <textarea
-                  className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2 row-2"
-                  defaultValue="123 Điện Biên Phủ, Quận 1, TP.HCM"
-                  {...register("address", { required: "Địa chỉ là bắt buộc" })}
-                />
-                {errors.address && (
-                  <p className="text-red-500 text-sm">
-                    {errors.address.message}
-                  </p>
-                )}
-              </div> */}
             </div>
-            <div className="flex justify-end mt-6">
+
+            {/* Address */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Địa chỉ *
+              </label>
+              <textarea
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 resize-none"
+                rows={3}
+                {...registerAddress("address", {
+                  required: "Địa chỉ là bắt buộc",
+                })}
+              />
+              {errorsAddress.address && (
+                <p className="text-red-500 text-sm">
+                  {errorsAddress.address.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-6 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50"
+              >
+                Hủy
+              </button>
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700"
               >
-                Lưu thay đổi
+                Lưu địa chỉ
               </button>
             </div>
           </form>
-        </div>
+        </Modal>
       </div>
-      <div className="w-full bg-white pt-2 p-6 rounded-lg shadow-md mt-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold mb-4 text-black-2">
-            Địa chỉ giao hàng của bạn
-          </h1>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-            onClick={() => showModal()}
-          >
-            Thêm địa chỉ mới{" "}
-          </button>
-        </div>
-
-        <div className="flex flex-col space-y-4">
-          {data?.address ? (
-            <div className="border p-4 rounded">
-              <p className="text-gray-700">Tên: {data?.full_name}</p>
-              <p className="text-gray-700">Điện thoại: {data?.phone_number}</p>
-              <p className="text-gray-700">Địa chỉ: {data?.address}</p>
-            </div>
-          ) : (
-            <p className="text-gray-500">Bạn chưa có địa chỉ giao hàng nào.</p>
-          )}
-        </div>
-      </div>
-      <Modal
-        title="Basic Modal"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <form onSubmit={handleSubmitAddress(onSubmitAddress)}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-gray-700">Tên người nhận</label>
-              <input
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
-                type="text"
-                defaultValue={data?.full_name}
-                {...register("fullName", { required: "Tên là bắt buộc" })}
-              />
-              {errorsAddress.name && (
-                <p className="text-red-500 text-sm">
-                  {errorsAddress.name.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-gray-700">Điện thoại</label>
-              <input
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
-                defaultValue={data?.phone_number}
-              />
-              {errorsAddress.phone && (
-                <p className="text-red-500 text-sm">
-                  {errorsAddress.phone.message}
-                </p>
-              )}
-            </div>
-          </div>
-          <div>
-            <label className="block text-gray-700">Địa chỉ</label>
-            <input
-              className="w-full border border-gray-300 rounded px-3 py-2 mt-1 text-black-2"
-              defaultValue=""
-            />
-            {errorsAddress.address && (
-              <p className="text-red-500 text-sm">
-                {errorsAddress.address.message}
-              </p>
-            )}
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }

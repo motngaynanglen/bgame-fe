@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { inter } from "../fonts/fonts";
+import { date } from "zod";
 
 //version 2: add cartStore interface để lưu trữ store name và location cho cart
 
 interface CartItem {
   productTemplateID: string;
   quantity: number;
-  name?: string;
+  product_name: string; // Thêm trường product_name
   price?: number; // Thêm trường price
   image?: string;
   storeId?: string;
@@ -16,15 +18,21 @@ interface CartStore {
   storeName: string;
   storeLocation: string;
 }
+interface BookingInfo {
+  bookDate: Date;
+  fromSlot: number;
+  toSlot: number;
+}
 interface RentalStore {
   cartItems: CartItem[];
   currentStoreId: string | null;
   cartStore: CartStore | null;
+  bookingInfo?: BookingInfo;
 
   setStoreInfo: (storeId: string, storeName: string, storeLocation: string) => void;
   setStoreId: (storeId: string) => void;
-
-  addToCart: (productTemplateID: string, name?: string, image?: string, price?: number) => void; 
+  setBookingInfo: (bookDate: Date, fromSlot: number, toSlot: number) => void;
+  addToCart: (productTemplateID: string, product_name: string, image?: string, price?: number) => void; // Cập nhật addToCart
   removeFromCart: (productTemplateID: string) => void;
   updateQuantity: (productTemplateID: string, quantity: number) => void;
   clearCart: () => void;
@@ -69,8 +77,11 @@ export const useRentalStore = create<RentalStore>()(
             : { storeId, storeName: "", storeLocation: "" }, // fallback khi chưa có store info
         });
       },
+      setBookingInfo: (bookDate, fromSlot, toSlot) => {
+        set({ bookingInfo: { bookDate, fromSlot, toSlot } });
+      },
 
-      addToCart: (productTemplateID, name, image, price) =>
+      addToCart: (productTemplateID, product_name, image, price) =>
         set((state) => {
           const existingItem = state.cartItems.find(
             (item) => item.productTemplateID === productTemplateID
@@ -88,8 +99,14 @@ export const useRentalStore = create<RentalStore>()(
             return {
               cartItems: [
                 ...state.cartItems,
-
-                { productTemplateID, quantity: 1, name, image, storeId: state.currentStoreId ?? undefined, price }, // Lưu cả name và image
+                { 
+                  productTemplateID, 
+                  quantity: 1, 
+                  product_name, 
+                  image, 
+                  storeId: state.currentStoreId ?? undefined,
+                   price 
+                  },
               ],
             };
           }
@@ -132,15 +149,15 @@ export const useRentalStore = create<RentalStore>()(
     {
       name: "rentalCart",
       storage: {
-        getItem: (name) => {
-          const item = sessionStorage.getItem(name);
+        getItem: (product_name) => {
+          const item = sessionStorage.getItem(product_name);
           return item ? JSON.parse(item) : null;
         },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
+        setItem: (product_name, value) => {
+          sessionStorage.setItem(product_name, JSON.stringify(value));
         },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
+        removeItem: (product_name) => {
+          sessionStorage.removeItem(product_name);
         },
       },
     }

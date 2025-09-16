@@ -18,8 +18,10 @@ interface BoardGame {
   publisher: string;
   category: string;
   player: string;
-  time: string;
+  duration: string | null | undefined;
   age: number;
+  number_of_player_min: number;
+  number_of_player_max: number;
   complexity: number;
 }
 
@@ -154,6 +156,10 @@ export default function ProductsPage({
                       player={product.player}
                       age={product.age}
                       quantity={product.sales_quantity}
+                      duration={product.duration}
+                      number_of_player_max={product.number_of_player_max}
+                      number_of_player_min={product.number_of_player_min}
+                      publisher={product.publisher}
                     />
                   );
                 })}

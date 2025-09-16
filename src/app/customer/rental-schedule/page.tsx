@@ -1,37 +1,29 @@
 "use client";
-
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  Card,
-  List,
-  Avatar,
-  Typography,
-  Space,
-  Tag,
-  Button,
-  Empty,
-  Row,
-  Col,
-  Skeleton,
-  Pagination,
-  Modal,
-} from "antd";
-import { useRouter } from "next/navigation";
 import bookListApiRequest from "@/src/apiRequests/bookList";
-import { useAppContext } from "../../app-provider";
-import { formatDateTime, formatVND } from "@/src/lib/utils";
-import PaymentModal from "@/src/components/CheckOut/PaymentModal";
+import { useAppContext } from "@/src/app/app-provider";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
+  DollarOutlined,
   ShopOutlined,
-  ExclamationCircleOutlined,
+  TableOutlined,
+  UserOutlined
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  Skeleton,
+  Tag,
+  Typography
+} from "antd";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const { Title, Text } = Typography;
 
-/* ---------- Types ---------- */
 interface ProductDto {
   id: string;
   template_id: string;
@@ -69,18 +61,7 @@ interface BackendResponse {
   paging?: PagingDto | null;
 }
 
-/* ---------- Status map ---------- */
-const STATUS_MAP: Record<string, { text: string; color: string }> = {
-  CREATED: { text: "Chưa thanh toán", color: "volcano" },
-  PAID: { text: "Đã thanh toán", color: "green" },
-  CANCELLED: { text: "Đã hủy", color: "red" },
-  STARTED: { text: "Đang thuê", color: "blue" },
-  ENDED: { text: "Kết thúc", color: "default" },
-  OVERDUE: { text: "Quá hạn", color: "orange" },
-  UNKNOWN: { text: "Chờ xác nhận", color: "default" },
-};
-
-export default function RentalHistoryPage() {
+const RentalHistoryView = () => {
   const { user } = useAppContext();
   const router = useRouter();
 
@@ -89,43 +70,22 @@ export default function RentalHistoryPage() {
 
   // Payment modal (giữ nguyên code cũ, chỉ kẹp confirm trước khi mở)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<{ id: string; type: number } | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<{
+    id: string;
+    type: number;
+  } | null>(null);
 
   const handleOpenPayment = (bookingId: string, bookingType: number) => {
     setSelectedBooking({ id: bookingId, type: bookingType });
     setPaymentModalOpen(true);
   };
 
-  const confirmBeforePay = (b: BookingDto) => {
-    Modal.confirm({
-      title: "Xác nhận thanh toán",
-      icon: <ExclamationCircleOutlined />,
-      okText: "Thanh toán",
-      cancelText: "Hủy",
-      content: (
-        <div className="text-sm leading-6">
-          <div>
-            Đơn: <b>#{b.code || b.id}</b>
-          </div>
-          <div>
-            Cửa hàng: <b>{b.store_name}</b>
-          </div>
-          <div className="mt-1">
-            Ngày thuê: <b>{formatDateTime(b.from, "DATE")}</b>
-          </div>
-          <div>
-            Giờ: <b>{formatDateTime(b.from, "TIME")}</b> — <b>{formatDateTime(b.to, "TIME")}</b>
-          </div>
-          <div className="mt-1">
-            Tổng tiền: <b>{formatVND(b.total_price)}</b>
-          </div>
-        </div>
-      ),
-      onOk: () => handleOpenPayment(b.id, 0), // 0 = type booking
-    });
-  };
-
-  const { data: raw, isLoading, isError, refetch } = useQuery<BackendResponse>({
+  const {
+    data: bookings,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<BackendResponse>({
     queryKey: ["rentalHistory", page, pageSize],
     queryFn: async () => {
       const res = await bookListApiRequest.getBookListHistory(
@@ -136,14 +96,6 @@ export default function RentalHistoryPage() {
     },
     staleTime: 30_000,
   });
-
-  const bookings = raw?.data ?? [];
-  const paging = raw?.paging ?? null;
-
-  const totalEstimated = useMemo(() => {
-    if (!paging) return bookings.length;
-    return paging.pageCount * paging.pageSize;
-  }, [paging, bookings.length]);
 
   /* ---------- Loading & Error ---------- */
   if (isLoading) {
@@ -170,228 +122,191 @@ export default function RentalHistoryPage() {
     );
   }
 
-  /* ---------- UI ---------- */
+  const formatVND = (amount: string | number | bigint) => {
+    const numericAmount = typeof amount === "string" ? Number(amount) : amount;
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(numericAmount);
+  };
+
+  const formatDate = (dateString: string | number | Date) => {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const formatTime = (dateString: string | number | Date) => {
+    return new Date(dateString).toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const STATUS_MAP: Record<string, { text: string; color: string }> = {
+  CREATED: { text: "Chưa thanh toán", color: "volcano" },
+  PAID: { text: "Đã thanh toán", color: "green" },
+  CANCELLED: { text: "Đã hủy", color: "red" },
+  STARTED: { text: "Đang thuê", color: "blue" },
+  ENDED: { text: "Kết thúc", color: "default" },
+  OVERDUE: { text: "Quá hạn", color: "orange" },
+  UNKNOWN: { text: "Chờ xác nhận", color: "default" },
+};
+
   return (
-    <>
-      <Card bordered className="w-full rounded-2xl p-4 sm:p-6 shadow-sm">
-        <Row justify="space-between" align="middle" className="mb-4 sm:mb-5">
-          <Col>
-            <div className="flex flex-col">
-              <Title level={4} className="!m-0">
-                Lịch sử thuê
-              </Title>
-              <Text type="secondary">Các lượt đặt gần đây của bạn</Text>
-            </div>
-          </Col>
-          <Col>
-            <Space>
-              <Button onClick={() => refetch()}>Làm mới</Button>
-              <Button type="primary" onClick={() => router.push("/rental")}>
-                Tìm thuê board game
-              </Button>
-            </Space>
-          </Col>
-        </Row>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="">
+        <div className="text-center mb-8">
+          <Title level={2} className="!mb-2 text-gray-800">
+            📦 Lịch Sử Đặt Thuê
+          </Title>
+          <Text type="secondary" className="text-lg">
+            Xem lại các phiên chơi board game của bạn
+          </Text>
+        </div>
 
-        {bookings.length === 0 ? (
-          <div className="py-10">
-            <Empty description="Bạn chưa có đơn đặt thuê">
-              <Button type="primary" onClick={() => router.push("/rental")}>
-                Tìm thuê board game
-              </Button>
-            </Empty>
-          </div>
+        {(bookings?.data?.length ?? 0) === 0 ? (
+          <Card className="text-center py-16 rounded-2xl shadow-lg border-0">
+            <div className="text-6xl mb-4">🎲</div>
+            <Title level={4} className="!mb-2 text-gray-600">
+              Chưa có lịch sử đặt thuê
+            </Title>
+            <Text type="secondary">
+              Bắt đầu đặt thuê board game để trải nghiệm nào!
+            </Text>
+          </Card>
         ) : (
-          <>
-            <List
-              itemLayout="vertical"
-              dataSource={bookings}
-              split
-              renderItem={(b) => {
-                const status = STATUS_MAP[b.status] ?? STATUS_MAP.UNKNOWN;
-                return (
-                  <List.Item
-                    key={b.id}
-                    className="!p-2 sm:!p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                    style={{ border: "none" }}
-                    extra={
-                      <div className="min-w-[220px] text-right flex flex-col gap-3 md:gap-3">
-                        <div>
-                          <Text type="secondary">Tổng tiền</Text>
-                          <div className="text-lg font-semibold">{formatVND(b.total_price)}</div>
-                        </div>
-
-                        <div>
-                          <Text type="secondary">Thời gian thuê</Text>
-                          <div className="font-semibold">
-                            <CalendarOutlined className="mr-1" />
-                            {formatDateTime(b.from, "DATE")}
-                          </div>
-                          <div className="text-[12px] text-black/60">
-                            <ClockCircleOutlined className="mr-1" />
-                            Giờ: {formatDateTime(b.from, "TIME")} — {formatDateTime(b.to, "TIME")}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          <Tag color={status.color} className="self-end">
-                            {status.text}
-                          </Tag>
-
-                          <div className="flex gap-2 justify-end">
-                            <Button
-                              size="small"
-                              onClick={() => router.push(`/rental/${b.id}`)}
-                            >
-                              Chi tiết
-                            </Button>
-
-                            {b.status === "CREATED" && (
-                              <Button
-                                type="primary"
-                                size="small"
-                                onClick={() => confirmBeforePay(b)}
-                              >
-                                Thanh toán
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    }
+          <div className="space-y-6">
+            {bookings?.data?.map((booking, index) => (
+              <Card
+                key={booking.code}
+                className="rounded-2xl shadow-lg border-0 hover:shadow-xl transition-all duration-300"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                  <div className="flex items-center gap-3 mb-3 sm:mb-0">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <Text strong className="text-blue-600 text-lg">
+                      #{booking.code}
+                    </Text>
+                  </div>
+                  <Tag
+                    color={STATUS_MAP[booking.status]?.color || STATUS_MAP.UNKNOWN.color}
+                    className="!px-4 !py-1 !rounded-full !text-sm"
                   >
-                    <div className="rounded-xl border border-gray-100 bg-white p-4 sm:p-5 hover:shadow-md transition-shadow duration-200">
-                      <List.Item.Meta
-                        avatar={
-                          <Avatar
-                            size={64}
-                            src={b.products?.[0]?.TemplateImage}
-                            shape="square"
-                            className="shadow-sm"
-                          />
-                        }
-                        title={
-                          <div className="flex flex-col gap-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              Mã đơn: <Text strong>#{b.code || b.id}</Text>
-                              <Tag>{b.type === 1 ? "Thuê theo ngày" : "Thuê theo giờ"}</Tag>
-                              {b.created_at && (
-                                <Text type="secondary">{formatDateTime(b.created_at, "DATETIME")}</Text>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 text-black/80">
-                              <ShopOutlined />
-                              <span className="font-medium">{b.store_name}</span>
-                              <span className="text-black/40">•</span>
-                              <span className="text-sm">Số bàn: {b.total_table}</span>
-                            </div>
-                          </div>
-                        }
-                        description={
-                          <div>
-                            <Text type="secondary">Số chủng loại phẩm:</Text>{" "}
-                            <Text strong>{b.products?.length ?? 0}</Text>
+                    {STATUS_MAP[booking.status]?.text || STATUS_MAP.UNKNOWN.text}
+                  </Tag>
+                </div>
 
-                            <div className="mt-2">
-                              <Space wrap>
-                                {b.products?.slice(0, 3).map((p) => (
-                                  <Card
-                                    key={p.template_id}
-                                    size="small"
-                                    className="w-[172px] rounded-lg shadow-[0_1px_0_rgba(0,0,0,0.03)]"
-                                  >
-                                    <div className="flex gap-2">
-                                      <img
-                                        src={
-                                          p.TemplateImage ||
-                                          "https://pagedone.io/asset/uploads/1705474774.png"
-                                        }
-                                        alt={p.ProductName}
-                                        className="w-12 h-12 object-cover rounded-md"
-                                      />
-                                      <div className="min-w-[96px]">
-                                        <Text
-                                          strong
-                                          className="block truncate"
-                                          title={p.ProductName}
-                                        >
-                                          {p.ProductName}
-                                        </Text>
-                                        <Text type="secondary" className="text-[12px]">
-                                          Số lượng: {p.quantity ?? "_"}
-                                        </Text>
-                                      </div>
-                                    </div>
-                                  </Card>
-                                ))}
-                                {b.products && b.products.length > 3 && (
-                                  <Card
-                                    size="small"
-                                    className="w-[172px] rounded-lg flex items-center justify-center"
-                                  >
-                                    <Text type="secondary">
-                                      +{b.products.length - 3} khác
-                                    </Text>
-                                  </Card>
-                                )}
-                              </Space>
-                            </div>
-
-                            <div className="mt-3 grid grid-cols-2 gap-3 md:hidden">
-                              <div className="rounded-lg border border-gray-100 p-3">
-                                <div className="text-xs text-black/60">Tổng tiền</div>
-                                <div className="font-semibold">{formatVND(b.total_price)}</div>
-                              </div>
-                              <div className="rounded-lg border border-gray-100 p-3">
-                                <div className="text-xs text-black/60">Ngày thuê</div>
-
-                                <div className="text-[12px] text-black/60">
-                                  Giờ: {formatDateTime(b.from, "TIME")} — {formatDateTime(b.to, "TIME")}
-                                </div>
-                              </div>
-                              <div className="col-span-2 flex justify-end gap-2">
-                                <Tag color={status.color}>{status.text}</Tag>
-                                <Button size="small" onClick={() => router.push(`/rental/${b.id}`)}>
-                                  Chi tiết
-                                </Button>
-                                {b.status === "CREATED" && (
-                                  <Button type="primary" size="small" onClick={() => confirmBeforePay(b)}>
-                                    Thanh toán
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        }
-                      />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                      <ShopOutlined className="text-blue-600 text-lg" />
+                      <div>
+                        <Text strong className="block text-gray-800">
+                          {booking.store_name}
+                        </Text>
+                        <Text type="secondary" className="text-sm">
+                          Địa điểm chơi
+                        </Text>
+                      </div>
                     </div>
-                  </List.Item>
-                );
-              }}
-            />
 
-            <div className="flex justify-center mt-4">
-              <Pagination
-                current={page}
-                pageSize={pageSize}
-                total={totalEstimated}
-                onChange={(p) => setPage(p)}
-                showSizeChanger={false}
-              />
-            </div>
-          </>
+                    <div className="p-3 bg-green-50 rounded-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CalendarOutlined className="text-green-600" />
+                        <Text strong>Ngày chơi</Text>
+                      </div>
+                      <Text className="block">{formatDate(booking.from)}</Text>
+                    </div>
+
+                    <div className="p-3 bg-purple-50 rounded-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ClockCircleOutlined className="text-purple-600" />
+                        <Text strong>Thời gian</Text>
+                      </div>
+                      <Text className="block">
+                        {formatTime(booking.from)} - {formatTime(booking.to)}
+                      </Text>
+                    </div>
+                  </div>
+
+                  {/* Thông tin board game */}
+                  <div className="lg:col-span-2">
+                    <div className="mb-4">
+                      <Text strong className="text-gray-700 text-lg">
+                        🎯 Board Game đã thuê
+                      </Text>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                      {booking.products?.map((product, idx) => (
+                        <div
+                          key={product.template_id || idx}
+                          className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                        >
+                          <Avatar
+                            src={product.TemplateImage || "/default-game.png"}
+                            shape="square"
+                            size={48}
+                            className="rounded-lg shadow-sm"
+                            icon={<UserOutlined />}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <Text
+                              strong
+                              className="block text-gray-800 truncate"
+                            >
+                              {product.ProductName}
+                            </Text>
+                            <Text type="secondary" className="text-sm">
+                              Số lượng: {product.quantity}
+                            </Text>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Divider className="my-4" />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-orange-50 rounded-xl">
+                        <TableOutlined className="text-orange-600 text-lg mb-1" />
+                        <Text strong className="block">
+                          {booking.total_table} bàn
+                        </Text>
+                        <Text type="secondary" className="text-sm">
+                          Số lượng bàn
+                        </Text>
+                      </div>
+
+                      <div className="text-center p-3 bg-red-50 rounded-xl">
+                        <DollarOutlined className="text-red-600 text-lg mb-1" />
+                        <Text strong className="block text-green-600">
+                          {formatVND(booking.total_price)}
+                        </Text>
+                        <Text type="secondary" className="text-sm">
+                          Tổng chi phí
+                        </Text>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <Text type="secondary" className="text-sm">
+                    🕐 Đặt vào: {formatDate(booking.from)} lúc{" "}
+                    {formatTime(booking.from)}
+                  </Text>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
-      </Card>
-
-      {selectedBooking && (
-        <PaymentModal
-          open={paymentModalOpen}
-          onClose={() => setPaymentModalOpen(false)}
-          referenceID={selectedBooking.id}
-          type={selectedBooking.type}
-          token={user?.token}
-        />
-      )}
-    </>
+      </div>
+    </div>
   );
-}
+};
+
+export default RentalHistoryView;

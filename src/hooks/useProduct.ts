@@ -16,10 +16,11 @@ interface BoardGame {
   player: string;
   complexity: number;
   age: string;
-  number_of_players_min: number;
-  number_of_players_max: number;
+  number_of_player_min: number;
+  number_of_player_max: number;
   hard_rank: number;
   time: string;
+  duration: string | null | undefined;
   description: string;
   sales_quantity: number;
   rent_quantity: number;

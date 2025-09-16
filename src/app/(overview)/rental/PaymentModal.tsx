@@ -137,7 +137,7 @@ export default function BookingPaymentModal({
 
   const products = cartItems.map((item) => ({
     ...item,
-    name: item.name,
+    name: item.product_name,
     price: item.price,
     total: item.quantity * (item.price ?? 0) * totalHours,
   }));

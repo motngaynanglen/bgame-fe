@@ -95,7 +95,7 @@ export default function NewsPage() {
           ))
         ) : (
           <div className="col-span-full text-center text-gray-500 py-10">
-            Cửa hàng chưa có sản phẩm cho thuê.
+            Không có tin tức nào
           </div>
         )}
       </ul>

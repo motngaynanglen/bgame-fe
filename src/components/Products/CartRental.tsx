@@ -1,11 +1,7 @@
 "use client";
-import { useAppContext } from "@/src/app/app-provider";
 import { useRentalStore } from "@/src/store/rentalStore";
 import { Button, Divider, Empty } from "antd";
-import { CheckboxGroupProps } from "antd/es/checkbox";
-import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { IoIosClose } from "react-icons/io";
 
 export default function CartRental({
@@ -16,75 +12,10 @@ export default function CartRental({
   onChooseTable?: () => void;
 }) {
   const { cartItems, removeFromCart } = useRentalStore();
-  const router = useRouter();
-  const { user } = useAppContext();
-
-  const [selectedOption, setSelectedOption] = useState<"days" | "hours">(
-    "days"
-  );
-  const [selectedDate, setSelectedDate] = useState<
-    [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
-  >(null);
-
-  const options: CheckboxGroupProps<string>["options"] = [
-    { label: "Thuê theo ngày", value: "days" },
-    { label: "Thuê theo giờ", value: "hours" },
-  ];
 
   console.log("cartitems", cartItems);
 
   useEffect(() => {}, [onChooseTable]);
-
-  const handleSubmit = async () => {
-    // if (!user) {
-    //   notifyError("Bạn cần đăng nhập để đặt trước.");
-    //   return;
-    // }
-
-    router.push("/rental/table");
-    // const postData = {
-    //   customerId: null, // Lấy từ context
-    //   bookListItems: cartItems.map((item) => ({
-    //     productTemplateID: item.productTemplateID,
-    //     quantity: item.quantity,
-    //   })),
-    //   storeId: storeId, // Store ID (Cập nhật nếu cần)
-    //   from: selectedDate ? selectedDate[0]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
-    //   to: selectedDate ? selectedDate[1]?.toISOString() : "", // Chuyển thời gian sang định dạng ISO
-    //   bookType: selectedOption === "days" ? 1 : 0, // 1 = theo ngày, 0 = theo giờ
-    // };
-
-    // try {
-    //   const response = await bookListApiRequest.createBookList(
-    //     postData,
-    //     user.token
-    //   );
-    //   console.log("Tại vì sao", postData);
-    //   if (response.statusCode == "200") {
-    //     notifySuccess(
-    //       "Đặt trước thành công!",
-    //       "Chúc bạn có những phút giây vui vẻ với sản phẩm của chúng tôi."
-    //     );
-    //   } else
-    //     notifyError(
-    //       "Đặt trước thất bại!",
-    //       response.message || "Vui lòng thử lại sau."
-    //     );
-    // } catch (error: any) {
-    //   console.error("Lỗi API:", error);
-    //   if (error instanceof HttpError && error.status === 401) {
-    //     notifyError("Đặt trước thất bại!", "bạn cần đăng nhập để tiếp tục");
-    //     router.push("/login");
-    //   } else {
-    //     // Xử lý lỗi khác nếu có
-    //     console.error("Lỗi khác:", error);
-    //     notifyError(
-    //       "Đặt trước thất bại",
-    //       "Có lỗi xảy ra khi đặt trước sản phẩm. Vui lòng thử lại sau."
-    //     );
-    //   }
-    // }
-  };
 
   return (
     <div className="w-full h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
@@ -114,15 +45,6 @@ export default function CartRental({
                 >
                   {/* image and name */}
                   <div className="flex flex-row sm:items-start sm:justify-around md:items-center md:justify-start">
-                    {/* <Image
-                      style={{ borderRadius: "0.5rem" }}
-                      width={96}
-                      height={96}
-                      src={imageUrls[0]}
-                      // alt={item.name}
-                      className="w-24 h-24 object-cover rounded-lg mr-2 sm:pr-0"
-                      // loading="lazy"
-                    /> */}
                     <img
                       src={imageUrls[0]}
                       alt=""
@@ -130,7 +52,7 @@ export default function CartRental({
                     />
                     <Divider type="vertical" className="" />
                     <div className="ml-4 sm:ml-0 mr-4">
-                      <h1 className="text-lg font-semibold">{item.name}</h1>
+                      <h1 className="text-lg font-semibold">{item.product_name}</h1>
 
                       <div className="flex items-center justify-start space-x-4 ">
                         <span className="text-base">SL: {item.quantity}</span>
@@ -158,27 +80,6 @@ export default function CartRental({
           </div>
         )}
       </div>
-      {/* <Divider />
-      <Radio.Group
-        options={options}
-        defaultValue="days"
-        optionType="button"
-        buttonStyle="solid"
-        onChange={(e) => setSelectedOption(e.target.value)}
-      />
-      <p className="mt-4 text-black-2">Chọn thời gian thuê: </p>
-      {selectedOption === "days" && (
-        <div>
-          <CustomDatePicker
-            onChange={(date) => setSelectedDate(date ? [date, date] : null)}
-          />
-        </div>
-      )}
-      {selectedOption === "hours" && (
-        <div>
-          <CustomRangePicker onChange={(dates) => setSelectedDate(dates)} />
-        </div>
-      )} */}
       <Divider />
       {onChooseTable ? (
         <Button
@@ -189,13 +90,7 @@ export default function CartRental({
           Chọn bàn
         </Button>
       ) : (
-        <Button
-          key={"select-table"}
-          onClick={handleSubmit}
-          disabled={cartItems.length === 0}
-        >
-          Đặt trước
-        </Button>
+        <></>
       )}
     </div>
   );
