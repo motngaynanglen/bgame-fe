@@ -221,8 +221,8 @@ export default function BookingProductTable({ bookDate }: PageProps) {
             <div className="overflow-auto border rounded-md">
                 {rentalLoading ? (
                     <Skeleton active paragraph={{ rows: 6 }} />
-                ) : rentalError ? (
-                    <Empty description="Không thể tải dữ liệu" />
+                // ) : rentalError ? (
+                //     <Empty description="Không thể tải dữ liệu" />
                 ) : (
                     <table className="min-w-max table-fixed border-collapse text-xs">
                         <thead>
