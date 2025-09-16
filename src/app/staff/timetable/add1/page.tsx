@@ -220,7 +220,7 @@ export default function StaffBookingPage() {
                                 dataSource={selectedProducts}
                                 renderItem={(item: any, index) => (
                                     <List.Item
-                                        actions={[<Button type="text" danger size="small" onClick={() => setSelectedProducts(prev => prev.filter((_, i) => i !== index))}>Xóa</Button>]}
+                                        actions={[<Button key={`remove-${item.product_id}`} type="text" danger size="small" onClick={() => setSelectedProducts(prev => prev.filter((_, i) => i !== index))}>Xóa</Button>]}
                                     >
                                         <List.Item.Meta title={item.product_name} />
                                         <div>{item.rent_price.toLocaleString()}đ</div>

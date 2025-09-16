@@ -53,8 +53,10 @@ export default function OrderDetailsPanel({ table, onUpdateOrders, onClearTable,
                             dataSource={orders}
                             renderItem={item => (
                                 <List.Item
+                                    key={item.product_id}
                                     actions={[
                                         <Button
+                                            key={`remove-${item.product_id}`}
                                             type="text"
                                             danger
                                             icon={<DeleteOutlined />}

@@ -32,7 +32,7 @@ interface RentalStore {
   setStoreInfo: (storeId: string, storeName: string, storeLocation: string) => void;
   setStoreId: (storeId: string) => void;
   setBookingInfo: (bookDate: Date, fromSlot: number, toSlot: number) => void;
-  addToCart: (productTemplateID: string, product_name?: string, image?: string, price?: number) => void; // Cập nhật addToCart
+  addToCart: (productTemplateID: string, product_name: string, image?: string, price?: number) => void; // Cập nhật addToCart
   removeFromCart: (productTemplateID: string) => void;
   updateQuantity: (productTemplateID: string, quantity: number) => void;
   clearCart: () => void;
@@ -99,8 +99,14 @@ export const useRentalStore = create<RentalStore>()(
             return {
               cartItems: [
                 ...state.cartItems,
-
-                { productTemplateID, quantity: 1, product_name, image, storeId: state.currentStoreId ?? undefined, price }, // Lưu cả product_name và image
+                { 
+                  productTemplateID, 
+                  quantity: 1, 
+                  product_name, 
+                  image, 
+                  storeId: state.currentStoreId ?? undefined,
+                   price 
+                  },
               ],
             };
           }
