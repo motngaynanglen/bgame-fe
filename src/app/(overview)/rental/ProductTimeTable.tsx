@@ -5,6 +5,8 @@ import { Card, DatePicker, Empty, Skeleton } from "antd";
 import dayjs, { formatToUTC7 } from "@/src/lib/dayjs";
 import { useEffect, useState } from "react";
 import { useRentalStore } from "@/src/store/rentalStore";
+import { useQuery } from "@tanstack/react-query";
+import bookListApiRequest from "@/src/apiRequests/bookList";
 
 const hours = Array.from({ length: 29 }, (_, i) => {
     return dayjs("07:00", "HH:mm").add(i * 30, "minute").format("HH:mm");
@@ -14,12 +16,13 @@ const slots = Array.from({ length: 29 }, (_, i) => i + 1);
 export interface BookingProductData {
     ProductTemplateID: string;
     ProductTemplateName: string;
-    from: number;
-    to: number;
-    item?: number;
+    From: number;
+    To: number;
+    Items?: number;
+    OnStock: number;
 }
 
-export interface NewResponseModel {
+interface ResponseModel {
     data: BookingProductData[];
     message: string;
     statusCode: number;
@@ -33,91 +36,30 @@ interface PageProps {
 interface SlotState {
     status: "available" | "locked";
     items: number;
+    onStock?: number; // Số lượng tồn kho của sản phẩm
+
 }
 interface ProductTemplateMap {
     [templateName: string]: {
         templateId: string;
+        image?: string;
         slots: { [slot: number]: SlotState };
     };
 }
-const MOCK_DATA = {
-    data: [
-        {
-            "ProductTemplateID": "9640EE63-76E0-424C-B9BA-53A456A3DD2F",
-            "ProductTemplateName": "CORTEX CHALLENGE 2 ENG",
-            "from": 3,
-            "to": 10,
-            "item": 1
-        },
-        {
-            "ProductTemplateID": "9640EE63-76E0-424C-B9BA-53A456A3DD2F",
-            "ProductTemplateName": "CORTEX CHALLENGE 2 ENG",
-            "from": 5,
-            "to": 13,
-            "item": 2
-        },
-        {
-            "ProductTemplateID": "9640EE63-76E0-424C-B9BA-53A456A3DD2F",
-            "ProductTemplateName": "CORTEX CHALLENGE 2 ENG",
-            "from": 9,
-            "to": 18
-        },
-        {
-            "ProductTemplateID": "9640EE63-76E0-424C-B9BA-53A456A3DD2F",
-            "ProductTemplateName": "CORTEX CHALLENGE 2 ENG",
-            "from": 11,
-            "to": 15,
-            "item": 3
-        },
-        {
-            "ProductTemplateID": "A5165A8B-714A-4F86-88BC-B6B41338CD45",
-            "ProductTemplateName": "Tam Quoc Sat Quoc Chien",
-            "from": 3,
-            "to": 10,
-            "item": 3
-        },
-        {
-            "ProductTemplateID": "A5165A8B-714A-4F86-88BC-B6B41338CD45",
-            "ProductTemplateName": "Tam Quoc Sat Quoc Chien",
-            "from": 5,
-            "to": 13,
-            "item": 1
-        },
-        {
-            "ProductTemplateID": "A5165A8B-714A-4F86-88BC-B6B41338CD45",
-            "ProductTemplateName": "Tam Quoc Sat Quoc Chien",
-            "from": 11,
-            "to": 15,
-            "item": 1
-        }
-    ],
-    message: "Success",
-    statusCode: 200,
-    paging: null
-};
-export default function BookingProductTable({ bookDate }: PageProps) {
+
+export default function BookingProductTable({ storeId, bookDate }: PageProps) {
     const { user } = useAppContext();
     const [bookingData, setBookingData] = useState<ProductTemplateMap>({});
-    const { cartItems, cartStore } = useRentalStore();
+    const { cartItems, cartStore, bookingInfo } = useRentalStore();
     const [selectedData, setSelectedData] = useState<{
-        date: string, storeId: string, productIds: string[]
+        BookDate: string, StoreId: string, ProductTemplateIds: string[]
     } | null>(null);
     const [hoveredSlot, setHoveredSlot] = useState<{
         templateName: string;
         slot: number;
     } | null>(null);
 
-    useEffect(() => {
-        if (cartItems.length === 0) return;
-        else {
-            const productIds = cartItems.map((item) => item.productTemplateID);
-            setSelectedData({
-                date: bookDate ? formatToUTC7(dayjs(bookDate)) : formatToUTC7(dayjs()),
-                storeId: cartStore?.storeId || "",
-                productIds: productIds,
-            });
-        }
-    }, [cartItems]);
+
     const getStatus = (templateName: string, slot: number): SlotState => {
         const template = bookingData[templateName];
         const slotInfo = template?.slots[slot];
@@ -129,13 +71,13 @@ export default function BookingProductTable({ bookDate }: PageProps) {
             items = slotInfo.items;
         } else {
             if (slot < 1 || slot > 28) status = "locked";
-            if (selectedData?.date) {
-                const isToday = dayjs(selectedData.date).isSame(dayjs(), "day");
+            if (selectedData?.BookDate) {
+                const isToday = dayjs(selectedData.BookDate).isSame(dayjs(), "day");
                 const nowSlot =
                     Math.floor(
                         dayjs().diff(dayjs().startOf("day").hour(7), "minute") / 30
                     ) + 1;
-                const isPast = dayjs(selectedData.date).isBefore(dayjs(), "day");
+                const isPast = dayjs(selectedData.BookDate).isBefore(dayjs(), "day");
                 const isBeforeNowSlot = isToday && slot < nowSlot + 2;
 
                 if (isPast || isBeforeNowSlot) status = "locked";
@@ -144,56 +86,100 @@ export default function BookingProductTable({ bookDate }: PageProps) {
         return { status, items };
     };
 
-    const { data, isLoading: rentalLoading, isError: rentalError } = {
-        data: MOCK_DATA,
-        isLoading: false,
-        isError: false,
-    };
-
+    const { data, isLoading: rentalLoading, isError: rentalError } = useQuery<ResponseModel>({
+        queryKey: ["productTimeTable", storeId, bookDate],
+        queryFn: async () => {
+            const res = await bookListApiRequest.getBookListTimeTableByDate(
+                selectedData,
+                user?.token
+            );
+            return res;
+        },
+        enabled: !!storeId,
+    });
     useEffect(() => {
-        if (!data?.data) return;
-
-        const templateNames = Array.from(new Set(data.data.map((item) => item.ProductTemplateName)));
-        const result: ProductTemplateMap = {};
-
-        templateNames.forEach((name) => {
-            const templateId = data.data.find((item) => item.ProductTemplateName === name)?.ProductTemplateID || "";
-            result[name] = {
-                templateId: templateId,
-                slots: {},
-            };
-            slots.forEach((slot) => {
-                result[name].slots[slot] = {
-                    status: "available",
-                    items: 0,
-                };
+        if (cartItems.length === 0) return;
+        else {
+            const productIds = cartItems.map((item) => item.productTemplateID);
+            const date = bookingInfo?.bookDate ? formatToUTC7(bookingInfo.bookDate) : formatToUTC7(new Date());
+            setSelectedData({
+                BookDate: date,
+                StoreId: cartStore?.storeId || "",
+                ProductTemplateIds: productIds,
             });
-        });
+        }
+    }, [cartItems, cartStore, bookingInfo]);
+    useEffect(() => {
+        if (!data?.data) {
+            // Nếu giỏ hàng rỗng thì xóa bảng
+            if (cartItems.length === 0) {
+                setBookingData({});
+            }
+            return;
+        };
 
-        data.data.forEach((item) => {
-            const templateName = item.ProductTemplateName;
-            if (item.from != null && item.to != null) {
-                for (let s = item.from; s <= item.to; s++) {
-                    const bookedItems = item.item !== undefined ? item.item : 1;
-                    if (result[templateName]?.slots[s]) {
-                        result[templateName].slots[s].items += bookedItems;
-                    }
+        // Bước 1: Khởi tạo dữ liệu từ `cartItems` làm nguồn chính.
+        // Điều này đảm bảo mọi sản phẩm trong giỏ hàng sẽ luôn được hiển thị.
+        const newBookingData = cartItems.reduce<ProductTemplateMap>((acc, cartItem) => {
+            const templateName = cartItem.product_name;
+
+            if (!acc[templateName]) {
+                acc[templateName] = {
+                    templateId: cartItem.productTemplateID,
+                    image: cartItem.image,
+                    slots: {},
+                };
+
+                // Tìm thông tin `onStock` tương ứng từ `data.data` (nếu có).
+                const apiDataItem = data?.data?.find(d => d.ProductTemplateID === cartItem.productTemplateID);
+                const onStock = apiDataItem ? apiDataItem.OnStock : 0; // Mặc định là 0 nếu không tìm thấy trong API response.
+
+                // Khởi tạo tất cả các slot với trạng thái mặc định (items = 0).
+                for (const slot of slots) {
+                    acc[templateName].slots[slot] = {
+                        status: "available",
+                        items: 0,
+                        onStock: onStock,
+                    };
                 }
             }
-        });
-        setBookingData(result);
-    }, [data]);
+            return acc;
+        }, {});
+       
+         // Bước 2: Cập nhật dữ liệu đặt chỗ thực tế từ API response (`data.data`).
+        // Chỉ chạy nếu `data.data` tồn tại.
+        if (data?.data) {
+            data.data.forEach(item => {
+                const templateName = item.ProductTemplateName;
 
-    function getTableBgColor(items: number) {
+                // Chỉ cập nhật nếu có thông tin đặt hàng (From, To, Items không null).
+                if (item.From != null && item.To != null && item.Items != null) {
+                    for (let s = item.From; s <= item.To; s++) {
+                        // Kiểm tra an toàn trước khi gán để tránh lỗi.
+                        if (newBookingData[templateName]?.slots[s]) {
+                            newBookingData[templateName].slots[s].items = item.Items;
+                        }
+                    }
+                }
+            });
+        }
+        
+        setBookingData(newBookingData);
+    }, [data, cartItems]);
+
+    function getTableBgColor(items: number, onStock?: number) {
         if (items === 1) {
             return "bg-yellow-400";
         }
-        if (items >= 2) {
+        if (onStock !== undefined && items >= onStock) {
             return "bg-red-400";
         }
         // items === 0
         return "bg-white";
     }
+    const shouldShowSkeleton = rentalLoading && Object.keys(bookingData).length === 0;
+    const shouldShowEmpty = (rentalError || (!rentalLoading && Object.keys(bookingData).length === 0 && cartItems.length > 0));
+    const shouldShowTable = !shouldShowSkeleton && !shouldShowEmpty && Object.keys(bookingData).length > 0;
 
     return (
         <Card
@@ -219,12 +205,13 @@ export default function BookingProductTable({ bookDate }: PageProps) {
 
             {/* Table */}
             <div className="overflow-auto border rounded-md">
-                {rentalLoading ? (
-                    <Skeleton active paragraph={{ rows: 6 }} />
-                ) : rentalError ? (
-                    <Empty description="Không thể tải dữ liệu" />
-                ) : (
+                {shouldShowSkeleton && <Skeleton active paragraph={{ rows: cartItems.length || 3 }} />}
+
+                {shouldShowEmpty && <Empty description={rentalError ? "Không thể tải dữ liệu" : "Không có sản phẩm trong giỏ hàng"} />}
+
+                {shouldShowTable && (
                     <table className="min-w-max table-fixed border-collapse text-xs">
+                        {/* Table Head */}
                         <thead>
                             <tr className="bg-cyan-200">
                                 <th className="w-[72px] border-b border-gray-300 px-2 py-1 text-left h-8">
@@ -242,7 +229,7 @@ export default function BookingProductTable({ bookDate }: PageProps) {
                                 ))}
                             </tr>
                         </thead>
-
+                        {/* Table Body */}
                         <tbody>
                             {Object.keys(bookingData).map((templateName, index) => (
                                 <tr key={index} className="border-b">
@@ -251,18 +238,18 @@ export default function BookingProductTable({ bookDate }: PageProps) {
                                     </td>
                                     {slots.map((slot) => {
                                         const slotState = getStatus(templateName, slot);
-                                        const bgColor = getTableBgColor(slotState.items);
+                                        const bgColor = getTableBgColor(slotState.items, slotState.onStock);
                                         return (
                                             <td
                                                 key={slot}
                                                 className={`h-8 min-w-[32px] border-r transition-all duration-150 relative
-            ${slotState.status === 'locked' ? 'bg-gray-200' : bgColor}`}
+                                                ${slotState.status === 'locked' ? 'bg-gray-300 cursor-not-allowed' : bgColor}`}
                                                 onMouseEnter={() => setHoveredSlot({ templateName, slot })}
                                                 onMouseLeave={() => setHoveredSlot(null)}
                                             >
                                                 {(hoveredSlot?.templateName === templateName && hoveredSlot?.slot === slot && slotState.items > 0) && (
                                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs p-1 rounded-sm min-w-[20px] text-center z-10">
-                                                        {slotState.items}
+                                                        {`${slotState.items}/${slotState.onStock}`}
                                                     </div>
                                                 )}
                                             </td>
