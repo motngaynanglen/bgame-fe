@@ -4,6 +4,7 @@ import { notification } from "antd";
 import { useRouter } from "next/navigation";
 import SpotlightCard from "../Bits/SpotlightCard";
 import { notifySuccess } from "../Notification/Notification";
+import { FaCakeCandles, FaClock, FaPeopleGroup } from "react-icons/fa6";
 
 function CardProduct({
   id,
@@ -95,12 +96,12 @@ function CardProduct({
               </p>
             </div> */}
             <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 flex flex-col">
-              <span>
+              <span className="flex items-center gap-2">
                 {" "}
-                ⏰ {duration ?? "xx"} phút  - 🎂 {age ?? "xx"}+ tuổi
+                <FaClock/>{duration ?? "xx"} phút  - <FaCakeCandles/> {age ?? "xx"}+ tuổi
               </span>
-              <span>
-                👥 {number_of_player_min || "xx"} -{" "}
+              <span className="flex items-center gap-2">
+                <FaPeopleGroup /> {number_of_player_min || "xx"} -{" "}
                 {number_of_player_max || "xx"} người
               </span>
             </div>

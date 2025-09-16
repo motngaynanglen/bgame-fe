@@ -61,7 +61,7 @@ export default function Home() {
       </section>
       <main className="">
         {/* <Banner /> */}
-        <div className="container min-h-screen mx-auto max-w-screen-2xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 max-w-7xl 2xl:max-w-screen-2xl">
           <div className="pb-2 ">
             <HotDeal category="Sản phẩm nổi bật" />
           </div>
