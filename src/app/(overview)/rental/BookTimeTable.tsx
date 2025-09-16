@@ -16,6 +16,8 @@ import {
 import dayjs, { formatToUTC7 } from "@/src/lib/dayjs";
 import { useEffect, useState } from "react";
 import BookingPaymentModal from "./PaymentModal";
+import clsx from "clsx";
+import Legend from "./Legend";
 
 const hours = Array.from({ length: 29 }, (_, i) => {
   return dayjs("07:00", "HH:mm")
@@ -56,9 +58,10 @@ export interface BookingData {
   tables: TableData[];
 }
 interface PageProps {
+  className?: string;
   storeId?: string;
   bookDate?: Date;
-  
+  staffmode?: boolean;
 }
 
 interface BookingList {
@@ -76,7 +79,7 @@ interface responseModel {
   paging: null;
 }
 
-export default function BookingTable({ storeId, bookDate }: PageProps) {
+export default function BookingTable({ storeId, bookDate, className, staffmode = false }: PageProps) {
   const { user, isAuthenticated } = useAppContext();
 
   const [bookingData, setBookingData] = useState<BookingCell[]>([]);
@@ -90,7 +93,7 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
     bookingData?: BookingData;
   }>({ open: false });
 
-  const { cartStore, cartItems } = useRentalStore();
+  const { cartStore, cartItems, setBookingInfo } = useRentalStore();
 
   const getStatus = (table: string, slot: number): BookingStatus => {
     const found = bookingData.find((b) => b.table === table && b.slot === slot);
@@ -259,6 +262,12 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
       })),
     };
   };
+  function setBookDate(date: dayjs.Dayjs) {
+    if (date && storeId) {
+      setSelectedDate(date);
+      setBookingInfo(date.toDate(), bookingModal?.payload?.fromSlot ?? 0, bookingModal?.payload?.toSlot ?? 0);
+    }
+  }
   function getTableBgColor(status: string, isSelected: boolean, owner?: any) {
     if (status === "booked" && owner != null) {
       return "bg-yellow-400";
@@ -277,41 +286,25 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
 
   return (
     <Card
-      className="w-11/12"
+      className={clsx("w-full", className)}
       title="Đặt bàn"
       extra={
         <DatePicker
           value={selectedDate}
-          onChange={(date) => setSelectedDate(date!)}
+          onChange={(date) => setBookDate(date)}
           disabledDate={(current) => {
             const today = dayjs().startOf("day");
             const maxDate = today.add(2, "month").endOf("month");
+            if (staffmode) {
+              return current > maxDate;
+            }
             return current < today || current > maxDate;
           }}
         />
       }
     >
       {/* Legend */}
-      <div className="flex gap-4 flex-wrap mb-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 border rounded bg-white" /> Trống
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-400 rounded" /> Đã đặt
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-yellow-400 rounded" /> Bạn đã đặt
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gray-300 rounded" /> Khoá
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-purple-400 rounded" /> Sự kiện
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-400 rounded" /> Bạn đang chọn
-        </div>
-      </div>
+      <Legend />
 
       {/* Table */}
       <div className="overflow-auto border rounded-md">
@@ -378,6 +371,25 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
 
       {/* Actions */}
       {selectedSlots.length > 0 && (
+        <Card className="mt-4 border-blue-500 bg-blue-50" style={{padding: '5px'}}>
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h4 className="font-bold text-base">Thông tin đặt bàn</h4>
+              <p>Bàn: <b>{selectedSlots[0].table}</b></p>
+              <p>
+                Thời gian: <b>{hours[selectedSlots[0].slot - 1]}</b> đến <b>{hours[selectedSlots[selectedSlots.length - 1].slot]}</b>
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => setSelectedSlots([])}>Hủy chọn</Button>
+              <Button type="primary" onClick={handleConfirmBooking}>
+                Xác nhận
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+      {/* {selectedSlots.length > 0 && (
         <div className="flex items-center justify-between mt-4">
           <div className="text-sm">
             ✅ Đã chọn: <b>{selectedSlots[0].table}</b> từ slot{" "}
@@ -391,10 +403,10 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
             </Button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Debug */}
-      {data && (
+      {/* {data && (
         <Collapse
           className="mt-4"
           items={[
@@ -409,10 +421,11 @@ export default function BookingTable({ storeId, bookDate }: PageProps) {
             },
           ]}
         />
-      )}
+      )} */}
 
       {/* Modal */}
-      {bookingModal.payload && (
+
+      {(bookingModal.payload && !staffmode) && (
         <BookingPaymentModal
           open={bookingModal.open}
           onClose={() => setBookingModal({ open: false })}

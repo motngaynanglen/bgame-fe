@@ -66,7 +66,12 @@ export const bookListApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
-
+  getBookListTimeTableByDate: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/BookList/get-booklist-timetable-by-date", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
   // //Book table
   // createBookTableByCustomer: (body: any, sessionToken?: string) =>
   //   http.post<CommonResType>(
