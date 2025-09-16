@@ -18,5 +18,6 @@ const storeApiRequest = {
       },
     }),
   getRentals: (body: any) => http.post<CommonResType>("/api/Store/get-rentals", body),
+  create: (body: any) => http.post<CommonResType>("/api/Store/create", body),
 };
 export default storeApiRequest;

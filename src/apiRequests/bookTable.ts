@@ -22,6 +22,11 @@ export const bookTableApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
-   
+    getStoreTableList: (body: any,sessionToken?: string) =>
+    http.post(`api/StoreTable/get-list-by-store-id`, body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
 }
 export default bookTableApiRequest;

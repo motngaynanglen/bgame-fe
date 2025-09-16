@@ -49,7 +49,7 @@ export default function HotDeal({ category }: { category: string }) {
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {products
           .filter((boardgame) => boardgame.sales_quantity > 0) // Lọc các sản phẩm có số lượng bán ra lớn hơn 0
-          .slice(0, 4) // Lấy 6 sản phẩm đầu tiên
+          .slice(0, 6) // Lấy 6 sản phẩm đầu tiên
           .map((boardgame, index) => {
             const imageUrls = boardgame.image?.split("||") || [];
             return (
