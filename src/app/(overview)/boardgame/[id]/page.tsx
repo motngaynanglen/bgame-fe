@@ -1,6 +1,8 @@
 "use client";
 import SingleProductDescription from "@/src/components/Products/ProductDescription";
 import ProductDetails from "@/src/components/Products/ProductDetails";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -31,15 +33,20 @@ export default function BoardGameDetailPage() {
   );
 
   return (
-    <div className="container min-h-screen mx-auto max-w-screen-2xl pt-4 bg-sky-50">
-      <ProductDetails productId={id} onProductData={setProductData} />
-      {productData ? (
-        <SingleProductDescription productData={productData} />
-      ) : (
-        <div className="text-gray-500 flex justify-center items-center">
-          Đang tải thông tin sản phẩm...
-        </div>
-      )}
+    <div className="min-h-screen bg-sky-50">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 max-w-7xl 2xl:max-w-screen-2xl">
+        <ProductDetails productId={id} onProductData={setProductData} />
+        {productData ? (
+          <SingleProductDescription productData={productData} />
+        ) : (
+          <div className="flex justify-center items-center py-16">
+            <div className="text-gray-500 text-lg">
+              <Spin indicator={<LoadingOutlined spin />} className="mr-2" />
+              Đang tải thông tin sản phẩm...
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
