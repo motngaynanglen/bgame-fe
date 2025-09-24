@@ -9,8 +9,23 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined 
 } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { inter } from '@/src/fonts/fonts';
+import { dashBoardApiRequest } from '@/src/apiRequests/dashBoard';
+import { useAppContext } from '../../app-provider';
 
-
+interface statisticsModel {
+    totalOrders: number;
+    totalBookList: number;
+    totalConsignmentOrder: number;
+    totalProduct: number;
+}
+interface ResponseModel {
+    data: statisticsModel[];
+    message: string;
+    statusCode: number;
+    paging: null;
+}
 
 type TimeRangeType = 'day' | 'weekly' | 'monthly';
 
@@ -20,6 +35,7 @@ const { Option } = Select;
 const ManagerDashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRangeType>('day');
   const [dateRange, setDateRange] = useState([]);
+  const user = useAppContext().user;
 
   // Dummy data - Thay thế bằng API thực tế
   const dashboardData = {
@@ -30,6 +46,18 @@ const ManagerDashboard = () => {
     totalRentalRevenue: 7500000,
     revenueChange: 15.3, // % thay đổi
   };
+  
+  // const { data, isLoading } = useQuery<ResponseModel>({
+  //   queryKey: ["news"],
+  //   queryFn: async () => {
+  //     // Replace with your actual API call
+  //     const res = await dashBoardApiRequest.getStatistics(user?.token);
+  //     return res.data;
+  //   }
+  // });
+
+  // console.log("Dashboard data:", data);
+
 
  const revenueData: Record<TimeRangeType, { purchase: number; rental: number }> = {
     day: {
@@ -133,7 +161,7 @@ const ManagerDashboard = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">📊 Dashboard Quản lý</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Dashboard Quản lý</h1>
         <p className="text-gray-600">Theo dõi hoạt động kinh doanh của cửa hàng</p>
       </div>
 
@@ -229,7 +257,7 @@ const ManagerDashboard = () => {
       <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} lg={12}>
           <Card 
-            title="📈 Doanh thu đơn mua" 
+            title="Doanh thu đơn mua" 
             className="rounded-xl shadow-sm"
           >
             <div className="text-2xl font-bold text-green-600">
@@ -248,7 +276,7 @@ const ManagerDashboard = () => {
 
         <Col xs={24} lg={12}>
           <Card 
-            title="📊 Doanh thu đơn thuê" 
+            title="Doanh thu đơn thuê" 
             className="rounded-xl shadow-sm"
           >
             <div className="text-2xl font-bold text-blue-600">
@@ -268,7 +296,7 @@ const ManagerDashboard = () => {
 
       {/* Recent Orders */}
       <Card 
-        title="📋 Đơn hàng gần đây" 
+        title=" Đơn hàng gần đây" 
         className="rounded-xl shadow-sm"
       >
         <Table 

@@ -38,7 +38,7 @@ const { TabPane } = Tabs;
 
 interface StoreData {
   id: string;
-  storeName: string;
+  store_name: string;
   address: string;
   hotline: string;
   lattitude: string;
@@ -71,54 +71,38 @@ const StoreDetailPage = () => {
 
   // Fetch store data
   useEffect(() => {
+    const fetchStoreData = async () => {
+      // Kiểm tra điều kiện
+      if (!storeId || !user?.token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        console.log("🔄 Fetching store data...");
+
+        // Gọi API trực tiếp với fetch
+        const response = await storeApiRequest.getDetail(storeId, user.token);
+        
+        if (response && response.data) {
+          console.log("✅ Data received:", response.data);
+          setStoreData(response.data);
+          form.setFieldsValue(response.data);
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } catch (error) {
+        console.error("❌ Fetch error:", error);
+        message.error("Không thể tải thông tin cửa hàng");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchStoreData();
-  }, [storeId]);
-
-  const fetchStoreData = async () => {
-    setLoading(true);
-    try {
-      // Mock data - replace with API call
-      const mockData: StoreData = {
-        id: storeId as string,
-        storeName: "Board Game Hub",
-        address: "123 Đường ABC, Quận 1, TP.HCM",
-        hotline: "0123456789",
-        lattitude: "10.823099",
-        longtitude: "106.629662",
-        email: "contact@boardgamehub.com",
-        isActive: true,
-        description:
-          "Cửa hàng board game lớn nhất TP.HCM với hơn 1000 tựa game",
-        openingHours: "8:00 - 22:00 (Thứ 2 - Chủ nhật)",
-        createdAt: "2024-01-01",
-        updatedAt: "2024-01-15",
-      };
-      setStoreData(mockData);
-      form.setFieldsValue(mockData);
-    } catch (error) {
-      message.error("Không thể tải thông tin cửa hàng");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // const { data, isLoading, isError, error } = useQuery<responseModel>({
-  //   queryKey: ["boardgameByID", storeId],
-  //   queryFn: async () => {
-  //     if (!user?.token) {
-  //       throw new Error("User token is not available");
-  //     }
-  //     return await storeApiRequest.getStoreId(user.token, storeId as string);
-  //   },
-  //   enabled: !!storeId && !!user?.token,
-  // });
-
-  // console.log("Fetched store data:", data);
-
-  // if (isError) {
-  //   message.error("Lỗi khi tải dữ liệu cửa hàng: " + (error as Error).message);
-  // }
-
+  }, [storeId, user?.token, form]); // Dependency array
+  console.log("storeData:", storeData);
   const handleSave = async (values: any) => {
     setSaving(true);
     try {
@@ -178,13 +162,15 @@ const StoreDetailPage = () => {
     });
   };
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <Spin size="large" />
-  //     </div>
-  //   );
-  // }
+
+    if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spin size="large" />
+        <Text className="ml-2">Đang tải thông tin cửa hàng...</Text>
+      </div>
+    );
+  }
 
   if (!storeData) {
     return (
@@ -201,7 +187,7 @@ const StoreDetailPage = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <Title level={2} className="!mb-1">
-              {storeData.storeName}
+              {storeData.store_name}
             </Title>
             <Text type="secondary">Quản lý thông tin cửa hàng</Text>
           </div>
@@ -265,7 +251,7 @@ const StoreDetailPage = () => {
                     <Divider orientation="left">Thông tin cơ bản</Divider>
 
                     <Form.Item
-                      name="storeName"
+                      name="store_name"
                       label="Tên cửa hàng"
                       rules={[
                         {
@@ -362,7 +348,7 @@ const StoreDetailPage = () => {
             <Card className="rounded-2xl shadow-lg border-0">
               <Descriptions column={1} bordered>
                 <Descriptions.Item label="Tên cửa hàng">
-                  {storeData.storeName}
+                  {storeData.store_name}
                 </Descriptions.Item>
                 <Descriptions.Item label="Email">
                   {storeData.email}

@@ -19,5 +19,10 @@ const storeApiRequest = {
     }),
   getRentals: (body: any) => http.post<CommonResType>("/api/Store/get-rentals", body),
   create: (body: any) => http.post<CommonResType>("/api/Store/create", body),
+  getDetail: (id: any, sessionToken: any) => http.get<CommonResType>(`/api/Store/${id}`, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
 };
 export default storeApiRequest;
