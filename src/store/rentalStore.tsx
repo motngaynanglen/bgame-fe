@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { inter } from "../fonts/fonts";
+import { date } from "zod";
 
 //version 2: add cartStore interface để lưu trữ store name và location cho cart
 
 interface CartItem {
   productTemplateID: string;
   quantity: number;
-  product_name?: string; // Thêm trường product_name
+  product_name: string; // Thêm trường product_name
   price?: number; // Thêm trường price
   image?: string;
   storeId?: string;
@@ -16,14 +18,21 @@ interface CartStore {
   storeName: string;
   storeLocation: string;
 }
+interface BookingInfo {
+  bookDate: Date;
+  fromSlot: number;
+  toSlot: number;
+}
 interface RentalStore {
   cartItems: CartItem[];
   currentStoreId: string | null;
   cartStore: CartStore | null;
+  bookingInfo?: BookingInfo;
 
   setStoreInfo: (storeId: string, storeName: string, storeLocation: string) => void;
   setStoreId: (storeId: string) => void;
-  addToCart: (productTemplateID: string, product_name?: string, image?: string, price?: number) => void; // Cập nhật addToCart
+  setBookingInfo: (bookDate: Date, fromSlot: number, toSlot: number) => void;
+  addToCart: (productTemplateID: string, product_name: string, image?: string, price?: number) => void; // Cập nhật addToCart
   removeFromCart: (productTemplateID: string) => void;
   updateQuantity: (productTemplateID: string, quantity: number) => void;
   clearCart: () => void;
@@ -68,6 +77,9 @@ export const useRentalStore = create<RentalStore>()(
             : { storeId, storeName: "", storeLocation: "" }, // fallback khi chưa có store info
         });
       },
+      setBookingInfo: (bookDate, fromSlot, toSlot) => {
+        set({ bookingInfo: { bookDate, fromSlot, toSlot } });
+      },
 
       addToCart: (productTemplateID, product_name, image, price) =>
         set((state) => {
@@ -87,8 +99,14 @@ export const useRentalStore = create<RentalStore>()(
             return {
               cartItems: [
                 ...state.cartItems,
-
-                { productTemplateID, quantity: 1, product_name, image, storeId: state.currentStoreId ?? undefined, price }, // Lưu cả product_name và image
+                { 
+                  productTemplateID, 
+                  quantity: 1, 
+                  product_name, 
+                  image, 
+                  storeId: state.currentStoreId ?? undefined,
+                   price 
+                  },
               ],
             };
           }
