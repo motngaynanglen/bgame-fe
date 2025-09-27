@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
@@ -5,19 +6,19 @@ export async function POST(request: Request) {
   const force = res.force as boolean | undefined;
   if (force) {
     return Response.json(
-      {
-        message: 'Buộc đăng xuất thành công'
-      },
+      { message: 'Buộc đăng xuất thành công' },
       {
         status: 200,
         headers: {
-          // Xóa cookie sessionToken
-          'Set-Cookie': `sessionToken=; Path=/; HttpOnly; Max-Age=0,sessionRole=; Path=/; HttpOnly; Max-Age=0`
+          'Set-Cookie': [
+            `sessionToken=; Path=/; HttpOnly; Max-Age=0`,
+            `sessionRole=; Path=/; HttpOnly; Max-Age=0`
+          ].join(", "),
         }
       }
     );
   }
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const sessionToken = (cookieStore).get('sessionToken');
   if (!sessionToken) {
     return Response.json(
@@ -27,4 +28,8 @@ export async function POST(request: Request) {
       }
     );
   }
+  return Response.json(
+    { message: 'Token còn hiệu lực' },
+    { status: 200 }
+  );
 }

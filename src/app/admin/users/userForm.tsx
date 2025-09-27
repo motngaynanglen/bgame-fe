@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormProps, Input } from "antd"
+import { Button, Form, FormProps, Input } from "antd"
 import { useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
 import { RegisterBody, RegisterBodyType } from "@/src/schemaValidations/auth.schema";
@@ -55,9 +55,9 @@ export default function UserForm({ user }: { user?: RegisterBodyType }) {
 
 
                 <Form.Item label={null}>
-                    <button className="bg-primary rounded-full px-5 py-2" type="submit">
+                    <Button className="!bg-primary !rounded-full px-5 py-2" htmlType="submit">
                         Submit
-                    </button>
+                    </Button>
                 </Form.Item>
 
             </Form >

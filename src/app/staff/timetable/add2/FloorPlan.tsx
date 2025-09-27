@@ -22,7 +22,7 @@ export default function FloorPlan({ tables, onSelectTable, selectedTableId }: Fl
 
                 </div>
             }>
-            <Divider>Sơ đồ bàn</Divider>
+            <Divider className='!mt-0 !mb-3'>Sơ đồ bàn</Divider>
 
             <div style={{ flex: 1 }}> {/* Đảm bảo div này giãn nở */}
                 <Row gutter={[24, 24]} style={{ marginTop: '20px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '10px' }}>
