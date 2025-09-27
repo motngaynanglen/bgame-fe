@@ -56,7 +56,7 @@ export default function LoginPage() {
       router.push("/");
       router.refresh();
       // KẾT THÚC SAU KHI SET COOKIE
- 
+
     } catch (error) {
       console.log("lỗi nè: ", error);
     }
@@ -109,18 +109,20 @@ export default function LoginPage() {
                 label=""
                 className="w-full border rounded-md focus:outline-none focus:border-blue-500 text-black-2"
               >
-                <Input required type={showPassword ? "text" : "password"} />
-                {showPassword ? (
-                  <AiFillEye
-                    className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                    onClick={togglePasswordVisibility}
-                  />
-                ) : (
-                  <AiFillEyeInvisible
-                    className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                    onClick={togglePasswordVisibility}
-                  />
-                )}
+                <div>
+                  <Input required type={showPassword ? "text" : "password"} />
+                  {showPassword ? (
+                    <AiFillEye
+                      className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                      onClick={togglePasswordVisibility}
+                    />
+                  ) : (
+                    <AiFillEyeInvisible
+                      className="absolute fill-black right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                      onClick={togglePasswordVisibility}
+                    />
+                  )}
+                </div>
               </FormItem>
             </div>
           </div>

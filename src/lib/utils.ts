@@ -11,11 +11,14 @@
 //   }
 //   const formatter = new Intl.DateTimeFormat(locale, options)
 //   return formatter.format(date)
+
+import dayjs from "./dayjs";
+
 // }
 export const formatTimeStringToTimestamp = (timeString: string) => {
   const [hours, minutes, seconds] = timeString.split(':').map(Number);
 
-  return seconds + (minutes * 60) + (hours * 60 * 60);
+  return (seconds ?? 0) + (minutes * 60) + (hours * 60 * 60);
 }
 export const formatTimeStringToArray = (timeString: string) => {
   const [hours, minutes, seconds] = timeString.split(':').map(Number);
@@ -116,3 +119,24 @@ export const formatDurationText = (slotCount: number) => {
   if (h > 0) return `${h} giờ`;
   return `${m} phút`;
 };
+export const ConvertSlotToTime = (slot: number, isBegin?: boolean, fullFormat?: boolean) => {
+  if (slot < 1 || slot > 29) return "NaN";
+  if (!isBegin) slot += 1; // Nếu là thời gian kết thúc thì +1 slot
+  return dayjs(
+    new Date().setHours(7 + Math.floor((slot - 1) / 2), (slot - 1) % 2 * 30, 0, 0)
+  ).format(fullFormat ? 'DD-MM-YYYY HH:mm:ss' : 'HH:mm');
+}
+export const ConvertSlotToDateTime = (slot: number, isBegin?: boolean) => {
+  if (slot < 1 || slot > 29) return;
+  if (!isBegin) slot += 1; // Nếu là thời gian kết thúc thì +1 slot
+  return dayjs(new Date().setHours(7 + Math.floor((slot - 1) / 2), (slot - 1) % 2 * 30, 0, 0))
+}
+export const ConvertTimeToSlot = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  if (hours < 7 || hours > 21 || (hours === 21 && minutes > 0)) return -1;
+  return (hours - 7) * 2 + (minutes >= 30 ? 1 : 0) + 1;
+};
+// const slots = Array.from({ length: 29 }, (_, i) => i + 1); // Slot 1 → 29
+// Cơ bản có 28 slot tương ứng 7h tới 21h (14h). Số Slot = (số giờ)  x2 + 1
+// Hiển thị nội dung thead lệch về bên trái nên phải; điễn giải slot 1 tương ứng 7h - 7h30 nên phải theo n+1
+// Nếu để 28 slot thì thời gian cuối cùng sẽ không được hiển thị.

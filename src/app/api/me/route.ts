@@ -22,5 +22,5 @@ export async function GET() {
   
   // const data = await res.json();
   const data = true
-  return Response.json(data);
+  return Response.json({ ok: true }, { status: 200 });
 }

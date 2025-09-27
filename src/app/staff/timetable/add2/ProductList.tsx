@@ -34,7 +34,7 @@ export default function ProductList({ onAddProduct, currentOrders }: ProductList
     };
     const searchProducts = useMutation({
         mutationFn: async (code: string) => {
-            const res = await productApiRequest.getByCode({ code }, user?.token);
+            const res = await productApiRequest.getByCode({ code , productType: 0 }, user?.token);
             return res.data;
         },
         onSuccess: (products) => {
@@ -140,7 +140,7 @@ export default function ProductList({ onAddProduct, currentOrders }: ProductList
                                             <div className="flex justify-between items-center">
                                                 <p className="text-sm text-gray-600">Mã: {item.code}</p>
                                                 <p className="font-bold text-green-600 text-lg">
-                                                    {item.price?.toLocaleString()}₫
+                                                    {item.rent_price_per_hour?.toLocaleString()}₫
                                                     {item.product_type === "RENT_PRODUCT" && <span className="text-xs text-gray-500 ml-1">/giờ</span>}
                                                 </p>
                                             </div>
