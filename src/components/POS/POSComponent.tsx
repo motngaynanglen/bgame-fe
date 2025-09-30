@@ -108,7 +108,7 @@ export default function POSComponent() {
 
   const searchProducts = useMutation({
     mutationFn: async (code: string) => {
-      const res = await productApiRequest.getByCode({ code });
+      const res = await productApiRequest.getByCode({ code, productType: 1 }, user?.token); // 0: rent, 1 purchase
       return res.data;
     },
     onSuccess: (products) => {

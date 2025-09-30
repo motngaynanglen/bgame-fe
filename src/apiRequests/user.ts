@@ -52,7 +52,7 @@ const userApiRequest = {
       },
     }),
   getProfile: (sessionToken: string) =>
-    http.get("/api/Account/get-profile", {
+    http.get("/api/Account/profile", {
       headers: {
         Authorization: `Bearer ${sessionToken}`,
       },
@@ -63,6 +63,11 @@ const userApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
-
+  updateAddress: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/Account/address", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
 };
 export default userApiRequest;
