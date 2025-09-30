@@ -1,5 +1,5 @@
 "use client";
-import { Avatar, DatePicker, DatePickerProps, Modal } from "antd";
+import { Avatar, DatePicker, DatePickerProps, message, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppContext } from "../app-provider";
@@ -17,23 +17,21 @@ import {
 
 dayjs.extend(customParseFormat);
 interface IFormInput {
-  personID: string;
   fullName: string;
   email: string;
-  dateOfBirth: string;
+  dateOfBirth: Date;
   image: string;
   gender: number;
   phoneNumber: string;
 }
 
 interface userProfile {
-  personID: string;
   full_name: string;
   address: IFormOutputAddress[];
   phone_number: string;
   email: string;
-  gender: string;
-  date_of_birth: string;
+  gender: number;
+  date_of_birth: Date;
   image: string;
 }
 
@@ -65,6 +63,7 @@ export default function ProfilePage() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<IFormInput>();
 
   const {
@@ -90,7 +89,7 @@ export default function ProfilePage() {
   // };
 
   const onChange: DatePickerProps["onChange"] = (date, dateString) => {
-    console.log(date, dateString);
+    setValue('dateOfBirth', date.toDate());
   };
 
   const { data, isLoading, refetch: refetchProfile } = useQuery<userProfile>({
@@ -116,20 +115,27 @@ export default function ProfilePage() {
     }
   }, [data]);
   const updateProfileMutation = useMutation({
-    mutationFn: (newAddressList: IFormOutputAddress[]) => {
-      // Thực hiện API cập nhật profile, chỉ gửi danh sách địa chỉ mới
-      const body = {
-        address: newAddressList
-      }
-      return userApiRequest.updateAddress(body, user?.token);
+    mutationFn: (formData: IFormInput) => {
+      const rawGender = formData.gender ?? (data?.gender ?? 0);
+      const numericGender = Number(rawGender);
+
+      const body: IFormInput = {
+        phoneNumber: formData.phoneNumber ?? data?.phone_number,
+        email: formData.email ?? data?.email,
+        fullName: formData.fullName ?? data?.full_name,
+        dateOfBirth: formData.dateOfBirth ?? data?.date_of_birth,
+        image: formData.image ?? data?.image,
+        gender: numericGender
+
+      };
+      return userApiRequest.updateProfile(body, user?.token);
     },
     onSuccess: () => {
-      alert("Cập nhật địa chỉ thành công!");
+      message.success("Cập nhật profile thành công!");
       refetchProfile(); // Tải lại profile để cập nhật dữ liệu gốc
     },
     onError: (error) => {
-      console.error("Lỗi cập nhật địa chỉ:", error);
-      alert("Cập nhật địa chỉ thất bại!");
+      message.error("Cập nhật profile thất bại!",8);
     },
   });
   const updateAddressMutation = useMutation({
@@ -141,12 +147,12 @@ export default function ProfilePage() {
       return userApiRequest.updateAddress(body, user?.token);
     },
     onSuccess: () => {
-      alert("Cập nhật địa chỉ thành công!");
+      message.success("Cập nhật địa chỉ thành công!");
       refetchProfile(); // Tải lại profile để cập nhật dữ liệu gốc
     },
     onError: (error) => {
       console.error("Lỗi cập nhật địa chỉ:", error);
-      alert("Cập nhật địa chỉ thất bại!");
+      message.error("Cập nhật địa chỉ thất bại!",8);
     },
   });
   const onSubmitAddress: SubmitHandler<IFormInputAddress> = (formData) => {
@@ -161,12 +167,14 @@ export default function ProfilePage() {
       );
     } else {
       // Chế độ THÊM MỚI
+
       const newAddress: IFormOutputAddress = {
         ...formData,
         id: Date.now(), // Tạo ID tạm thời
         // is_default: false, // Thêm logic mặc định nếu cần
       };
       setTempAddresses((prev) => [...prev, newAddress]);
+
     }
 
     handleCancel();
@@ -193,9 +201,13 @@ export default function ProfilePage() {
   };
   // --- CÁC HANDLER KHÁC ---
   const showModal = () => {
-    setEditingAddress(null);
-    resetAddressForm();
-    setIsModalOpen(true);
+    if (tempAddresses.length > 2) {
+      message.warning(<>Số địa chỉ tối đa là <span className="text-warning font-bold">3</span>. Vui lòng xóa bớt nếu muốn thêm...</>, 5);
+    } else {
+      setEditingAddress(null);
+      resetAddressForm();
+      setIsModalOpen(true);
+    }
   };
 
   const handleCancel = () => {
@@ -204,8 +216,7 @@ export default function ProfilePage() {
     setIsModalOpen(false);
   };
   const onSubmit: SubmitHandler<IFormInput> = (formData) => {
-    // 1. Cập nhật thông tin profile (nếu cần)
-    // 2. Gửi API cập nhật danh sách địa chỉ mới (tempAddresses)
+    updateProfileMutation.mutate(formData)
     updateAddressMutation.mutate(tempAddresses);
   };
   // const { data, isLoading, isError, error } = useQuery<IFormInput>({
@@ -234,7 +245,7 @@ export default function ProfilePage() {
     const encodedAddress = encodeURIComponent(address);
     return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
   };
-   if (isLoading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
   return (
@@ -332,9 +343,9 @@ export default function ProfilePage() {
                         required: "Giới tính là bắt buộc",
                       })}
                     >
-                      <option value="male">Nam</option>
-                      <option value="female">Nữ</option>
-                      <option value="other">Không xác định</option>
+                      <option value="1">Nam</option>
+                      <option value="2">Nữ</option>
+                      <option value="0">Không xác định</option>
                     </select>
                     {errors.gender && (
                       <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -407,9 +418,10 @@ export default function ProfilePage() {
           <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
             <h1 className="text-2xl font-bold text-white">
               📦 Địa chỉ giao hàng
+              <span className="text-xs font-thin float-right"> Hãy chắc chắn bạn nhập đúng địa chỉ giao hàng!</span>
             </h1>
             <p className="text-green-100 text-sm">
-              Quản lý địa chỉ nhận hàng của bạn 
+              Quản lý địa chỉ nhận hàng của bạn
             </p>
           </div>
 
