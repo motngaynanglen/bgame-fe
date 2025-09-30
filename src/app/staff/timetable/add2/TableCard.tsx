@@ -28,10 +28,9 @@ const getStatusColor = (book: book | undefined) => {
 };
 export default function TableCard({ table, onClick, isSelected }: TableCardProps) {
   const [book, setBook] = useState<book | undefined>(undefined);
-
+  
   useEffect(() => {
 
-    let timerId: NodeJS.Timeout;
 
     const checkAndUpdateBooking = () => {
       if (!table.bookTables || table.bookTables.length === 0) {
@@ -61,7 +60,7 @@ export default function TableCard({ table, onClick, isSelected }: TableCardProps
           }
           setBook(data);
         }
-      } if (nearestBooking) {
+      } else if (nearestBooking) {
         const endTime = ConvertSlotToDateTime(nearestBooking.from_slot, false);
         if (endTime) {
           const data: book = {
@@ -82,7 +81,7 @@ export default function TableCard({ table, onClick, isSelected }: TableCardProps
     };
 
     checkAndUpdateBooking();
-    timerId = setInterval(checkAndUpdateBooking, 30000);
+    const timerId: NodeJS.Timeout = setInterval(checkAndUpdateBooking, 30000);
 
     return () => clearInterval(timerId);
   }, [table]);
