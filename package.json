@@ -38,7 +38,7 @@
     "antd": "^5.26.5",
     "antd-img-crop": "^4.24.0",
     "axios": "^1.7.9",
-    "chart.js": "^4.4.8",
+    "chart.js": "^4.5.0",
     "cloudinary": "^2.6.0",
     "clsx": "^2.1.1",
     "cookies-next": "^6.1.0",

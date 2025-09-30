@@ -14,8 +14,10 @@ export interface productModel {
     sales_quantity?: number,
     rent_quantity?: number
 }
-import { z } from "zod";
+import { array, z } from "zod";
 import { PagingRes } from "./common.schema";
+import { duration } from "moment";
+import { list } from "postcss";
 
 export const productFullFormSchema = z.object({
     id: z.string().optional(), // Hoặc z.undefined() nếu bạn muốn bắt buộc không có giá trị
@@ -82,11 +84,14 @@ export const productTemplateSchema = z.object({
         .refine((val) => val % 1000 === 0, { message: "Giá phải là bội số của 1000" }),
     rentPricePerHour: z.number().min(0, "Giá thuê theo giờ không được âm").max(1000000, "Giá thuê theo giờ quá lớn")
         .refine((val) => val % 1000 === 0, { message: "Giá phải là bội số của 1000" }),
-    difficulty: z.number(),
+    hardRank: z.number(),
     age: z.number(),
     numberOfPlayerMin: z.number(),
     numberOfPlayerMax: z.number(),
     description: z.string().min(10, "Mô tả phải có ít nhất 10 ký tự").max(10000, "Mô tả quá dài"),
+    publisher: z.string().optional().nullable(),
+    duration: z.number().optional().nullable(),
+    listCategories: array(z.string()).optional().nullable(),
 });
 export type productTemplateBodyType = z.infer<typeof productTemplateSchema>;
 
