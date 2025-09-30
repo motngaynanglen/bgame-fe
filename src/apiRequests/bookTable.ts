@@ -28,5 +28,12 @@ export const bookTableApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+    getbooklistbyDate: (body: Date,sessionToken?: string) =>
+    http.get(`api/StoreTable/booklist?Date=${body.toISOString()}`, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+
 }
 export default bookTableApiRequest;

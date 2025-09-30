@@ -1,5 +1,4 @@
 "use client";
-import { isClient } from "@/src/lib/httpAxios";
 import { AccountResType } from "@/src/schemaValidations/account.schema";
 import { getCookie } from "cookies-next";
 import {
@@ -58,11 +57,11 @@ export default function AppProvider({
     }
   }, [isAuthenticated, setUser]);
   useEffect(() => {
-    // const token = getCookie("sessionToken");
-    // if(!token) {
-    //   setUser(null);
-    // }
-    setUserState(getStoredUser());
+    // Khởi tạo từ localStorage khi mount
+    const storedUser = getStoredUser();
+    if (storedUser) {
+      setUserState(storedUser);
+    }
   }, []);
   // const [user, setUserState] = useState<User | null>(() => {
   //   if (isClient()) {
