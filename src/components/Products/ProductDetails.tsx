@@ -330,7 +330,7 @@ function ProductDetails({
                 🛒 Thêm vào giỏ hàng
               </button>
 
-              <button
+              {/* <button
                 disabled={data.data.sales_quantity <= 0}
                 onClick={handleBuyNow}
                 className={`flex-1 bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all ${
@@ -340,7 +340,7 @@ function ProductDetails({
                 }`}
               >
                 ⚡ Mua ngay
-              </button>
+              </button> */}
             </div>
 
             {/* Store Availability */}

@@ -15,6 +15,9 @@ import {
   Spin,
   Tabs,
   Modal,
+  Upload,
+  UploadProps,
+  UploadFile,
 } from "antd";
 import {
   ShopOutlined,
@@ -26,25 +29,55 @@ import {
   CloseOutlined,
   DeleteOutlined,
   EyeOutlined,
+  InboxOutlined,
 } from "@ant-design/icons";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import storeApiRequest from "@/src/apiRequests/stores";
 import { useAppContext } from "@/src/app/app-provider";
+import Dragger from "antd/es/upload/Dragger";
+import { useImageUploader } from "@/src/hooks/useImageUploader";
+
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
 
+const beforeUpload = (file: File) => {
+  const isImage = file.type.startsWith("image/");
+  const isLt20MB = file.size / 1024 / 1024 <= 20;
+  if (!isImage) {
+    message.error("Chỉ cho phép ảnh!");
+    return Upload.LIST_IGNORE;
+  }
+  if (!isLt20MB) {
+    message.error("Dung lượng ảnh phải ≤ 20MB!");
+    return Upload.LIST_IGNORE;
+  }
+  return true;
+};
+const uploadProps: UploadProps = {
+  accept: "image/*",
+  beforeUpload: beforeUpload,
+  multiple: true,
+  maxCount: 10,
+  listType: "picture",
+  showUploadList: {
+    showPreviewIcon: true,
+    showRemoveIcon: true,
+  },
+};
+
 interface StoreData {
   id: string;
-  store_name: string;
+  storeName: string;
+  code: string;
   address: string;
   hotline: string;
-  lattitude: string;
+  latitude: string;
   longtitude: string;
   email: string;
-  isActive?: boolean;
+  status: string;
   description?: string;
   openingHours?: string;
   createdAt?: string;
@@ -67,6 +100,9 @@ const StoreDetailPage = () => {
   const [activeTab, setActiveTab] = useState("details");
   const { storeId } = useParams();
   const { user } = useAppContext();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const { uploadImages, uploading } = useImageUploader();
+
   console.log("storeId from params:", storeId);
 
   // Fetch store data
@@ -84,7 +120,7 @@ const StoreDetailPage = () => {
 
         // Gọi API trực tiếp với fetch
         const response = await storeApiRequest.getDetail(storeId, user.token);
-        
+
         if (response && response.data) {
           console.log("✅ Data received:", response.data);
           setStoreData(response.data);
@@ -106,14 +142,13 @@ const StoreDetailPage = () => {
   const handleSave = async (values: any) => {
     setSaving(true);
     try {
-      // API call to update store
       const updateData = {
         ...values,
         id: storeId,
       };
 
       console.log("Update data:", updateData);
-      // await updateStoreApi(updateData);
+      await storeApiRequest.update(updateData, user?.token);
 
       message.success("Cập nhật thông tin thành công!");
       setEditing(false);
@@ -132,8 +167,12 @@ const StoreDetailPage = () => {
 
   const handleStatusChange = async (checked: boolean) => {
     try {
-      // await updateStoreStatusApi(storeId, checked);
-      setStoreData((prev) => (prev ? { ...prev, isActive: checked } : null));
+      await storeApiRequest.changeStatus(storeId, user?.token);
+
+      setStoreData((prev) =>
+        prev ? { ...prev, status: checked ? "ACTIVE" : "INACTIVE" } : null
+      );
+
       message.success(
         checked ? "Đã kích hoạt cửa hàng" : "Đã vô hiệu hóa cửa hàng"
       );
@@ -141,6 +180,16 @@ const StoreDetailPage = () => {
       message.error("Thay đổi trạng thái thất bại");
     }
   };
+
+  // const handleStatusChange = async (checked: boolean) => {
+  //   try {
+  //     // await updateStoreStatusApi(storeId, checked);
+  //     setStoreData(prev => prev ? { ...prev, isActive: checked } : null);
+  //     message.success(checked ? 'Đã kích hoạt cửa hàng' : 'Đã vô hiệu hóa cửa hàng');
+  //   } catch (error) {
+  //     message.error('Thay đổi trạng thái thất bại');
+  //   }
+  // };
 
   const handleDeleteStore = () => {
     Modal.confirm({
@@ -162,8 +211,7 @@ const StoreDetailPage = () => {
     });
   };
 
-
-    if (loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spin size="large" />
@@ -187,7 +235,7 @@ const StoreDetailPage = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <Title level={2} className="!mb-1">
-              {storeData.store_name}
+              {storeData.storeName}
             </Title>
             <Text type="secondary">Quản lý thông tin cửa hàng</Text>
           </div>
@@ -196,10 +244,18 @@ const StoreDetailPage = () => {
             <Switch
               checkedChildren="Hoạt động"
               unCheckedChildren="Tạm đóng"
-              checked={storeData.isActive}
+              checked={storeData.status === "ACTIVE"}
               onChange={handleStatusChange}
               className="mr-2"
             />
+
+            {/* <Switch
+              checkedChildren="Hoạt động"
+              unCheckedChildren="Tạm đóng"
+              checked={storeData.isActive}
+              onChange={handleStatusChange}
+              className="mr-2"
+            /> */}
 
             {!editing ? (
               <Button
@@ -251,7 +307,7 @@ const StoreDetailPage = () => {
                     <Divider orientation="left">Thông tin cơ bản</Divider>
 
                     <Form.Item
-                      name="store_name"
+                      name="storeName"
                       label="Tên cửa hàng"
                       rules={[
                         {
@@ -309,7 +365,7 @@ const StoreDetailPage = () => {
                     <Row gutter={[12, 0]}>
                       <Col xs={12}>
                         <Form.Item
-                          name="lattitude"
+                          name="latitude"
                           label="Vĩ độ"
                           rules={[
                             { required: true, message: "Vui lòng nhập vĩ độ" },
@@ -339,6 +395,29 @@ const StoreDetailPage = () => {
                     </Form.Item>
                   </Col>
                 </Row>
+                {/* --- HÌNH ẢNH --- */}
+                <Col span={24}>
+                  <Card size="small" title="Hình ảnh Của Hàng">
+                    <Form.Item name="image" label="Hình ảnh">
+                      <Dragger
+                        {...uploadProps}
+                        fileList={fileList}
+                        onChange={(info) => setFileList(info.fileList)}
+                        disabled={uploading}
+                      >
+                        <p className="ant-upload-drag-icon">
+                          <InboxOutlined />
+                        </p>
+                        <p className="ant-upload-text">
+                          Kéo và thả hoặc chọn ảnh
+                        </p>
+                        <p className="ant-upload-hint">
+                          Tối đa 10 ảnh, mỗi ảnh ≤ 20MB
+                        </p>
+                      </Dragger>
+                    </Form.Item>
+                  </Card>
+                </Col>
               </Form>
             </Card>
           </TabPane>
@@ -348,7 +427,7 @@ const StoreDetailPage = () => {
             <Card className="rounded-2xl shadow-lg border-0">
               <Descriptions column={1} bordered>
                 <Descriptions.Item label="Tên cửa hàng">
-                  {storeData.store_name}
+                  {storeData.storeName}
                 </Descriptions.Item>
                 <Descriptions.Item label="Email">
                   {storeData.email}
@@ -360,7 +439,7 @@ const StoreDetailPage = () => {
                   {storeData.address}
                 </Descriptions.Item>
                 <Descriptions.Item label="Tọa độ">
-                  {storeData.lattitude}, {storeData.longtitude}
+                  {storeData.latitude}, {storeData.longtitude}
                 </Descriptions.Item>
                 <Descriptions.Item label="Giờ mở cửa">
                   {storeData.openingHours || "Chưa cập nhật"}
@@ -371,10 +450,14 @@ const StoreDetailPage = () => {
                 <Descriptions.Item label="Trạng thái">
                   <span
                     className={
-                      storeData.isActive ? "text-green-600" : "text-red-600"
+                      storeData.status === "ACTIVE"
+                        ? "text-green-600"
+                        : "text-red-600"
                     }
                   >
-                    {storeData.isActive ? "Đang hoạt động" : "Tạm đóng"}
+                    {storeData.status === "ACTIVE"
+                      ? "Đang hoạt động"
+                      : "Tạm đóng"}
                   </span>
                 </Descriptions.Item>
                 <Descriptions.Item label="Ngày tạo">
@@ -397,7 +480,7 @@ const StoreDetailPage = () => {
           <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
             <Text type="secondary">
               <EyeOutlined className="mr-2" />
-              Bản đồ sẽ hiển thị tại đây ({storeData.lattitude},{" "}
+              Bản đồ sẽ hiển thị tại đây ({storeData.latitude},{" "}
               {storeData.longtitude})
             </Text>
           </div>
