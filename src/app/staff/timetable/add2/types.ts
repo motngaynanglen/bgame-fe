@@ -2,14 +2,39 @@ export type Table = {
     TableID: string;
     TableName: string;
     Capacity: number;
-    // FromSlot: number;
-    // ToSlot: number;
-    // Owner: string;
     Status: string;
     books?: BookList;
+    bookTables?: BookTable[] | [];
 };
+export type BookTable = {
+    id: string,
+    from_slot: number,
+    to_slot: number,
+    book_name: string | null,
+    table_list_ids: string,
+    total_time: number,
+    status: string,
+    bookLists: bookList[]
+}
+export type bookList = {
+    id: string;
+    code: string;
+    book_table_id: number;
+    total_price: number;
+    products: Product[];
+}
+export type Product = {
+    id: string;
+    book_list_id: string;
+    product_name: string;
+    // description: string;
+    code: string;
+    image: string;
+}
+
 export type BookList = {
     id: string;
+    book_code: string;
     from_slot: number;
     to_slot: number;
     BookItem: BookItem[] | BoardGame[];
@@ -19,9 +44,10 @@ export type BookItem = {
     product_id: string;
     code: string;
     product_name?: string; // Thêm trường product_name
-    price?: number; // Thêm trường price
+    rent_price_per_hour?: number; // Thêm trường price
     image?: string;
 }
+
 export interface BoardGame {
     id?: string;
     product_id: string;
@@ -41,4 +67,12 @@ export interface BoardGame {
     age?: number;
     complexity?: number;
     product_type?: string;
+}
+export type book = {
+  deadline: {
+    time: number,
+    type: 'end' | 'start'
+  },
+  bookingData: BookTable
+  type: 'past' | 'present' | 'future'
 }
