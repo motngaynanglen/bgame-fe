@@ -1,10 +1,11 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+// Giả định schema đã được cập nhật để chứa expectedReceiptDate
 import {
     orderFormSchema,
     OrderFormValues,
-} from "@/src/schemaValidations/order.schema";
+} from "@/src/schemaValidations/order.schema"; // Cần đảm bảo file này có 'expectedReceiptDate'
 import {
     Button,
     Card,
@@ -16,6 +17,7 @@ import {
     Space,
     Switch,
     Spin,
+    DatePicker, // Import DatePicker
 } from "antd";
 import { FormItem } from "react-hook-form-antd";
 import { useParams } from "next/navigation";
@@ -23,25 +25,40 @@ import { useAppContext } from "@/src/app/app-provider";
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { HttpError } from "@/src/lib/httpAxios";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import dayjs from "@/src/lib/dayjs"; // Import dayjs và Dayjs
+import { formToJSON } from "axios";
+import { json } from "stream/consumers";
+import { formatDateTime, toISOStringWithOffset } from "@/src/lib/utils";
+import { OrderGroupDetail } from "../types";
 
-interface OrderDetail {
-    order_status: string;
-    full_name: string;
-    address: string;
-    phone_number: string;
-    total_price: number;
-    total_item: number;
-    order_code: string;
-    order_id: string;
-    email: string;
-    order_created_at: string;
-}
+// Cập nhật OrderFormValues (Giả định schema đã được cập nhật)
+// Nếu bạn không thể thay đổi file schema gốc, bạn có thể tạm thời định nghĩa lại:
+// export interface OrderFormValues {
+//     orderID: string;
+//     email: string;
+//     fullName: string;
+//     phoneNumber: string;
+//     address: string;
+//     isDelivery: boolean;
+//     deliveryCode: string;
+//     deliveryBrand: string;
+//     expectedReceiptDate: Dayjs | null; // Sử dụng Dayjs cho DatePicker
+// }
 
+// Cập nhật OrderDetail (Thêm trường mới)
+
+const statusMeta: Record<string, { color: string; label: string }> = {
+  CREATED: { color: "warning", label: "Chưa Thanh Toán" },
+  PAID: { color: "green", label: "Đang xử lý" },
+  PREPARED: { color: "blue", label: "Đã chuẩn bị" },
+  DELIVERING: { color: "processing", label: "Đang giao" },
+  RECEIVED: { color: "success", label: "Hoàn tất" },
+  CANCELLED: { color: "error", label: "Đã hủy" },
+};
 export default function UpdateDeliveryInfoPage() {
     const { id } = useParams();
     const { user } = useAppContext();
-
     const form = useForm<OrderFormValues>({
         resolver: zodResolver(orderFormSchema),
         defaultValues: {
@@ -49,17 +66,11 @@ export default function UpdateDeliveryInfoPage() {
         },
     });
 
-    const {
-        handleSubmit,
-        control,
-        watch,
-        reset,
-        formState: { isSubmitting },
-    } = form;
+    const { handleSubmit, control, watch, reset, getValues, setValue, formState: { isSubmitting, isValidating, isValid, errors }, } = form;
 
     const isDelivery = watch("isDelivery");
 
-    const { data, isLoading } = useQuery<OrderDetail>({
+    const { data, isLoading } = useQuery<OrderGroupDetail>({
         queryKey: ["order", id],
         queryFn: async () => {
             const res = await orderApiRequest.getOrderById({
@@ -69,11 +80,10 @@ export default function UpdateDeliveryInfoPage() {
         },
     });
 
-    // ✅ Reset form khi có dữ liệu
     useEffect(() => {
         if (data) {
             reset({
-                orderID: data.order_id,
+                orderID: data.order_group_id,
                 email: data.email,
                 fullName: data.full_name,
                 phoneNumber: data.phone_number,
@@ -81,17 +91,27 @@ export default function UpdateDeliveryInfoPage() {
                 isDelivery: true,
                 deliveryCode: "",
                 deliveryBrand: "",
+                expectedReceiptDate: data.expected_receipt_date ?? null,
             });
+
         }
-    }, [data, reset]);
+    }, [data, reset, setValue]);
 
     const onSubmit = async (values: OrderFormValues) => {
+        // Chuyển đổi Dayjs object sang chuỗi ISO 8601 trước khi gửi lên API
+        const bodyToSend = {
+            ...values,
+            expectedReceiptDate: values.expectedReceiptDate ? toISOStringWithOffset(values.expectedReceiptDate, -7) : null
+            // Lí do -7 vì -7 sẽ khiến múi giờ defaut +0 vẫn rơi vào đúng ngày, không lệch ngày.
+            // Thay thế Dayjs object bằng chuỗi ISO 8601/null
+        };
+
         try {
             const res = await orderApiRequest.updateOrderDeliveryInfo(
-                values,
+                bodyToSend,
                 user?.token
             );
-            message.success(res.message);
+            message.success("Cập nhật dữ liệu thành công", 10);
         } catch (error) {
             if (error instanceof HttpError) {
                 message.error(error.message ?? "");
@@ -99,18 +119,31 @@ export default function UpdateDeliveryInfoPage() {
         }
     };
 
+    const cardTitle = () => {
+        return (
+            <div className="flex justify-between items-center"> 
+                <span>
+                    Cập nhật thông tin giao hàng
+                </span>
+                {/* <span>
+                    Đơn hàng đang trong trạng thái chuẩn bị, vui lòng xác nhận đủ sản phẩm.
+                </span> */}
+            </div>
+        )
+    }
     return (
-        <Card title="Cập nhật thông tin giao hàng" style={{ maxWidth: 800, margin: "auto" }}>
+        <Card title={cardTitle()} style={{ maxWidth: 800, margin: "auto" }}>
             {isLoading ? (
-                <Spin />
+                <Spin tip="Đang tải dữ liệu đơn hàng..." />
             ) : (
-                <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+                <Form layout="vertical" onFinish={handleSubmit(onSubmit)} disabled={data?.order_status != "PAID"}>
                     <Row gutter={[16, 16]}>
                         <Col span={24} hidden>
                             <FormItem control={control} name="orderID" label="Mã đơn hàng">
-                                <Input placeholder="UUID đơn hàng" />
+                                <Input />
                             </FormItem>
                         </Col>
+                        {/* Thông tin người nhận */}
                         <Col span={12}>
                             <FormItem control={control} name="fullName" label="Họ tên người nhận">
                                 <Input />
@@ -131,11 +164,15 @@ export default function UpdateDeliveryInfoPage() {
                                 <Input />
                             </FormItem>
                         </Col>
+
+                        {/* Trạng thái giao hàng */}
                         <Col span={24}>
-                            <FormItem control={control} name="isDelivery" label="Giao hàng?">
-                                <Switch checked={isDelivery} />
+                            <FormItem control={control} name="isDelivery" label="Giao hàng?" valuePropName="checked">
+                                <Switch />
                             </FormItem>
                         </Col>
+
+                        {/* Thông tin vận chuyển (chỉ hiển thị khi isDelivery là true) */}
                         {isDelivery && (
                             <>
                                 <Col span={12}>
@@ -148,8 +185,21 @@ export default function UpdateDeliveryInfoPage() {
                                         <Input />
                                     </FormItem>
                                 </Col>
+                                {/* Trường mới: expectedReceiptDate */}
+                                <Col span={12}>
+                                    <FormItem control={control} name="expectedReceiptDate" label="Ngày dự kiến nhận hàng" getValueFromEvent={(date: dayjs.Dayjs | null) => date}>
+                                        <DatePicker
+                                            format="DD/MM/YYYY" // Định dạng hiển thị
+                                            style={{ width: '100%' }}
+                                        // onChange={(date) => setValue('expectedReceiptDate', date.toDate())}
+                                        // defaultValue={dayjs(data?.expected_receipt_date)}
+                                        />
+                                    </FormItem>
+
+                                </Col>
                             </>
                         )}
+
                         <Col span={24} style={{ textAlign: "right" }}>
                             <Space>
                                 <Button onClick={() => reset()} disabled={isSubmitting}>
@@ -163,6 +213,7 @@ export default function UpdateDeliveryInfoPage() {
                     </Row>
                 </Form>
             )}
+
         </Card>
     );
 }

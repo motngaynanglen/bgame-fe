@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+
+
 export const orderFormSchema = z.object({
   orderID: z.string().uuid({ message: "Mã đơn hàng không hợp lệ" }),
   email: z.string().email({ message: "Email không hợp lệ" }),
@@ -7,8 +9,11 @@ export const orderFormSchema = z.object({
   phoneNumber: z.string().min(8, "SĐT ít nhất 8 số"),
   address: z.string().min(5, "Địa chỉ quá ngắn"),
   isDelivery: z.boolean(),
-  deliveryCode: z.string().optional(),
-  deliveryBrand: z.string().optional(),
+  deliveryCode: z.string().nullable(),
+  deliveryBrand: z.string().nullable(),
+
+  expectedReceiptDate: z.coerce.date().nullable(),
+
 }).refine(
   (data) => {
     if (data.isDelivery) {
@@ -19,6 +24,18 @@ export const orderFormSchema = z.object({
   {
     message: "Vui lòng nhập mã vận đơn và hãng vận chuyển",
     path: ["deliveryCode"],
+  }
+).refine(
+  (data) => {
+    // Logic kiểm tra: Nếu là Giao hàng, phải chọn Ngày dự kiến
+    if (data.isDelivery) {
+      return data.expectedReceiptDate
+    }
+    return true;
+  },
+  {
+    message: "Vui lòng chọn Ngày dự kiến nhận hàng",
+    path: ["expectedReceiptDate"],
   }
 );
 

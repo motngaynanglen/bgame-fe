@@ -86,9 +86,7 @@ export default function TemplateForm() {
   const fetchStoreList = async (templateId: string): Promise<StoreItem[]> => {
     setStoreLoading(true);
     try {
-      const res = await storeApiRequest.getListAndProductCountById({
-        productTemplateId: templateId,
-      });
+      const res = await storeApiRequest.getListAndProductCountById(templateId);
       const data: StoreItem[] = res.data;
 
       // Map dữ liệu trả về sang định dạng dùng trong cart

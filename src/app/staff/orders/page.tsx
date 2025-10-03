@@ -108,7 +108,7 @@ export type HistoryRequest = {
 const fmtVND = (v: number) => formatVND(v);
 
 /** Map status to color + label */
-const statusMeta: Record<string, { color: string; label: string }> = {
+const orderGroupStatusMeta: Record<string, { color: string; label: string }> = {
   CREATED: { color: "warning", label: "Chưa Thanh Toán" },
   PAID: { color: "green", label: "Đang xử lý" },
   PREPARED: { color: "blue", label: "Đã chuẩn bị" },
@@ -116,7 +116,14 @@ const statusMeta: Record<string, { color: string; label: string }> = {
   RECEIVED: { color: "success", label: "Hoàn tất" },
   CANCELLED: { color: "error", label: "Đã hủy" },
 };
-
+const orderStatusMeta: Record<string, { color: string; label: string }> = {
+  CREATED: { color: "warning", label: "Chưa chuẩn bị" },
+  PREPARED: { color: "blue", label: "Đã chuẩn bị" },
+  DELIVERING: { color: "processing", label: "Đang giao" },
+  DELIVERED: { color: "green", label: "Đã đến" },
+  RECEIVED: { color: "success", label: "Hoàn tất" },
+  CANCELLED: { color: "error", label: "Đã hủy" },
+};
 /** Smart debouncer */
 function useDebounce<T>(value: T, delay = 500) {
   const [debounced, setDebounced] = useState(value);
@@ -326,8 +333,8 @@ export default function OrderHistoryStaffPage() {
       key: "status",
       width: 150,
       render: (s: string) => (
-        <Tag color={statusMeta[s]?.color || "default"}>
-          {statusMeta[s]?.label || s}
+        <Tag color={orderGroupStatusMeta[s]?.color || "default"}>
+          {orderGroupStatusMeta[s]?.label || s}
         </Tag>
       ),
     },
@@ -339,11 +346,11 @@ export default function OrderHistoryStaffPage() {
           <Button type="link" onClick={() => router.push(`/staff/orders/${r.id}`)}>
             Xem Chi Tiết
           </Button>
-          {/* {r.status === "CREATED" && (
+          {r.status === "PAID" && (
             <Button type="primary" onClick={() => handlePay(r)} disabled={!user?.token}>
-              Thanh Toán
+              Chuẩn bị
             </Button>
-          )} */}
+          )}
           {/* </Space> */}
         </>
       ),
@@ -360,8 +367,8 @@ export default function OrderHistoryStaffPage() {
             <Space>
               <Text strong>{o.store_name}</Text>
               <Tag>{o.code}</Tag>
-              <Tag color={statusMeta[o.status]?.color || "default"}>
-                {statusMeta[o.status]?.label || o.status}
+              <Tag color={orderStatusMeta[o.status]?.color || "default"}>
+                {orderStatusMeta[o.status]?.label || o.status}
               </Tag>
             </Space>
           }
@@ -427,8 +434,8 @@ export default function OrderHistoryStaffPage() {
             setStatus(v);
           }}
           style={{ minWidth: 220 }}
-          options={Object.keys(statusMeta).map((k) => ({
-            label: statusMeta[k].label,
+          options={Object.keys(orderGroupStatusMeta).map((k) => ({
+            label: orderGroupStatusMeta[k].label,
             value: k,
           }))}
         />
