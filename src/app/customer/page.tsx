@@ -96,7 +96,7 @@ export default function ProfilePage() {
     queryKey: ["userProfile", user?.token],
     queryFn: async () => {
       if (!user?.token) {
-        throw new Error("User token is not available");
+        return
       }
       const res = await userApiRequest.getProfile(user?.token);
       // if (!res.ok) {
