@@ -48,6 +48,7 @@ interface PaymentData {
 }
 export default function POSComponent() {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
+  const [isCash, setIsCash] = useState<boolean>(true); // Mặc định là Tiền mặt (true)
 
   const { user } = useAppContext();
 
@@ -68,14 +69,20 @@ export default function POSComponent() {
   const [invoiceItems, setInvoiceItems] = useState<Product[]>([]);
   const [paymentData, setPaymentData] = useState<PaymentData | undefined>(undefined);
   const [errorsItems, setErrorsItems] = useState<string[]>([]);
-  const handlePaymentAction = async (id: string) => {
+
+  const handlePaymentAction = async (id: string, isCash: boolean) => {
     if (!id) {
       notifyError("Lỗi thanh toán", "Không có dữ liệu thanh toán.");
       return;
     }
     try {
       const res = await transactionApiRequest.performTransaction(
-        { referenceID: id, type: 1 },
+        {
+          referenceID: id,
+          type: 1,
+          isOffline: true,
+          isCash: isCash,
+        },
         user?.token
       );
 
@@ -235,7 +242,7 @@ export default function POSComponent() {
             return;
           }
           const response = await orderApiRequest.createOrderByStaff({ orders }, user.token);
-          handlePaymentAction(response.data);
+          handlePaymentAction(response.data, isCash);
           notification.success({ message: "Tạo đơn hàng thành công" });
         } catch (error) {
           if (error instanceof EntityError) {
@@ -289,14 +296,31 @@ export default function POSComponent() {
             <span className="font-medium text-xl">Tên khách hàng:</span>
             <Input placeholder="Khách lẻ" size="middle" className="mt-1" />
           </div>
-          <div className="mb-2 space-y-2">
-            <div className="flex justify-between">
-              <span className="text-xl">Tổng SL hàng:</span>{" "}
-              <span className="text-xl">{totalQuantity}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-xl">Thực thu:</span>{" "}
-              <span className="text-xl">{totalAmount}</span>
+          <div className="space-y-2 mb-4">
+            <h2 className="text-xl font-semibold mb-2">Phương thức thanh toán</h2>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  name="payment"
+                  className="mr-2"
+                  checked={isCash === true} // Tiền mặt: type = true
+                  onChange={() => setIsCash(true)} // Chọn Tiền mặt: set state = true
+                />
+                <label className="text-lg">Tiền mặt</label>
+                <i className="fas fa-money-bill-wave ml-2"></i>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  name="payment"
+                  className="mr-2"
+                  checked={isCash === false} // Chuyển khoản: type = false
+                  onChange={() => setIsCash(false)} // Chọn Chuyển khoản: set state = false
+                />
+                <label className="text-lg">Chuyển khoản</label>
+                <i className="fas fa-money-bill-wave ml-2"></i>
+              </div>
             </div>
           </div>
           <div className="space-y-2 mb-4">

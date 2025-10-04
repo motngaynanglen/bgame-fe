@@ -207,7 +207,7 @@ export default function BookingProductTable({ storeId, bookDate }: PageProps) {
             <div className="overflow-auto border rounded-md">
                 {shouldShowSkeleton && <Skeleton active paragraph={{ rows: cartItems.length || 3 }} />}
 
-                {shouldShowEmpty && <Empty description={rentalError ? "Không thể tải dữ liệu" : "Không có sản phẩm trong giỏ hàng"} />}
+                {shouldShowEmpty && <Empty description={rentalError ? "Không thể tải dữ liệu" : "Các sản phẩm trong giỏ hàng của bạn không trùng lịch"} />}
 
                 {shouldShowTable && (
                     <table className="min-w-max table-fixed border-collapse text-xs">

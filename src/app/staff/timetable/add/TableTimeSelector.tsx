@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import Legend from "./Legend"; // Giữ lại component Legend nếu cần
 import bookTableApiRequest from "@/src/apiRequests/bookTable"; // Giả sử API request vẫn dùng
+import { BookingRequestBody, TableViewModel } from "./types";
+import { BookingData } from "@/src/app/(overview)/rental/types";
+import BookingPaymentModal from "./PaymentModal";
 
 const { Text } = Typography;
 
@@ -43,9 +46,8 @@ interface ApiResponse {
 interface TableTimeSelectorProps {
     className?: string;
     storeId: string;
-    tableId: string;
-    tableName: string;
-    initialDate?: Date;
+    tableData: TableViewModel | undefined;
+
     onSelectionChange: (selection: SelectedTime | null) => void;
 }
 
@@ -53,18 +55,20 @@ interface TableTimeSelectorProps {
 
 export default function TableTimeSelector({
     storeId,
-    tableId,
-    tableName,
-    initialDate,
+    tableData,
     className,
     onSelectionChange,
 }: TableTimeSelectorProps) {
 
     // --- STATE ---
-    const [selectedDate, setSelectedDate] = useState(initialDate ? dayjs(initialDate) : dayjs());
+    const [selectedDate, setSelectedDate] = useState(dayjs());
     const [bookedSlots, setBookedSlots] = useState<number[]>([]);
     const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
-
+    const [bookingModal, setBookingModal] = useState<{
+        open: boolean;
+        payload?: BookingRequestBody;
+        bookingData?: BookingData;
+    }>({ open: false });
     // --- API QUERY ---
     const { data, isLoading, isError } = useQuery<ApiResponse>({
         queryKey: ["tableTimeData", storeId, selectedDate.format("YYYY-MM-DD")],
@@ -83,7 +87,7 @@ export default function TableTimeSelector({
     useEffect(() => {
         if (data?.data) {
             const slotsForThisTable = data.data
-                .filter(booking => booking.TableID === tableId)
+                .filter(booking => booking.TableID === tableData?.TableId)
                 .flatMap(booking => {
                     const range = [];
                     for (let s = booking.FromSlot; s <= booking.ToSlot; s++) {
@@ -93,12 +97,12 @@ export default function TableTimeSelector({
                 });
             setBookedSlots(slotsForThisTable);
         }
-    }, [data, tableId]);
+    }, [data, tableData]);
 
     // Reset lựa chọn khi ngày hoặc bàn thay đổi
     useEffect(() => {
         setSelectedSlots([]);
-    }, [selectedDate, tableId]);
+    }, [selectedDate, tableData]);
 
 
     // --- LOGIC HÀM ---
@@ -149,7 +153,9 @@ export default function TableTimeSelector({
 
     const handleConfirm = () => {
         if (selectedSlots.length === 0) return;
-        
+        const tableId = tableData?.TableId ?? "";
+        const tableName = tableData?.TableName ?? "";
+
         const fromSlot = Math.min(...selectedSlots);
         const toSlot = Math.max(...selectedSlots);
 
@@ -166,9 +172,34 @@ export default function TableTimeSelector({
 
     const handleCancel = () => {
         setSelectedSlots([]);
-        onSelectionChange(null); // Báo cho component cha là đã hủy chọn
+        // onSelectionChange(null); // Báo cho component cha là đã hủy chọn
     };
-    
+    const handleConfirmBooking = () => {
+
+        const tableID = tableData?.TableId;
+        const tableName = tableData?.TableName;
+        const rawData = tableData?.BookInfo?.bookData
+        if (!rawData) {
+            message.error("Hãy chọn ngày đặt bàn.");
+            return;
+        }
+        const fromSlot = rawData?.from_slot;
+        const toSlot = rawData?.to_slot;
+
+        const payload: BookingRequestBody = {
+            storeId,
+            bookDate: selectedDate?.format(),
+            fromSlot,
+            toSlot,
+            tableIDs: tableID ? [tableID] : [],
+            bookListItems: rawData?.book_lists[0].products.map((item) => ({
+                productID: item.product_id,
+            })),
+        };
+        setBookingModal({ open: true, payload });
+        // mutation.mutate(payload);
+    };
+   
     // --- RENDER ---
     const getCellBgColor = (status: SlotStatus) => {
         switch (status) {
@@ -178,11 +209,13 @@ export default function TableTimeSelector({
             default: return "bg-white hover:bg-green-100";
         }
     };
-
+    if (!tableData) {
+        return;
+    }
     return (
         <Card
             className={clsx("w-full", className)}
-            title={`Chọn thời gian cho Bàn ${tableName}`}
+            title={`Chọn thời gian cho Bàn ${tableData.TableName}`}
             extra={
                 <DatePicker
                     value={selectedDate}
@@ -201,7 +234,7 @@ export default function TableTimeSelector({
                     <table className="min-w-max table-fixed border-collapse text-xs">
                         <thead>
                             <tr className="bg-cyan-200">
-                                <th className="w-[72px] sticky left-0 bg-cyan-200 z-10"></th>
+                                <th className="w-[72px] sticky left-0 bg-cyan-200 z-10 h-8" ></th>
                                 {hours.map(hour => (
                                     <th key={hour} className="w-[48px] border-b border-gray-300 relative text-center font-normal p-0">
                                         <span className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[16px]">
@@ -214,7 +247,7 @@ export default function TableTimeSelector({
                         <tbody>
                             <tr className="border-b">
                                 <td className="sticky left-0 bg-slate-50 border-r px-2 py-2 font-medium z-10">
-                                    {tableName}
+                                    {tableData.TableName}
                                 </td>
                                 {slots.map((slot) => {
                                     const status = getStatus(slot);
@@ -240,7 +273,7 @@ export default function TableTimeSelector({
                     <div className="flex items-center justify-between">
                         <div>
                             <Text strong>Đã chọn:</Text>
-                            <Text> Bàn <b>{tableName}</b> </Text>
+                            <Text> Bàn <b>{tableData.TableName}</b> </Text>
                             <Text>
                                 từ <b>{hours[Math.min(...selectedSlots) - 1]}</b> đến <b>{hours[Math.max(...selectedSlots)]}</b>
                             </Text>
@@ -252,6 +285,26 @@ export default function TableTimeSelector({
                     </div>
                 </Card>
             )}
+            {(tableData?.BookInfo?.bookData.book_lists[0].products) && (
+                <>
+                    <Card className="mt-4" size="small">
+                        <div className="flex items-center justify-end">
+                            <Button danger onClick={handleConfirmBooking}>Thanh toán</Button>
+                        </div>
+                    </Card>
+
+                    {(bookingModal.payload) && (
+                        <BookingPaymentModal
+                            open={bookingModal.open}
+                            onClose={() => setBookingModal({ open: false })}
+                            products={tableData?.BookInfo?.bookData.book_lists[0].products}
+                            bookingBody={bookingModal.payload}
+                        />
+                    )}
+                </>
+            )}
+
+
         </Card>
     );
 }
