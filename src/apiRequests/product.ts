@@ -62,5 +62,11 @@ const productApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+  productSuggestion: (body: any, sessionToken?: string) =>
+    http.post<CommonResType>("/api/ProductTemplate/suggestion", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
 };
 export default productApiRequest;

@@ -15,4 +15,10 @@ export const dashBoardApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+  adminDashboard: (period: string, sessionToken?: string) =>
+    http.get<CommonResType>(`/api/Dashboard/admin/${period}`, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
 };

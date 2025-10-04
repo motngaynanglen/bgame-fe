@@ -1,23 +1,21 @@
 "use client";
 import bookTableApiRequest from "@/src/apiRequests/bookTable";
 import { useAppContext } from "@/src/app/app-provider";
-import { PaymentData } from "@/src/schemaValidations/transaction.schema";
+import dayjs, { formatToUTC7 } from "@/src/lib/dayjs";
 import { useRentalStore } from "@/src/store/rentalStore";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Button,
   Card,
-  Collapse,
   DatePicker,
   Empty,
   message,
-  Skeleton,
+  Skeleton
 } from "antd";
-import dayjs, { formatToUTC7 } from "@/src/lib/dayjs";
-import { useEffect, useState } from "react";
-import BookingPaymentModal from "./PaymentModal";
 import clsx from "clsx";
+import { useEffect, useState } from "react";
 import Legend from "./Legend";
+import BookingPaymentModal from "./PaymentModal";
 
 const hours = Array.from({ length: 29 }, (_, i) => {
   return dayjs("07:00", "HH:mm")

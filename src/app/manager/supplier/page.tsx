@@ -13,14 +13,15 @@ import Breadcrumb, { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAppContext } from "../../app-provider";
+import supplierApiRequest from "@/src/apiRequests/supplier";
 
-const role: string = "admin";
-const baseUrl: string = "/" + role + "/" + "stores";
+const role: string = "manager";
+const baseUrl: string = "/" + role + "/" + "supplier";
 const createUrl: string = baseUrl + "/" + "create";
 
 const breadcrumb: BreadcrumbItemType[] = [
   {
-    href: "/admin",
+    href: "/manager",
     title: <HomeOutlined />,
   },
   {
@@ -28,7 +29,7 @@ const breadcrumb: BreadcrumbItemType[] = [
     title: (
       <>
         <UserOutlined />
-        <span>Board Game List</span>
+        <span>Nhà cung cấp</span>
       </>
     ),
   },
@@ -38,7 +39,7 @@ interface DataType {
   id: string;
   key: string;
   code: string;
-  store_name: string;
+  supplier_name: string;
   address: string;
   image: string;
   latitude: string;
@@ -54,8 +55,8 @@ const columns: TableProps<DataType>["columns"] = [
     key: "code",
   },
   {
-    title: "Tên cửa hàng",
-    dataIndex: "store_name",
+    title: "Tên nhà cung cấp",
+    dataIndex: "supplier_name",
     key: "store_name",
     render: (text) => <a>{text}</a>,
   },
@@ -75,8 +76,8 @@ const columns: TableProps<DataType>["columns"] = [
   },
   {
     title: "Điện thoại",
-    dataIndex: "hotline",
-    key: "hotline",
+    dataIndex: "phone_number",
+    key: "phone_number",
     // render: (text) => <a>{text}</a>,
   },
   {
@@ -85,44 +86,9 @@ const columns: TableProps<DataType>["columns"] = [
     key: "status",
     // render: (text) => <a>{text}</a>,
   },
-  // {
-  //   title: "Action",
-  //   key: "action",
-  //   render: (_, record) => (
-  //     <>
-  //       <Row gutter={[12, 12]}>
-  //         <Col span={12}>
-  //           <Button color="primary" variant="dashed">
-  //             View
-  //           </Button>
-  //         </Col>
-  //         {/* <Col span={12}>
-  //                       <Button color="green" variant="filled" >Update</Button>
-  //                   </Col> */}
-
-  // //         {/* {(() => {
-  // //                       switch (record.status) {
-  // //                           case "ACTIVE":
-  // //                               return (
-  // //                                   <Col span={8} className="flex justify-center">
-  // //                                       <Button color="red" variant="filled">DEACTIVE</Button>;
-  // //                                   </Col>);
-  // //                           case "DEACTIVE":
-  // //                               return (
-  // //                                   <Col span={8} className="flex justify-center">
-  // //                                       <Button color="yellow" variant="filled">ACTIVE</Button>;
-  // //                                   </Col>);
-  // //                           default:
-  // //                               return null;
-  // //                       }
-  // //                   })()} */}
-  // //       </Row>
-  // //     </>
-  //   ),
-  // },
 ];
 
-export default function AdminTableStore({
+export default function ManagerSupplier({
   searchParams,
 }: {
   searchParams?: {
@@ -138,12 +104,12 @@ export default function AdminTableStore({
 
 
   const apiBody = {
-    search: searchParams?.query ?? "",
-    filter: ["string"],
-    // paging: {
-    //     pageNum: searchParams?.page ? parseInt(searchParams.page) : 1,
-    //     pageSize: 5
-    // }
+    // search: searchParams?.query ?? "",
+    // filter: ["string"],
+    paging: {
+        pageNum: searchParams?.page ? parseInt(searchParams.page) : 1,
+        pageSize: 5
+    }
   };
   const fetchTableData = async () => {
     setTableLoading(true);
@@ -154,7 +120,7 @@ export default function AdminTableStore({
     // }
     try {
       // const response = await userApiRequest.getListByAdmin(apiBody, user.token);
-      const response = await storeApiRequest.getList(apiBody);
+      const response = await supplierApiRequest.get(apiBody, user?.token);
       const data: DataType[] = response.data.map((item: DataType) => ({
         ...item,
         key: item.id, // Gán id vào key
@@ -200,13 +166,13 @@ export default function AdminTableStore({
             onRow={(record) => {
               return {
                 onClick: () => {
-                  router.push(`/admin/stores/${record.id}`);
+                  router.push(`/manager/supplier/${record.id}`);
                 },
               };
             }}
           />
           <br />
-          <AntdCustomPagination totalPages={paging?.paging.pageCount ?? 1} />
+          {/* <AntdCustomPagination totalPages={paging?.paging.pageCount ?? 1} /> */}
         </>
       )}
     </>
