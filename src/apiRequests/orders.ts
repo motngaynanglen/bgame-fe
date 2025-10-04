@@ -33,6 +33,18 @@ export const orderApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
+  updateOrderToDelivered: (id: string, body: any, sessionToken?: string) =>
+    http.post<CommonResType>(`/api/Order/${id}/delivered`, body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  updateOrderToReceived: (id: string, body: any, sessionToken?: string) =>
+    http.post<CommonResType>(`/api/Order/${id}/received`, body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
   updateOrderDeliveryInfo: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/Order/update-order-delivery-info", body, {
       headers: {
@@ -45,7 +57,7 @@ export const orderApiRequest = {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
-    getOrderHistoryPaged: (body: any, sessionToken?: string) =>
+  getOrderHistoryPaged: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/Order/get-order-paged", body, {
       headers: {
         Authorization: `Bearer ${sessionToken}`,
@@ -53,6 +65,12 @@ export const orderApiRequest = {
     }),
   getOrderById: (body: any, sessionToken?: string) =>
     http.post<CommonResType>("/api/Order/get-by-id", body, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }),
+  updateOrderByIdTransfered: (id: string, body: any, sessionToken?: string) =>
+    http.post<CommonResType>(`/api/Order/${id}/transfered`, body, {
       headers: {
         Authorization: `Bearer ${sessionToken}`,
       },

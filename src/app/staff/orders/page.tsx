@@ -20,15 +20,16 @@ import {
   Modal,
 } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { ExclamationCircleOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { orderApiRequest } from "@/src/apiRequests/orders";
 import { useAppContext } from "../../app-provider";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import transactionApiRequest from "@/src/apiRequests/transaction";
 import { formatDateTime, formatVND } from "@/src/lib/utils";
 import PaymentModal from "@/src/components/CheckOut/PaymentModal";
 import { useRouter } from "next/navigation";
+import storeApiRequest from "@/src/apiRequests/stores";
 
 /**
  * Replace with your real API endpoint.
@@ -54,6 +55,7 @@ export type StoreOrder = {
   code: string;
   total_item: number;
   total_price: number;
+  is_hub: number;
   status: string;
   items: OrderItem[];
 };
@@ -108,15 +110,44 @@ export type HistoryRequest = {
 const fmtVND = (v: number) => formatVND(v);
 
 /** Map status to color + label */
-const statusMeta: Record<string, { color: string; label: string }> = {
+const orderGroupStatusMeta: Record<string, { color: string; label: string }> = {
   CREATED: { color: "warning", label: "Chưa Thanh Toán" },
   PAID: { color: "green", label: "Đang xử lý" },
-  PREPARED: { color: "blue", label: "Đã chuẩn bị" },
+  COMPLETED: { color: "success", label: "Hoàn tất" },
+  CANCELLED: { color: "error", label: "Đã hủy" },
+};
+const orderStatusMeta: Record<string, { color: string; label: string }> = {
+  CREATED: { color: "warning", label: "Chưa chuẩn bị" },
+  PREPARED: { color: "blue", label: "Đang lấy hàng" },
   DELIVERING: { color: "processing", label: "Đang giao" },
+  DELIVERED: { color: "green", label: "Đã đến" },
   RECEIVED: { color: "success", label: "Hoàn tất" },
   CANCELLED: { color: "error", label: "Đã hủy" },
 };
+const getSmartGroupStatus = (group: OrderGroup) => {
+  // 1. Nếu nhóm đã bị HỦY hoặc HOÀN TẤT, giữ nguyên
+  if (group.status === "COMPLETED" || group.status === "CANCELLED") {
+    return orderGroupStatusMeta[group.status];
+  }
 
+  // 2. Tìm trạng thái cao nhất trong các đơn hàng con
+  const statuses = group.orders.map(o => o.status);
+
+  // Ưu tiên: DELIVERED > DELIVERING > PREPARED > (Mặc định là status của group)
+
+  if (statuses.includes("DELIVERED")) {
+    return orderStatusMeta["DELIVERED"];
+  }
+  if (statuses.includes("DELIVERING")) {
+    return orderStatusMeta["DELIVERING"];
+  }
+  if (statuses.includes("PREPARED")) {
+    return orderStatusMeta["PREPARED"];
+  }
+
+  // 3. Nếu không tìm thấy trạng thái đặc biệt nào, dùng trạng thái mặc định của nhóm
+  return orderGroupStatusMeta[group.status] || { color: "default", label: group.status };
+};
 /** Smart debouncer */
 function useDebounce<T>(value: T, delay = 500) {
   const [debounced, setDebounced] = useState(value);
@@ -157,13 +188,69 @@ export default function OrderHistoryStaffPage() {
     id: string;
     type: number;
   } | null>(null);
-
+  const { data: storeIdData, isLoading: storeLoading } = useQuery({
+    queryKey: ["selectedStoreId"],
+    queryFn: async () => {
+      if (!user?.token) {
+        message.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.")
+        return null;
+      }
+      const res = await storeApiRequest.getStoreId(user.token);
+      // Giả định API trả về storeId string
+      return res.data;
+    },
+    enabled: !!user?.token,
+  });
+  const myStoreId = storeIdData as string | undefined;
   const handleOpenPayment = (orderGroupId: string, type: number) => {
     setSelectedOrder({ id: orderGroupId, type: type });
     setPaymentModalOpen(true);
   };
   const debouncedKeyword = useDebounce(keyword, 500);
-
+  const updateToDeliveredMutation = useMutation({
+    mutationFn: async (orderGroupId: string) => {
+      return await orderApiRequest.updateOrderToDelivered(orderGroupId, {}, user?.token);
+    },
+    onSuccess: () => {
+      message.success("Đơn hàng đã được cập nhật là Đã đến.");
+      qc.invalidateQueries({ queryKey: ['orderHistory'] });
+      fetchData(); // Tải lại dữ liệu bảng
+    },
+    onError: (err: any) => {
+      message.error(err?.message || "Lỗi cập nhật trạng thái đơn hàng.");
+    }
+  });
+  const updateToReceivedMutation = useMutation({
+    mutationFn: async (orderGroupId: string) => {
+      return await orderApiRequest.updateOrderToReceived(orderGroupId, {}, user?.token);
+    },
+    onSuccess: () => {
+      message.success("Đơn hàng đã được cập nhật là Đã đến.");
+      qc.invalidateQueries({ queryKey: ['orderHistory'] });
+      fetchData(); // Tải lại dữ liệu bảng
+    },
+    onError: (err: any) => {
+      message.error(err?.message || "Lỗi cập nhật trạng thái đơn hàng.");
+    }
+  });
+  const handleDelivered = (order: OrderGroup) => {
+    Modal.confirm({
+      title: "Xác nhận Đã đến",
+      content: `Bạn xác nhận rằng đơn hàng #${order.code} đã đến điểm tập kết?`,
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk: () => updateToDeliveredMutation.mutate(order.id),
+    });
+  };
+  const handleReceived = (order: OrderGroup) => {
+    Modal.confirm({
+      title: "Xác nhận Đã đến",
+      content: `Bạn xác nhận rằng đơn hàng #${order.code} đã đến tay khách hàng? Hoặc là quá 5 ngày kể từ ngày xác nhận mà khách không trả lời!`,
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk: () => updateToReceivedMutation.mutate(order.id),
+    });
+  };
   const body: HistoryRequest = useMemo(() => {
     const createdFrom = range?.[0]?.toISOString() ?? null;
     const createdTo = range?.[1]?.endOf("day").toISOString() ?? null;
@@ -240,8 +327,17 @@ export default function OrderHistoryStaffPage() {
             </Typography.Text>
           </div>
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            Tạo lúc {formatDateTime(r.created_at, "DATETIME")}
+            Tạo lúc: {formatDateTime(r.created_at, "DATETIME")}
           </Typography.Text>
+          {r.is_delivery && (
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Dự kiến: {r.expected_receipt_date ? dayjs(r.expected_receipt_date).format('DD/MM/YYYY') :
+                <Text type="warning">
+                  Chưa cập nhật <ExclamationCircleOutlined />
+                </Text>}
+            </Typography.Text>
+          )}
+
         </div>
       ),
     },
@@ -313,7 +409,7 @@ export default function OrderHistoryStaffPage() {
           </Tag>
           {v && r.delivery_brand && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {r.delivery_brand} • {r.delivery_code || "—"}
+              {r.delivery_brand} <br /> {r.delivery_code || "—"}
             </Text>
           )}
         </Space>
@@ -325,28 +421,95 @@ export default function OrderHistoryStaffPage() {
       dataIndex: "status",
       key: "status",
       width: 150,
-      render: (s: string) => (
-        <Tag color={statusMeta[s]?.color || "default"}>
-          {statusMeta[s]?.label || s}
-        </Tag>
-      ),
+      render: (_, r) => {
+        const meta = getSmartGroupStatus(r);
+        return (
+          <Tag color={meta.color || "default"}>
+            {meta.label || r.status}
+          </Tag>
+        );
+      },
     },
     {
       title: "Hành động",
       key: "action",
-      render: (_, r) => (
-        <>
-          <Button type="link" onClick={() => router.push(`/staff/orders/${r.id}`)}>
-            Xem Chi Tiết
-          </Button>
-          {/* {r.status === "CREATED" && (
-            <Button type="primary" onClick={() => handlePay(r)} disabled={!user?.token}>
-              Thanh Toán
-            </Button>
-          )} */}
-          {/* </Space> */}
-        </>
-      ),
+      render: (_, r) => {
+        // --- LOGIC 1: Hiển thị nút "Hàng đã đến" ---
+        // 1. Kiểm tra ngày dự kiến nhận
+        const isExpectedTimePassed =
+          r.expected_receipt_date
+            ? dayjs().isAfter(dayjs(r.expected_receipt_date).subtract(1, 'day')) // Thụt lùi 1 ngày để xử lý chênh lệch 
+            : false;
+        const isExpectedTimePassed5 =
+          r.expected_receipt_date
+            ? dayjs().isAfter(dayjs(r.expected_receipt_date).add(-1, 'day')) // Tiến ngày để xử lý chênh lệch 
+            : false;
+        // 2. Kiểm tra có order nào đang DELIVERING không
+        const isAnyDelivering = r.orders.some(o => o.status === "DELIVERING");
+        // 3. Kiểm tra trạng thái nhóm hiện tại phải là DELIVERING/PREPARED hoặc tương tự
+        const isReadyToDeliver = r.status !== "COMPLETED" && r.status !== "CANCELLED" && r.status !== "RECEIVED";
+        const showDeliveredButton =
+          r.is_delivery &&             // Phải là đơn hàng giao
+          isReadyToDeliver &&          // Không phải trạng thái cuối cùng/hủy
+          isExpectedTimePassed &&      // Đã quá giờ dự kiến
+          isAnyDelivering;             // Có đơn hàng đang giao
+
+        // cùng kiến trúc hỗ trợ cho ép buộc
+        const isAllDelivered = r.orders.every(o => o.status === "DELIVERED");
+
+        const showHardRecivedButton =
+          r.is_delivery &&
+          isReadyToDeliver &&
+          isExpectedTimePassed5 &&
+          isAllDelivered;
+
+        const allowAction = r.orders.find((order) => order.is_hub == 1)?.store_id == myStoreId
+
+        return (
+          <>
+            <div>
+              <Button
+                type="link"
+                onClick={() => router.push(`/staff/orders/${r.id}`)}
+              >
+                Xem Chi Tiết
+              </Button>
+              {allowAction &&
+                (
+                  <>
+                    {showDeliveredButton && (
+                      <Button
+                        type="primary"
+                        size="small"
+                        onClick={() => handleDelivered(r)}
+                        loading={updateToDeliveredMutation.isPending}
+                      >
+                        Hàng đã đến
+                      </Button>
+                    )}
+                    {showHardRecivedButton && (
+                      <Button
+                        color="yellow"
+                        size="small"
+                        onClick={() => handleReceived(r)}
+                        loading={updateToReceivedMutation.isPending}
+                      >
+                        Kết đơn
+                      </Button>
+                    )}
+                  </>
+                )
+              }
+
+              {/* {r.status === "CREATED" && (
+                <Button type="default" size="small" onClick={() => handlePay(r)}>
+                  Thanh toán
+                </Button>
+              )} */}
+            </div>
+          </>
+        );
+      },
     },
   ];
 
@@ -360,8 +523,8 @@ export default function OrderHistoryStaffPage() {
             <Space>
               <Text strong>{o.store_name}</Text>
               <Tag>{o.code}</Tag>
-              <Tag color={statusMeta[o.status]?.color || "default"}>
-                {statusMeta[o.status]?.label || o.status}
+              <Tag color={orderStatusMeta[o.status]?.color || "default"}>
+                {orderStatusMeta[o.status]?.label || o.status}
               </Tag>
             </Space>
           }
@@ -427,8 +590,8 @@ export default function OrderHistoryStaffPage() {
             setStatus(v);
           }}
           style={{ minWidth: 220 }}
-          options={Object.keys(statusMeta).map((k) => ({
-            label: statusMeta[k].label,
+          options={Object.keys(orderGroupStatusMeta).map((k) => ({
+            label: orderGroupStatusMeta[k].label,
             value: k,
           }))}
         />
@@ -505,6 +668,7 @@ export default function OrderHistoryStaffPage() {
               dataSource={data}
               expandable={{ expandedRowRender }}
               pagination={pagination}
+              onChange={onChange}
             />
           )}
         </Card>

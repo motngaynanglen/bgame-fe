@@ -150,8 +150,6 @@ function ProductDetails({
     enabled: !!productId,
   });
 
-  console.log("hehe: ", productId);
-
   const {
     data: storesData,
     isLoading: isLoadingStores,
@@ -160,9 +158,8 @@ function ProductDetails({
   } = useQuery({
     queryKey: ["storesByProductTemplateId", productId],
     queryFn: async () => {
-      const res = await storeApiRequest.getListAndProductCountById(
-        productId
-      );
+
+      const res = await storeApiRequest.getListAndProductCountById(productId as string);
       return res.data;
     },
     enabled: !!productId,

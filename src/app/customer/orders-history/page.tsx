@@ -151,7 +151,7 @@ export default function OrderHistoryPage() {
 
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<{ id: string; type: number } | null>(null);
-  
+
   const handleOpenPayment = (orderGroupId: string, type: number) => {
     setSelectedOrder({ id: orderGroupId, type: type });
     setPaymentModalOpen(true);
@@ -190,7 +190,28 @@ export default function OrderHistoryPage() {
       setLoading(false);
     }
   };
-
+  const updateToReceivedMutation = useMutation({
+    mutationFn: async (orderGroupId: string) => {
+      return await orderApiRequest.updateOrderToReceived(orderGroupId, {}, user?.token);
+    },
+    onSuccess: () => {
+      message.success("Đơn hàng đã được cập nhật là Đã đến.");
+      qc.invalidateQueries({ queryKey: ['orderHistory'] });
+      fetchData(); // Tải lại dữ liệu bảng
+    },
+    onError: (err: any) => {
+      message.error(err?.message || "Lỗi cập nhật trạng thái đơn hàng.");
+    }
+  });
+  const handleReceived = (order: OrderGroup) => {
+    Modal.confirm({
+      title: "Xác nhận Đã đến",
+      content: `Bạn xác nhận rằng đơn hàng #${order.code} đã đến tay! Vui lòng xác nhận.`,
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk: () => updateToReceivedMutation.mutate(order.id),
+    });
+  };
   useEffect(() => {
     fetchData();
   }, [body]);
@@ -309,20 +330,63 @@ export default function OrderHistoryPage() {
     {
       title: "Hành động",
       key: "action",
-      render: (_, r) => (
-        <>
-          {/* <Space>
-          <Button type="link" onClick={() => handleOpenPayment(r.id, 0)}>
-            Xem chi tiết
-          </Button> */}
-          {r.status === "CREATED" && (
-            <Button type="primary" onClick={() => handlePay(r)}>
-              Thanh toán
-            </Button>
-          )}
-          {/* </Space> */}
-        </>
-      ),
+      render: (_, r) => {
+        // --- LOGIC 1: Hiển thị nút "Hàng đã đến" ---
+        // 1. Kiểm tra ngày dự kiến nhận
+        const isExpectedTimePassed =
+          r.expected_receipt_date
+            ? dayjs().isAfter(dayjs(r.expected_receipt_date).subtract(1, 'day')) // Thụt lùi 1 ngày để xử lý chênh lệch 
+            : false;
+        const isExpectedTimePassed5 =
+          r.expected_receipt_date
+            ? dayjs().isAfter(dayjs(r.expected_receipt_date).add(-1, 'day')) // Tiến ngày để xử lý chênh lệch 
+            : false;
+        // 2. Kiểm tra có order nào đang DELIVERING không
+        const isAnyDelivering = r.orders.some(o => o.status === "DELIVERING");
+        // 3. Kiểm tra trạng thái nhóm hiện tại phải là DELIVERING/PREPARED hoặc tương tự
+        const isReadyToDeliver = r.status !== "COMPLETED" && r.status !== "CANCELLED" && r.status !== "RECEIVED";
+        const showDeliveredButton =
+          r.is_delivery &&             // Phải là đơn hàng giao
+          isReadyToDeliver &&          // Không phải trạng thái cuối cùng/hủy
+          isExpectedTimePassed &&      // Đã quá giờ dự kiến
+          isAnyDelivering;             // Có đơn hàng đang giao
+
+        // cùng kiến trúc hỗ trợ cho ép buộc
+        const isAllDelivered = r.orders.every(o => o.status === "DELIVERED");
+
+        const showHardRecivedButton =
+          r.is_delivery &&
+          isReadyToDeliver &&
+          isExpectedTimePassed5 &&
+          isAllDelivered;
+
+
+        return (
+          <>
+            <div>
+
+
+              {showHardRecivedButton && (
+                <Button
+                  color="yellow"
+                  size="small"
+                  onClick={() => handleReceived(r)}
+                  loading={updateToReceivedMutation.isPending}
+                >
+                  Kết đơn
+                </Button>
+              )}
+
+
+              {r.status === "CREATED" && (
+                <Button type="default" size="small" onClick={() => handlePay(r)}>
+                  Thanh toán
+                </Button>
+              )}
+            </div>
+          </>
+        );
+      },
     },
   ];
 
@@ -467,7 +531,7 @@ export default function OrderHistoryPage() {
           open={paymentModalOpen}
           onClose={() => setPaymentModalOpen(false)}
           referenceID={selectedOrder.id}
-          type={0}
+          type={1}
           token={user?.token}
         />
       )}
