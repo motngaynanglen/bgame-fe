@@ -160,9 +160,9 @@ function ProductDetails({
   } = useQuery({
     queryKey: ["storesByProductTemplateId", productId],
     queryFn: async () => {
-      const res = await storeApiRequest.getListAndProductCountById({
-        productTemplateId: productId,
-      });
+      const res = await storeApiRequest.getListAndProductCountById(
+        productId
+      );
       return res.data;
     },
     enabled: !!productId,

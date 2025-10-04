@@ -6,10 +6,9 @@ const storeApiRequest = {
   getList: (body: any) => http.post<CommonResType>("/api/Store/list", body),
   getListByProductGroupRefId: (body: any) =>
     http.post<CommonResType>("/api/Store/get-list-by-group-ref-id", body),
-  getListAndProductCountById: (body: any) =>
-    http.post<CommonResType>(
-      "/api/Store/get-list-by-product-template-id",
-      body
+  getListAndProductCountById: (id: any) =>
+    http.get<CommonResType>(
+      `/api/Store/product-template/${id}/list`,
     ),
   getStoreId: (sessionToken: any) =>
     http.get<CommonResType>("/api/Store/get-store-id", {
@@ -18,7 +17,7 @@ const storeApiRequest = {
       },
     }),
   getRentals: (body: any) =>
-    http.post<CommonResType>("/api/Store/get-rentals", body),
+    http.post<CommonResType>("/api/Store/rentals", body),
   create: (body: any) => http.post<CommonResType>("/api/Store", body),
   getDetail: (id: any, sessionToken: any) =>
     http.get<CommonResType>(`/api/Store/${id}`, {

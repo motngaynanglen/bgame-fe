@@ -434,7 +434,7 @@ export default function ProductForm({
                 </Row>
                 {/* Row 2 */}
                 <Row gutter={16}>
-                  <Col span={6}>
+                  <Col span={8}>
                     <FormItem
                       control={control}
                       name="age"
@@ -443,7 +443,16 @@ export default function ProductForm({
                       <InputNumber min={1} max={10} style={{ width: "100%" }} />
                     </FormItem>
                   </Col>
-                  <Col span={18}>
+                   <Col span={9}>
+                    <FormItem
+                      control={control}
+                      name="duration"
+                      label="Thời gian chơi (phút)"
+                    >
+                      <InputNumber min={1} style={{ width: "100%" }} />
+                    </FormItem>
+                  </Col>
+                  <Col span={9}>
                     <FormItem
                       control={control}
                       name="listCategories"
@@ -466,15 +475,7 @@ export default function ProductForm({
                       />
                     </FormItem>
                   </Col>
-                  {/* <Col span={8}>
-                    <FormItem
-                      control={control}
-                      name="numberOfPlayerMax"
-                      label="Số người chơi tối đa"
-                    >
-                      <InputNumber min={1} style={{ width: "100%" }} />
-                    </FormItem>
-                  </Col> */}
+                 
                 </Row>
               </Card>
             </Col>
