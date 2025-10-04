@@ -10,8 +10,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginBody, LoginBodyType } from "@/src/schemaValidations/auth.schema";
 import { useForm } from "react-hook-form";
 import { FormItem } from "react-hook-form-antd";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 import Image from "next/image";
+import { AxiosError } from "axios";
+import { HttpError } from "@/src/lib/httpAxios";
 // import Image from "next/image";
 
 export default function LoginPage() {
@@ -58,7 +60,10 @@ export default function LoginPage() {
       // KẾT THÚC SAU KHI SET COOKIE
 
     } catch (error) {
-      console.log("lỗi nè: ", error);
+      if (error instanceof HttpError) {
+        const messageString = error.message;
+        message.error(messageString, 5);
+      }
     }
   };
   return (
