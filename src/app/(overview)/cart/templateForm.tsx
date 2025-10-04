@@ -370,10 +370,11 @@ export default function TemplateForm() {
           Tiếp tục mua hàng
         </button>
         <button
-          className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${cart.length === 0
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-blue-500"
-            }`}
+          className={`bg-blue-600 text-white px-6 py-3 rounded-lg ${
+            cart.length === 0
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-blue-500"
+          }`}
           disabled={cart.length === 0}
           onClick={() => router.push("/check-out")}
         >

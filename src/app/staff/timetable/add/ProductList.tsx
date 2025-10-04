@@ -3,26 +3,18 @@
 import React, { useMemo, useState } from 'react';
 import { Drawer, List, Button, Tag, message, Input, Spin, AutoComplete, Empty, Image, Typography, Tooltip, Card, Switch } from 'antd';
 import { CheckCircleOutlined, SearchOutlined } from '@ant-design/icons';
-import { BoardGame, BookItem } from './types';
+import { BoardGame, BookItem, ProductViewModel } from './types';
 import { useAppContext } from '@/src/app/app-provider';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import productApiRequest from '@/src/apiRequests/product';
 import { on } from 'events';
 import { Tool } from 'react-feather';
 
 interface ProductListProps {
-    onAddProduct: (product: BookItem | BoardGame) => void;
+    onAddProduct: (product: ProductViewModel | BoardGame) => void;
     currentOrders: BoardGame[];
 }
 
-// const menuItems: BoardGame[] = [
-//     { product_id: 'C01', product_name: 'Board Game - Catan', price: 25000 },
-//     { product_id: 'C02', product_name: 'Manga - One Piece Vol.1', price: 20000 },
-//     { product_id: 'C03', product_name: 'Sách - Đắc nhân tâm', price: 30000 },
-//     { product_id: 'C04', product_name: 'Board Game - Ma Sói', price: 40000 },
-//     { product_id: 'C05', product_name: 'Board Game - UNO', price: 15000 },
-//     { product_id: 'C06', product_name: 'Manga - Attack on Titan', price: 22000 },
-// ];
 
 export default function ProductList({ onAddProduct, currentOrders }: ProductListProps) {
     const { user } = useAppContext();
@@ -32,9 +24,22 @@ export default function ProductList({ onAddProduct, currentOrders }: ProductList
     const handleSwitchChange = (checked: boolean) => {
         setShowAll(checked);
     };
+    // const { data: products } = useQuery({
+    //     queryKey: ["storeProducts", searchTerm, user?.token],
+    //     queryFn: async () => {
+    //         if (!user?.token) {
+    //             throw new Error("User token is not available");
+    //         }
+    //         const res = await productApiRequest.getByCode({ code: searchTerm, productType: 0 }, user?.token);
+    //         return res.data;
+    //     },
+        
+    //     enabled: !!user?.token,
+    // });
+
     const searchProducts = useMutation({
         mutationFn: async (code: string) => {
-            const res = await productApiRequest.getByCode({ code , productType: 0 }, user?.token);
+            const res = await productApiRequest.getByCode({ code, productType: 0 }, user?.token);
             return res.data;
         },
         onSuccess: (products) => {

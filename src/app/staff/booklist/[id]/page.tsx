@@ -104,8 +104,7 @@ export default function Page() {
     }
     updateItemMutation.mutate({ bookItemId, code });
   };
-  console.log("data", data);
-  console.log("data order", data?.book_items);
+ 
   // console.log()
 
   if (isLoading || !data) {

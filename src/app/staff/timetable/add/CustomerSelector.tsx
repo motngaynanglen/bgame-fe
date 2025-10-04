@@ -17,12 +17,13 @@ interface Customer {
 }
 interface CustomerSelectorProps {
     selectedCustomer: Customer | null;
+    disabled?: boolean;
     onClearCustomer: () => void;
     onSelectCustomer: (customer: Customer) => void;
     layout?: "vertical" | "horizontal";
 }
 
-const CustomerSelector = ({ selectedCustomer, onSelectCustomer, onClearCustomer, layout }: CustomerSelectorProps) => {
+const CustomerSelector = ({ selectedCustomer, onSelectCustomer, onClearCustomer, layout, disabled }: CustomerSelectorProps) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [options, setOptions] = useState<{ value: string; label: string; customer: Customer }[]>([]);
     const [form] = Form.useForm();

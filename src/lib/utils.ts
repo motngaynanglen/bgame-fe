@@ -131,9 +131,9 @@ export const ConvertSlotToDateTime = (slot: number, isBegin?: boolean) => {
   if (!isBegin) slot += 1; // Nếu là thời gian kết thúc thì +1 slot
   return dayjs(new Date().setHours(7 + Math.floor((slot - 1) / 2), (slot - 1) % 2 * 30, 0, 0))
 }
-export const ConvertTimeToSlot = (time: string) => {
+export const ConvertTimeToSlot = (time: string, testing?: number) => {
   const [hours, minutes] = time.split(":").map(Number);
-  if (hours < 7 || hours > 21 || (hours === 21 && minutes > 0)) return -1;
+  if (hours < 7 || hours > 21 || (hours === 21 && minutes > 0)) return (testing ?? -1);
   return (hours - 7) * 2 + (minutes >= 30 ? 1 : 0) + 1;
 };
 // const slots = Array.from({ length: 29 }, (_, i) => i + 1); // Slot 1 → 29

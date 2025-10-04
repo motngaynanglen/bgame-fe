@@ -1,11 +1,13 @@
 "use client";
 import { useProducts } from "@/src/hooks/useProduct";
-import { Divider } from "antd";
+import { Divider, Typography } from "antd";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import CardHotDeal from "../Card/CardHotDeal";
+const { Title, Paragraph, Text } = Typography;
+
 
 export default function HotDeal({ category }: { category: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,9 +43,9 @@ export default function HotDeal({ category }: { category: string }) {
   return (
     <div className="container mx-auto" ref={containerRef}>
       <Divider variant="dashed" style={{ borderColor: "#7cb305" }}>
-        <h1 className="text-2xl p-1 font-bold uppercase bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-          {category}
-        </h1>
+        <Title level={2} className="!text-4xl !font-bold">
+          Sản phẩm nổi bật
+        </Title>
       </Divider>
 
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -71,7 +73,6 @@ export default function HotDeal({ category }: { category: string }) {
                   number_of_player_max={boardgame.number_of_player_max}
                   number_of_player_min={boardgame.number_of_player_min}
                   publisher={boardgame.publisher}
-
                 />
               </div>
             );

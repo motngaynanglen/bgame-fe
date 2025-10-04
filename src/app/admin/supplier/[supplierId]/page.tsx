@@ -1,43 +1,40 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  message,
-  Row,
-  Col,
-  Typography,
-  Divider,
-  Descriptions,
-  Switch,
-  Spin,
-  Tabs,
-  Modal,
-  Upload,
-  UploadProps,
-  UploadFile,
-} from "antd";
-import {
-  ShopOutlined,
-  EnvironmentOutlined,
-  PhoneOutlined,
-  MailOutlined,
-  EditOutlined,
-  SaveOutlined,
-  CloseOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-  InboxOutlined,
-} from "@ant-design/icons";
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import storeApiRequest from "@/src/apiRequests/stores";
 import { useAppContext } from "@/src/app/app-provider";
-import Dragger from "antd/es/upload/Dragger";
 import { useImageUploader } from "@/src/hooks/useImageUploader";
-
+import {
+    CloseOutlined,
+    EditOutlined,
+    EnvironmentOutlined,
+    EyeOutlined,
+    InboxOutlined,
+    MailOutlined,
+    PhoneOutlined,
+    SaveOutlined,
+    ShopOutlined
+} from "@ant-design/icons";
+import {
+    Button,
+    Card,
+    Col,
+    Descriptions,
+    Divider,
+    Form,
+    Input,
+    message,
+    Modal,
+    Row,
+    Spin,
+    Switch,
+    Tabs,
+    Typography,
+    Upload,
+    UploadFile,
+    UploadProps,
+} from "antd";
+import Dragger from "antd/es/upload/Dragger";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -98,18 +95,17 @@ const StoreDetailPage = () => {
   const [editing, setEditing] = useState(false);
   const [storeData, setStoreData] = useState<StoreData | null>(null);
   const [activeTab, setActiveTab] = useState("details");
-  const { storeId } = useParams();
+  const { supplierId } = useParams();
   const { user } = useAppContext();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const { uploadImages, uploading } = useImageUploader();
 
-  console.log("storeId from params:", storeId);
+  console.log("storeId from params:", supplierId);
 
   // Fetch store data
   useEffect(() => {
     const fetchStoreData = async () => {
-      // Kiểm tra điều kiện
-      if (!storeId || !user?.token) {
+      if (!supplierId || !user?.token) {
         setLoading(false);
         return;
       }
@@ -119,7 +115,7 @@ const StoreDetailPage = () => {
         console.log("🔄 Fetching store data...");
 
         // Gọi API trực tiếp với fetch
-        const response = await storeApiRequest.getDetail(storeId, user.token);
+        const response = await storeApiRequest.getDetail(supplierId, user.token);
 
         if (response && response.data) {
           console.log("✅ Data received:", response.data);
@@ -137,14 +133,14 @@ const StoreDetailPage = () => {
     };
 
     fetchStoreData();
-  }, [storeId, user?.token, form]); // Dependency array
+  }, [supplierId, user?.token, form]); // Dependency array
   console.log("storeData:", storeData);
   const handleSave = async (values: any) => {
     setSaving(true);
     try {
       const updateData = {
         ...values,
-        id: storeId,
+        id: supplierId,
       };
 
       console.log("Update data:", updateData);
@@ -167,7 +163,7 @@ const StoreDetailPage = () => {
 
   const handleStatusChange = async (checked: boolean) => {
     try {
-      await storeApiRequest.changeStatus(storeId, user?.token);
+      await storeApiRequest.changeStatus(supplierId, user?.token);
 
       setStoreData((prev) =>
         prev ? { ...prev, status: checked ? "ACTIVE" : "INACTIVE" } : null

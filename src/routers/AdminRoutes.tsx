@@ -207,41 +207,46 @@ export const AdminMenuAntd: ItemType<MenuItemType>[] | undefined = [
 	},
 	{
 		key: "group-13",
-		label: (<Link href={"/admin/stores"} className={clsx("font-medium text-lg")}>Quản lý cửa hàng</Link>),
+		label: (<Link href={"/admin/stores"} className={clsx("font-medium text-lg")}>Danh sách cửa hàng</Link>),
 		icon: (<UserOutlined />),
 	},
 	{
-		key: 'group-category',
-		label: (<span
-			className={clsx("font-medium ")}>Quản lý thẻ sản phẩm</span>),
-		icon: (
-			<AiOutlineBook />
-		),
-		children: [
-			{
-				key: 'group-category-1', label: (<Link href={"/admin/categories"}
-					className={clsx("font-medium")}>Danh sách</Link>),
-				icon: (<AiOutlineUnorderedList />),
-			},
-			{
-				key: 'group-category-2', label: (<Link href={"/admin/products/addGroup"}
-					className={clsx("font-medium")}>Bổ xung đầu mục</Link>),
-				icon: (<AiFillFolderAdd />),
-			},
-			{
-				key: 'group-category-3', label: (<Link href={"/admin/products/addRef"}
-					className={clsx("font-medium")}>Bổ xung nhóm</Link>),
-				icon: (<AiFillFileAdd />),
-			},
-			{
-				key: 'group-category-4', label: (<Link href={"/admin/products/add"}
-					className={clsx("font-medium")}>Bổ xung sản phẩm</Link>),
-				icon: (<GrTableAdd />),
-			},
-
-
-		]
+		key: "group-14",
+		label: (<Link href={"/admin/supplier"} className={clsx("font-medium text-lg")}>Danh sách nhà cung cấp</Link>),
+		icon: (<UserOutlined />),
 	},
+	// {
+	// 	key: 'group-category',
+	// 	label: (<span
+	// 		className={clsx("font-medium ")}>Quản lý thẻ sản phẩm</span>),
+	// 	icon: (
+	// 		<AiOutlineBook />
+	// 	),
+	// 	children: [
+	// 		{
+	// 			key: 'group-category-1', label: (<Link href={"/admin/categories"}
+	// 				className={clsx("font-medium")}>Danh sách</Link>),
+	// 			icon: (<AiOutlineUnorderedList />),
+	// 		},
+	// 		{
+	// 			key: 'group-category-2', label: (<Link href={"/admin/products/addGroup"}
+	// 				className={clsx("font-medium")}>Bổ xung đầu mục</Link>),
+	// 			icon: (<AiFillFolderAdd />),
+	// 		},
+	// 		{
+	// 			key: 'group-category-3', label: (<Link href={"/admin/products/addRef"}
+	// 				className={clsx("font-medium")}>Bổ xung nhóm</Link>),
+	// 			icon: (<AiFillFileAdd />),
+	// 		},
+	// 		{
+	// 			key: 'group-category-4', label: (<Link href={"/admin/products/add"}
+	// 				className={clsx("font-medium")}>Bổ xung sản phẩm</Link>),
+	// 			icon: (<GrTableAdd />),
+	// 		},
+
+
+	// 	]
+	// },
 ]
 export const AdminRouter: DashboardRouter = {
 	role: "admin",
