@@ -55,7 +55,7 @@ export default function FloorPlan({ tables, now, onSelectTable, selectedTableId 
                 return data;
             }
         } else if (nearestBookTable) {
-            const endTime = ConvertSlotToDateTime(nearestBookTable.from_slot, false);
+            const endTime = ConvertSlotToDateTime(nearestBookTable.from_slot, true);
             if (endTime) {
                 const bookItemViewModels = mapBookListsToBookItemViewModel(nearestBookTable.bookLists);
 

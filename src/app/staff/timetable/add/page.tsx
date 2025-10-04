@@ -219,7 +219,6 @@ export default function Home() {
                     onClearTable={handleClearTable}
                     onClose={() => setSelectedTable(undefined)} 
                     viewMode={true}
-                    token={user?.token}
                 />
             </Drawer>
             

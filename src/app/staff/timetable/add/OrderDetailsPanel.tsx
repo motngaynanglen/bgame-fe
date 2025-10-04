@@ -10,6 +10,7 @@ import confirm from 'antd/es/modal/confirm';
 import bookListApiRequest from '@/src/apiRequests/bookList';
 import { HttpError } from '@/src/lib/httpAxios';
 import { notifyError } from '@/src/components/Notification/Notification';
+import { useAppContext } from '@/src/app/app-provider';
 
 const { Title, Text } = Typography;
 
@@ -31,7 +32,6 @@ interface OrderDetailsPanelProps {
     onClearTable: (tableId: string) => void;
     onClose: () => void;
     viewMode?: boolean
-    token?: string
 }
 interface Customer {
     id: string;
@@ -39,9 +39,10 @@ interface Customer {
     phone: string;
 }
 
-export default function OrderDetailsPanel({ table, onUpdateOrders, onOpenDrawer, onClearTable, onClose, viewMode = false, token }: OrderDetailsPanelProps) {
+export default function OrderDetailsPanel({ table, onUpdateOrders, onOpenDrawer, onClearTable, onClose, viewMode = false,  }: OrderDetailsPanelProps) {
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
+    const {user} = useAppContext();
     // ✅ Lấy BookViewModel từ BookInfo
     const currentBookViewModel: BookViewModel | undefined = useMemo(() => {
         // Sử dụng table?.BookInfo?.bookData để xác định đơn đã tồn tại
@@ -118,7 +119,7 @@ export default function OrderDetailsPanel({ table, onUpdateOrders, onOpenDrawer,
             cancelText: "Hủy",
             onOk: async () => {
                 try {
-                    await bookListApiRequest.startBookList({ bookListId: bookingId }, token);
+                    await bookListApiRequest.startBookList({ bookListId: bookingId },user?.token);
                     notification.success({ message: "Đã bắt đầu" });
                 } catch (error) {
                     if (error instanceof HttpError) notifyError(error.message);
@@ -140,7 +141,7 @@ export default function OrderDetailsPanel({ table, onUpdateOrders, onOpenDrawer,
             onOk: async () => {
                 // Gọi API kết thúc
                 try {
-                    await bookListApiRequest.endBookList({ bookListId: bookingId }, token);
+                    await bookListApiRequest.endBookList({ bookListId: bookingId }, user?.token);
                     notification.success({ message: "Đã kết thúc" });
                 } catch (error) {
                     if (error instanceof HttpError) notifyError(error.message);
