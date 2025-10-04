@@ -17,7 +17,9 @@ import {
     Space,
     Switch,
     Spin,
-    DatePicker, // Import DatePicker
+    DatePicker,
+    Typography,
+    Tag, // Import DatePicker
 } from "antd";
 import { FormItem } from "react-hook-form-antd";
 import { useParams } from "next/navigation";
@@ -49,12 +51,12 @@ import { OrderGroupDetail } from "../types";
 // Cập nhật OrderDetail (Thêm trường mới)
 
 const statusMeta: Record<string, { color: string; label: string }> = {
-  CREATED: { color: "warning", label: "Chưa Thanh Toán" },
-  PAID: { color: "green", label: "Đang xử lý" },
-  PREPARED: { color: "blue", label: "Đã chuẩn bị" },
-  DELIVERING: { color: "processing", label: "Đang giao" },
-  RECEIVED: { color: "success", label: "Hoàn tất" },
-  CANCELLED: { color: "error", label: "Đã hủy" },
+    CREATED: { color: "warning", label: "Chưa Thanh Toán" },
+    PAID: { color: "green", label: "Đang xử lý" },
+    PREPARED: { color: "blue", label: "Đã chuẩn bị" },
+    DELIVERING: { color: "processing", label: "Đang giao" },
+    RECEIVED: { color: "success", label: "Hoàn tất" },
+    CANCELLED: { color: "error", label: "Đã hủy" },
 };
 export default function UpdateDeliveryInfoPage() {
     const { id } = useParams();
@@ -89,9 +91,11 @@ export default function UpdateDeliveryInfoPage() {
                 phoneNumber: data.phone_number,
                 address: data.address,
                 isDelivery: true,
-                deliveryCode: "",
-                deliveryBrand: "",
-                expectedReceiptDate: data.expected_receipt_date ?? null,
+                deliveryCode: data.delivery_code ?? "",
+                deliveryBrand: data.delivery_brand ?? "",
+                expectedReceiptDate: data.expected_receipt_date && dayjs(data.expected_receipt_date).isValid()
+                    ? dayjs(data.expected_receipt_date)
+                    : null,
             });
 
         }
@@ -121,7 +125,7 @@ export default function UpdateDeliveryInfoPage() {
 
     const cardTitle = () => {
         return (
-            <div className="flex justify-between items-center"> 
+            <div className="flex justify-between items-center">
                 <span>
                     Cập nhật thông tin giao hàng
                 </span>
@@ -131,12 +135,13 @@ export default function UpdateDeliveryInfoPage() {
             </div>
         )
     }
+    const disableForm = (data?.order_status != "PAID") || !(data.orders.every((order) => order.order_status == "PREPARED"))
     return (
         <Card title={cardTitle()} style={{ maxWidth: 800, margin: "auto" }}>
             {isLoading ? (
                 <Spin tip="Đang tải dữ liệu đơn hàng..." />
             ) : (
-                <Form layout="vertical" onFinish={handleSubmit(onSubmit)} disabled={data?.order_status != "PAID"}>
+                <Form layout="vertical" onFinish={handleSubmit(onSubmit)} disabled={disableForm}>
                     <Row gutter={[16, 16]}>
                         <Col span={24} hidden>
                             <FormItem control={control} name="orderID" label="Mã đơn hàng">
@@ -166,12 +171,22 @@ export default function UpdateDeliveryInfoPage() {
                         </Col>
 
                         {/* Trạng thái giao hàng */}
-                        <Col span={24}>
+                        <Col span={12}>
                             <FormItem control={control} name="isDelivery" label="Giao hàng?" valuePropName="checked">
                                 <Switch />
                             </FormItem>
                         </Col>
-
+                        <Col span={12}>
+                            <Typography.Text>Trạng thái: <Tag>{data?.order_status}</Tag></Typography.Text>
+                            <br />
+                            <Typography.Text>Danh sách trạng thái con: </Typography.Text>
+                            <br />
+                            {data?.orders.map((order, index) => (
+                                <Tag key={order.order_id + index}>
+                                    {order.order_status}
+                                </Tag>
+                            ))}
+                        </Col>
                         {/* Thông tin vận chuyển (chỉ hiển thị khi isDelivery là true) */}
                         {isDelivery && (
                             <>
@@ -192,7 +207,6 @@ export default function UpdateDeliveryInfoPage() {
                                             format="DD/MM/YYYY" // Định dạng hiển thị
                                             style={{ width: '100%' }}
                                         // onChange={(date) => setValue('expectedReceiptDate', date.toDate())}
-                                        // defaultValue={dayjs(data?.expected_receipt_date)}
                                         />
                                     </FormItem>
 

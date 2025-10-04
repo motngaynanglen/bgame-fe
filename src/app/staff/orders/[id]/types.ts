@@ -8,7 +8,8 @@ export interface OrderGroupDetail {
     total_item: number;
     total_price: number;
     is_delivery: boolean;
-
+    delivery_brand: string;
+    delivery_code: string;
     order_status: string;
     order_created_at: string;
     expected_receipt_date?: Date | null;
@@ -33,7 +34,6 @@ export interface OrderItem {
     order_id: string;
     product_id: string;
     code: string;
-    product_code_received: string;
     current_price: number;
     order_item_status: string;
     order_item_created_at: string;
@@ -48,8 +48,8 @@ export interface OrderItem {
 /** Map status to color + label for Order Group */
 export const orderGroupStatusMeta: Record<string, { color: string; label: string }> = {
     CREATED: { color: "warning", label: "Chưa Thanh Toán" },
-    PAID: { color: "green", label: "Đang xử lý" },
-    PREPARED: { color: "blue", label: "Đã chuẩn bị" }, // Thêm PREPARED cho Group nếu có
+    PAID: { color: "green", label: "Đã thanh toán" },
+    PREPARED: { color: "blue", label: "Đã chuẩn bị" }, 
     DELIVERING: { color: "processing", label: "Đang giao" },
     COMPLETED: { color: "success", label: "Hoàn tất" },
     CANCELLED: { color: "error", label: "Đã hủy" },

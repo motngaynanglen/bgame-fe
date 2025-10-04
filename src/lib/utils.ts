@@ -12,7 +12,7 @@
 //   const formatter = new Intl.DateTimeFormat(locale, options)
 //   return formatter.format(date)
 
-import dayjs from "./dayjs";
+import dayjs from "../lib/dayjs";
 
 // }
 export const formatTimeStringToTimestamp = (timeString: string) => {
@@ -70,7 +70,6 @@ export function formatDateTime(dateString: string | Date, Type: "DATETIME" | "DA
   const date = new Date(dateString);
 
   const currentOffset = date.getTimezoneOffset(); // Lấy độ lệch múi giờ hiện tại (phút)
-  console.log(date)
   // Nếu múi giờ là UTC (offset = 0), cộng thêm 7 giờ
   const hoursUTC7 = (): number => {
     if (currentOffset < 0) {
@@ -79,7 +78,6 @@ export function formatDateTime(dateString: string | Date, Type: "DATETIME" | "DA
     return (date.getUTCHours())
   }
 
-  console.log("after: " + date)
   const day = String(date.getUTCDate()).padStart(2, '0');
   const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
   const year = date.getUTCFullYear();
@@ -107,9 +105,11 @@ export const formatVND = (value: string | number): string => {
   }).format(number);
 };
 
-export function toISOStringWithOffset(date: Date, offsetHours: number) {
-  const local = new Date(date.getTime() - offsetHours * 60 * 60 * 1000);
-  return local.toISOString();
+export function toISOStringWithOffset(date: Date | dayjs.Dayjs, offsetHours: number) {
+  const dayjsDate = dayjs(date);
+  const adjustedDate = dayjsDate.add(offsetHours, 'hour');
+
+  return adjustedDate.toISOString();
 }
 export const formatDurationText = (slotCount: number) => {
   const totalMinutes = slotCount * 30;

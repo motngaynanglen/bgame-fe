@@ -25,6 +25,7 @@ interface OrderItemRowProps {
   item: OrderItem;
   orderGroupStatus: string;
   isMyStoreOrder: boolean;
+  isActionAvailable: boolean;
   token: string | undefined;
   handleUpdateItem: (orderItemId: string, productCode: string) => void;
   isUpdating: boolean;
@@ -34,14 +35,14 @@ const OrderItemRow: React.FC<OrderItemRowProps> = ({
   item,
   orderGroupStatus,
   isMyStoreOrder,
+  isActionAvailable,
   token,
   handleUpdateItem,
   isUpdating
 }) => {
-  const isActionAvailable = isMyStoreOrder && (orderGroupStatus === "CREATED" || orderGroupStatus === "PAID");
 
   // State cục bộ để quản lý Input/Autocomplete cho item này
-  const [selectedCode, setSelectedCode] = useState<string>(item.product_code_received || "");
+  const [selectedCode, setSelectedCode] = useState<string>("");
 
   const {
     options,
@@ -79,7 +80,9 @@ const OrderItemRow: React.FC<OrderItemRowProps> = ({
     <tr key={item.order_item_id}>
       <td className="border border-gray-600 p-2 text-left">
         <strong className="block">{item.product_name}</strong>
-        <small className="text-gray-400">Mã SP: {item.code}</small>
+        <Typography.Text className="text-gray-400 text-sm " copyable={{ text: item.code }} >
+          Mã SP: {item.code}
+        </Typography.Text>
       </td>
       <td className="border border-gray-600 p-2">
         {formatCurrency(item.current_price)}
@@ -117,7 +120,7 @@ const OrderItemRow: React.FC<OrderItemRowProps> = ({
           </Button>
         </td>
       )}
-      {!isActionAvailable && (item.product_code_received && <td className="border border-gray-600 p-2">{item.product_code_received}</td>)}
+      {/* {!isActionAvailable && (item.product_code_received && <td className="border border-gray-600 p-2">{item.product_code_received}</td>)} */}
 
     </tr>
 
@@ -146,7 +149,7 @@ const OrderDetailItems: React.FC<OrderDetailItemProps> = ({
   isUpdating,
   isMyStoreOrder
 }) => {
-  const isActionAvailable = isMyStoreOrder && (orderGroupStatus === "CREATED" || orderGroupStatus === "PAID");
+  const isActionAvailable = isMyStoreOrder && (orderGroupStatus === "CREATED" || orderGroupStatus === "PAID") && (order.order_status === "CREATED");
 
   return (
     <div className="space-y-4">
@@ -155,17 +158,26 @@ const OrderDetailItems: React.FC<OrderDetailItemProps> = ({
         Cửa hàng: {order.store_name || "Tên cửa hàng"}
         <Divider type="vertical" />
         {!isMyStoreOrder && <Tag color="default">Cửa hàng khác</Tag>}
-        {(order.is_hub == 1) && <Tag color="cyan">Điểm tập kết</Tag>}
-        {((order.is_transfered == 1) && (order.is_hub != 1)) ?
-          <Tag color="green">Đã đáp ứng tập kết</Tag> :
-          <Tag color="warning">Chưa tập kết</Tag>}
+        {(order.is_hub == 1) ? <Tag color="cyan">Điểm tập kết</Tag> :
+          ((order.is_transfered == 1)) ?
+            <Tag color="green">Đã tập kết</Tag> :
+            <Tag color="warning">Chưa tập kết</Tag>
+        }
+
+
       </h5>
       <p className="text-sm">
         Trạng thái:
         <Tag color={getOrderStatus(order.order_status).color} className="ml-2">
           {getOrderStatus(order.order_status).label}
         </Tag>
+        {(isMyStoreOrder && order.is_hub == 0) && (
+          <span>
+            hãy chuyển đơn tới điểm tập kết.
+          </span>
+        )}
       </p>
+
       <div className="overflow-x-auto">
         <table className="min-w-full text-center border-collapse border border-gray-600">
           <thead className="">
@@ -174,13 +186,15 @@ const OrderDetailItems: React.FC<OrderDetailItemProps> = ({
               <th className="border border-gray-600 p-2">Giá</th>
               <th className="border border-gray-600 p-2">Thành tiền</th>
               <th className="border border-gray-600 p-2">Trạng thái Item</th>
-              {(isMyStoreOrder && (orderGroupStatus === "CREATED" || orderGroupStatus === "PAID")) ? (
+              {(isActionAvailable) ? (
                 <>
                   <th className="border border-gray-600 p-2 w-[200px]">Mã Code</th>
                   <th className="border border-gray-600 p-2 w-[100px]">Hành động</th>
                 </>
               ) : (
-                <th className="border border-gray-600 p-2">Mã Code Đã Nhận</th>
+                <>
+                  {/* <th className="border border-gray-600 p-2">Mã Code Đã Nhận</th> */}
+                </>
               )}
             </tr>
           </thead>
@@ -191,6 +205,7 @@ const OrderDetailItems: React.FC<OrderDetailItemProps> = ({
                 item={item}
                 orderGroupStatus={orderGroupStatus}
                 isMyStoreOrder={isMyStoreOrder}
+                isActionAvailable={isActionAvailable}
                 token={token}
                 handleUpdateItem={handleUpdateItem}
                 isUpdating={isUpdating}
@@ -242,7 +257,7 @@ export default function OrderDetail() {
       return res.data;
     },
   });
-  const hubstore = data?.orders.find((value) => { value.is_hub == 1 })
+  const hubstore = data?.orders.find((value) =>  value.is_hub == 1 )
 
   // Tải thông tin cửa hàng (Nếu cần để hiển thị tên)
   // Cần một API map order.store_id với store name. Hiện tại tôi bỏ qua logic này.
@@ -269,13 +284,27 @@ export default function OrderDetail() {
       message.error("Có lỗi khi cập nhật. Vui lòng thử lại.");
     },
   });
+  const transferedMutation = useMutation({
+    mutationFn: async ({ orderId }: { orderId: string }) => {
+      const order = data?.orders.find(o => o.items.some(i => i.order_id === orderId));
+      if (!order) throw new Error("Không tìm thấy đơn hàng chứa item này.");
 
-  const handleCodeChange = (orderItemId: string, value: string) => {
-    setCodesByItem((prev) => ({
-      ...prev,
-      [orderItemId]: value,
-    }));
-  };
+      return await orderApiRequest.updateOrderByIdTransfered(orderId, {}, user?.token);
+    },
+    onSuccess: () => {
+      message.success("Cập nhật thành công");
+      refetch();
+    },
+    onError: () => {
+      message.error("Có lỗi khi cập nhật. Vui lòng thử lại.");
+    },
+  });
+  // const handleCodeChange = (orderItemId: string, value: string) => {
+  //   setCodesByItem((prev) => ({
+  //     ...prev,
+  //     [orderItemId]: value,
+  //   }));
+  // };
 
   const handleUpdateToPrepared = () => {
     Modal.confirm({
@@ -305,12 +334,15 @@ export default function OrderDetail() {
   const handleUpdateItem = (orderItemId: string) => {
     const productCode = codesByItem[orderItemId] || "";
     if (!productCode) {
-      message.error("Bạn phải nhập mã code trước khi cập nhật."+ "ok bro");
+      message.error("Bạn phải nhập mã code trước khi cập nhật." + "ok bro");
       return;
     }
     updateItemMutation.mutate({ orderItemId, productCode });
   };
 
+  const handleUpdateToTransfered = (orderId: string) => {
+    transferedMutation.mutate({ orderId });
+  };
   // Tính tổng tiền cho tất cả các đơn hàng con
   const totalOrderPrice = useMemo(() => {
     if (!data || !data.orders) return 0;
@@ -335,15 +367,15 @@ export default function OrderDetail() {
   const hubStoreName = hubstore?.is_hub ? hubstore.store_name : "Chưa cập nhật"
   const myStoreOrders = data.orders.filter(order => order.store_id === myStoreId);
   const otherStoreOrders = data.orders.filter(order => order.store_id !== myStoreId);
-  const genExtra = () => (
-    <SettingOutlined
-      onClick={(event) => {
-        // If you don't want click extra trigger collapse, you can prevent this:
-        event.stopPropagation();
-      }}
-    />
-  )
+  const isMyStorePrepared = data.orders.length > 0 && !(data.orders.some(order => (order.is_transfered == 0 && order.is_hub == 0)));
 
+  const allowUpdateDeliveryInfo = (
+    data.order_status === "PAID"
+    && myStoreOrders[0].order_status === "PREPARED"
+    && myStoreOrders[0].is_hub == 1
+    && data.is_delivery
+    && isMyStorePrepared
+  )
   return (
     <div className="min-h-screen p-4 sm:p-6">
       <Card
@@ -391,6 +423,8 @@ export default function OrderDetail() {
         </Row>
 
         <Divider className="border-gray-600 my-6" />
+        {/* --- Chi tiết đơn hàng con (Orders và Order Items) --- */}
+
         <Collapse
           ghost
           expandIconPosition="end"
@@ -434,8 +468,24 @@ export default function OrderDetail() {
             },
           ]}
         />
-        {/* --- Chi tiết đơn hàng con (Orders và Order Items) --- */}
+        {/* Nút hành động */}
+        <div className="flex justify-end pt-4 space-x-4">
+          {/* Chỉ hiện nút Xác thực khi trạng thái group là PAID và order là CREATED */}
 
+          <Button
+            type="primary"
+            size="large"
+            onClick={handleUpdateToPrepared}
+            loading={updateItemMutation.isPending}
+            className="bg-green-600 hover:bg-green-700 border-green-600"
+            disabled={!(data.order_status === "PAID" && myStoreOrders[0].order_status === "CREATED")}
+          >
+            Xác thực đơn hàng
+          </Button>
+
+
+
+        </div>
 
         <Divider className="border-gray-600 my-6" />
         <Collapse
@@ -453,7 +503,24 @@ export default function OrderDetail() {
                   {otherStoreOrders.map((order) => (
                     <Card
                       key={order.order_id}
-                      title={<span className="font-bold">Mã Đơn: {order.order_code}</span>}
+                      title={<div className="flex justify-between items-center">
+                        <span className="font-bold">Mã Đơn: {order.order_code}</span>
+                        {/* <Tag color="cyan">Trạng thái: {order.order_status}</Tag> */}
+                        <span className="flex justify-between items-center">
+                          <Button color='cyan' size="small" type="dashed"
+                            onClick={() => handleUpdateToTransfered(order.order_id)}
+                            loading={transferedMutation.isPending}
+                            disabled={!(order.is_transfered == 0 && order.order_status == "PREPARED")}
+                            hidden={myStoreOrders[0].is_hub != 1}
+                          >
+                            Đã nhận hàng
+                          </Button>
+                          <Divider type="vertical" />
+                          <Tag color={getOrderStatus(order.order_status).color}>
+                            Trạng thái: {getOrderStatus(order.order_status).label}
+                          </Tag>
+                        </span>
+                      </div>}
                       className="bg-gray-100 border border-gray-600"
                     >
                       <OrderDetailItems
@@ -465,6 +532,7 @@ export default function OrderDetail() {
                         isUpdating={updateItemMutation.isPending}
                         isMyStoreOrder={false} // Tắt tương tác
                       />
+
                     </Card>
                   ))}
                 </Space>
@@ -489,33 +557,18 @@ export default function OrderDetail() {
             <h4 className="text-xl font-semibold border-b border-gray-700 pb-1 mb-2">Ghi chú</h4>
             <p className="whitespace-pre-line text-gray-300 italic">{data.order_group_code || "Không có ghi chú."}</p>
           </div>
+          {/* Chỉ hiện nút Xác thực khi trạng thái group là PAID và order là PREPARED */}
 
-          {/* Nút hành động */}
-          <div className="flex justify-end pt-4 space-x-4">
-            {/* Chỉ hiện nút Xác thực khi trạng thái là PAID */}
-            {data.order_status === "PAID" && (
-              <Button
-                type="primary"
-                size="large"
-                onClick={handleUpdateToPrepared}
-                loading={updateItemMutation.isPending}
-                className="bg-green-600 hover:bg-green-700 border-green-600"
-              >
-                Xác thực đơn hàng
-              </Button>
-            )}
-            {/* Chỉ hiện nút Cập nhật giao hàng khi trạng thái là PREPARED */}
-            {data.order_status === "PREPARED" && data.is_delivery && (
-              <Button
-                type="primary"
-                size="large"
-                onClick={() => router.push(`/staff/orders/${data.order_group_id}/update-delivery-info`)}
-                className="bg-blue-600 hover:bg-blue-700 border-blue-600"
-              >
-                Cập nhật thông tin giao hàng
-              </Button>
-            )}
-          </div>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => router.push(`/staff/orders/${data.order_group_id}/update-delivery-info`)}
+            className="bg-blue-600 hover:bg-blue-700 border-blue-600"
+            disabled={!allowUpdateDeliveryInfo}
+          >
+            Cập nhật thông tin giao hàng
+          </Button>
+
         </div>
       </Card>
     </div>

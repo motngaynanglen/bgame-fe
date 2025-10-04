@@ -1,5 +1,13 @@
 import { z } from "zod";
+import dayjs from "../lib/dayjs";
 
+const DayjsClass = dayjs().constructor as typeof dayjs.Dayjs;
+
+const DayjsSchema = z.instanceof(DayjsClass, {
+  message: "Ngày không hợp lệ. Vui lòng chọn lại."
+}).refine((date) => date.isValid(), {
+  message: "Ngày không hợp lệ."
+});
 
 
 export const orderFormSchema = z.object({
@@ -12,7 +20,7 @@ export const orderFormSchema = z.object({
   deliveryCode: z.string().nullable(),
   deliveryBrand: z.string().nullable(),
 
-  expectedReceiptDate: z.coerce.date().nullable(),
+  expectedReceiptDate: DayjsSchema.nullable(),
 
 }).refine(
   (data) => {
@@ -29,7 +37,7 @@ export const orderFormSchema = z.object({
   (data) => {
     // Logic kiểm tra: Nếu là Giao hàng, phải chọn Ngày dự kiến
     if (data.isDelivery) {
-      return data.expectedReceiptDate
+      return data.expectedReceiptDate && data.expectedReceiptDate.isValid();
     }
     return true;
   },
