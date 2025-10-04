@@ -93,7 +93,7 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
         href={"/staff/timetable/add"}
         className={clsx("font-medium text-base")}
       >
-        Thuê tại cửa hàng  
+        Thuê tại cửa hàng
       </Link>
     ),
     icon: <MdAddChart />,
@@ -136,49 +136,52 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
   {
     key: "group-3",
     label: (
-      <p className={clsx("font-medium text-base")}>
-        Quản lý đơn hàng
-      </p>
+      <Link
+        href={"/staff/orders"}
+        className={clsx("font-medium text-base")}
+      >
+        Danh sách đơn hàng
+      </Link>
     ),
-    icon: <AiOutlineBook />,
-    children: [
-      {
-        key: "31",
-        label: (
-          <Link
-            href={"/staff/orders/pending"}
-            className={clsx("font-medium text-base")}
-          >
-            Nhận đơn chờ
-          </Link>
-        ),
-        icon: <AiOutlineUnorderedList />,
-      },
-      {
-        key: "32",
-        label: (
-          <Link
-            href={"/staff/orders/on-going"}
-            className={clsx("font-medium text-base")}
-          >
-            Đơn đang xử lý
-          </Link>
-        ),
-        icon: <MdAddChart />,
-      },
-      {
-        key: "33",
-        label: (
-          <Link
-            href={"/staff/orders"}
-            className={clsx("font-medium text-base")}
-          >
-            Danh sách đơn hàng
-          </Link>
-        ),
-        icon: <MdAddChart />,
-      },
-    ],
+    icon: <MdAddChart />,
+    // children: [
+    //   // {
+    //   //   key: "31",
+    //   //   label: (
+    //   //     <Link
+    //   //       href={"/staff/orders/pending"}
+    //   //       className={clsx("font-medium text-base")}
+    //   //     >
+    //   //       Nhận đơn chờ
+    //   //     </Link>
+    //   //   ),
+    //   //   icon: <AiOutlineUnorderedList />,
+    //   // },
+    //   // {
+    //   //   key: "32",
+    //   //   label: (
+    //   //     <Link
+    //   //       href={"/staff/orders/on-going"}
+    //   //       className={clsx("font-medium text-base")}
+    //   //     >
+    //   //       Đơn đang xử lý
+    //   //     </Link>
+    //   //   ),
+    //   //   icon: <MdAddChart />,
+    //   // },
+    //   {
+    //     key: "33",
+    //     label: (
+    //       <Link
+    //         href={"/staff/orders"}
+    //         className={clsx("font-medium text-base")}
+    //       >
+    //         Danh sách đơn hàng
+    //       </Link>
+    //     ),
+    //     icon: <MdAddChart />,
+    //   },
+    // ],
   },
   {
     key: "group-4",
@@ -187,7 +190,7 @@ export const staffMenuAntd: ItemType<MenuItemType>[] | undefined = [
         href={"/staff/sale/detail-online"}
         className={clsx("font-medium text-base")}
       >
-        Quản lý ký gửi  
+        Quản lý ký gửi
       </Link>
     ),
     icon: <MdAddChart />,
